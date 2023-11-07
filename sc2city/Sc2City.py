@@ -13,7 +13,7 @@ from MA_interface import MapAnalyserInterface
 class Sc2City(BotAI):
 
     def __init__(self):
-        self.memory   = UnitsInMemory(self)
+        self.memory = UnitsInMemory(self)
 
     async def on_start(self):
         """on_start runs once in beginning of every game"""

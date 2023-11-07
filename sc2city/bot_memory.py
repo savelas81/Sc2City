@@ -15,7 +15,7 @@ class UnitsInMemory:
         self.enemy_units_in_memory_by_tag = {}
         self.our_units_in_memory_by_tag = {}
         self.debug_timer = 0
-        self.killed_enemy_units  = Units([], self.ai)
+        self.killed_enemy_units = Units([], self.ai)
         self.lost_friendly_units = Units([], self.ai)
 
     def update_units_in_memory(self, enemy_units, our_units):
