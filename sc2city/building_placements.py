@@ -181,7 +181,6 @@ class BuildingPlacementSolver:
             color = red
             draw_addon = False
             self.draw_debug_single(pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon)
-            self.draw_debug_single(pos2=pos, size=(size - 0.05), height=2, color=color, draw_addon=draw_addon)
 
         """macaro orbital placement debug"""
         for p in self.macro_orbitals:
