@@ -47,7 +47,7 @@ class MapAnalyserInterface:
                         weight=enemy_unit.air_dps)
         if self.debug:
             color = Point3((201, 168, 79))
-            size: int = 13
+            size: int = 14
             for x, y in zip(*np.where(self.enemy_ground_grid > 1)):
                 height: float = self.ai.get_terrain_z_height(self.ai.start_location)
                 pos: Point3 = Point3((x, y, height))
