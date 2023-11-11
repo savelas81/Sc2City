@@ -114,5 +114,6 @@ class BuildingPlacementSolver:
             print(e)
 
     def draw_debug(self):
+
         pass
 
