@@ -138,6 +138,7 @@ class BuildingPlacementSolver:
         white = Point3((255, 255, 255))
         draw_addon = False
         """barrack placement debugs below"""
+        """demo comment"""
         for p in self.building_positions_priority_1:
             pos = Point2(p)
             size = 1.45
