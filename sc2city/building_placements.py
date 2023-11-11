@@ -160,7 +160,7 @@ class BuildingPlacementSolver:
             self.draw_debug_single(pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon)
             self.draw_debug_single(pos2=pos, size=(size - 0.05), height=0.3, color=color, draw_addon=draw_addon)
 
-        """depot placement debug"""
+        """depot placement debug """
         for p in self.supplydepot_positions_priority_1:
             pos = Point2(p)
             size = 0.95
