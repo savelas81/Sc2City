@@ -11,6 +11,7 @@ class ScvManager:
         self.mineral_collector_tag_list = []
         self.vespene_collector_tag_list = []
         self.repairer_tag_list = []
+        self.boys_list = []
         self.builder_tag: int = 0
         self.next_building_type = None
         self.next_building_position = Point2((0, 0))
@@ -35,4 +36,8 @@ class ScvManager:
             return False
 
     async def queue_building(self, structure_type_id=UnitTypeId.BARRACKS):
+
+        """choice scv"""
+        """send this scv to building location"""
+        """once enough money build the building"""
         pass

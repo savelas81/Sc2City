@@ -19,7 +19,11 @@ class OpenerManager:
         if self.create_opener:
             self.create_opener = False
             if opening_strategy == 1:
-                self.build_order = []
+                self.build_order = [
+                    UnitTypeId.SCV,
+                    UnitTypeId.SCV,
+                    UnitTypeId.SUPPLYDEPOT,
+                ]
             if opening_strategy == 2:
                 self.build_order = []
             if opening_strategy == 3:
@@ -48,7 +52,7 @@ class OpenerManager:
                     self.build_order.pop(0)
                 return
         if next_to_be_build == UnitTypeId.SUPPLYDEPOT:
-            if self.ai.minerals > 50:
+            if self.ai.minerals > 30:
                 self.ai.scv_manager.queue_building(structure_type_id=next_to_be_build)
 
             else:
