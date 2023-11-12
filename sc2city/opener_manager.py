@@ -17,7 +17,6 @@ class OpenerManager:
     def run_opener(self, opening_strategy=1):
         """[UnitTypeId]"""
         if self.create_opener:
-            self.corner_depot_positions = self.ai.main_base_ramp.corner_depots
             self.create_opener = False
             if opening_strategy == 3 and len(self.build_order) == 0:
                 self.build_order = [
@@ -38,21 +37,21 @@ class OpenerManager:
         next_to_be_build = self.build_order[0]
         if next_to_be_build == UnitTypeId.SCV:
             if self.ai.can_afford(next_to_be_build):
-                for cc in self.ai.townhalls.ready.idle:
+                for cc in self.ai.townhalls.ready:
                     cc.train(UnitTypeId.SCV)
                     self.build_order.pop(0)
                 return
         if next_to_be_build == UnitTypeId.SUPPLYDEPOT:
             if not self.builder_tag:
                 if self.ai.minerals > 50:
-                    # TODO we need better method for this and integrate it with SCV manager!
-                    self.builder_tag = self.ai.units.SCV.random
+                    if self.ai.scv_manager.building_queue_empty:
+                        self.ai.scv_manager.queue_building(structure_type_id=next_to_be_build)
 
             else:
                 if self.ai.can_afford(next_to_be_build):
                     for position in self.corner_depot_positions:
-                        if self.ai.this_valid_building_location(position=position):
-                            for scv in self.ai.units.SCV:
+                        if self.ai.building_placements.this_valid_building_location(position=position):
+                            for scv in self.ai.units(UnitTypeId.SCV):
                                 if self.builder_tag == scv.tag:
                                     scv.build(next_to_be_build, position)
                                     self.builder_tag = None

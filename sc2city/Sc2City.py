@@ -11,6 +11,8 @@ from bot_memory import UnitsInMemory
 from MA_interface import MapAnalyserInterface
 from strategy_manager import StrategyManager
 from building_placements import BuildingPlacementSolver
+from opener_manager import OpenerManager
+from scv_manager import ScvManager
 
 
 class Sc2City(BotAI):
@@ -18,11 +20,14 @@ class Sc2City(BotAI):
     def __init__(self):
         self.memory = UnitsInMemory(self)
         self.strategy_manager = StrategyManager(self)
-        self.building_placements = BuildingPlacementSolver
+        self.building_placements = BuildingPlacementSolver(self)
+        self.opener_manager = OpenerManager(self)
+        self.scv_manager = ScvManager(self)
 
     async def on_start(self):
         """on_start runs once in beginning of every game"""
         self.MA = MapAnalyserInterface(self)
+        await self.scv_manager.worker_spit_frame_zero()
 
     async def on_step(self, iteration):
         self.memory.update_units_in_memory(enemy_units=self.all_enemy_units, our_units=(self.units|self.structures))
