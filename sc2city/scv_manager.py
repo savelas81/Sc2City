@@ -39,6 +39,9 @@ class ScvManager:
             return False
 
     async def queue_building(self, structure_type_id=UnitTypeId.BARRACKS):
+        if structure_type_id == UnitTypeId.REFINERY:
+            self.next_building_type = structure_type_id
+            return
         position = await self.ai.building_placements.get_placement_for(structure_type_id=structure_type_id)
         if self.first_builder_tag != 0:
             contractor = self.first_builder_tag
@@ -75,18 +78,36 @@ class ScvManager:
     async def build_queued_building(self):
         if await self.building_queue_empty():
             return
-        if self.ai.can_afford(self.next_building_type):
-            for scv in self.ai.units(UnitTypeId.SCV):
-                if scv.tag == self.builder_tag:
-                    scv.build(self.next_building_type, self.next_building_position)
-                    if self.builder_tag not in self.active_builders_tag_list:
-                        self.active_builders_tag_list.append(self.builder_tag)
-                    self.builder_tag: int = 0
-                    self.next_building_type = None
-                    self.next_building_position = Point2((0, 0))
-                    return
-            print("scv_manager: No scv tags match self.builder_tag")
-            return
+        if self.next_building_type == UnitTypeId.REFINERY:
+            if self.ai.can_afford(self.next_building_type):
+                for cc in self.ai.townhalls:
+                    geysers = self.ai.vespene_geyser.closer_than(10.0, cc)
+                    for geyser in geysers:
+                        point = geyser.position.towards(self.ai.game_info.map_center, 2)
+                        if not self.ai.gas_buildings.closer_than(1.0, geyser):
+                            contractor = await self.select_contractor(position=point)
+                            if contractor is None:
+                                return
+                            contractor.build(UnitTypeId.REFINERY, geyser)
+                            if contractor.tag in self.mineral_collector_tag_list:
+                                self.mineral_collector_tag_list.remove(contractor.tag)
+                            if contractor.tag not in self.active_builders_tag_list:
+                                self.active_builders_tag_list.append(contractor.tag)
+                            self.next_building_type = None
+                            return
+        else:
+            if self.ai.can_afford(self.next_building_type):
+                for scv in self.ai.units(UnitTypeId.SCV):
+                    if scv.tag == self.builder_tag:
+                        scv.build(self.next_building_type, self.next_building_position)
+                        if self.builder_tag not in self.active_builders_tag_list:
+                            self.active_builders_tag_list.append(self.builder_tag)
+                        self.builder_tag: int = 0
+                        self.next_building_type = None
+                        self.next_building_position = Point2((0, 0))
+                        return
+                print("scv_manager: No scv tags match self.builder_tag")
+                return
 
 
 
