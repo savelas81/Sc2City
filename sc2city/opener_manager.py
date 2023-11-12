@@ -18,7 +18,11 @@ class OpenerManager:
         """[UnitTypeId]"""
         if self.create_opener:
             self.create_opener = False
-            if opening_strategy == 3 and len(self.build_order) == 0:
+            if opening_strategy == 1:
+                self.build_order = []
+            if opening_strategy == 2:
+                self.build_order = []
+            if opening_strategy == 3:
                 self.build_order = [
                     UnitTypeId.SCV,
                     UnitTypeId.SCV,
@@ -34,6 +38,8 @@ class OpenerManager:
                     AbilityId.UPGRADETOORBITAL_ORBITALCOMMAND,
                     UnitTypeId.SCV,
                 ]
+        if not self.ai.scv_manager.building_queue_empty:
+            return
         next_to_be_build = self.build_order[0]
         if next_to_be_build == UnitTypeId.SCV:
             if self.ai.can_afford(next_to_be_build):
@@ -42,10 +48,8 @@ class OpenerManager:
                     self.build_order.pop(0)
                 return
         if next_to_be_build == UnitTypeId.SUPPLYDEPOT:
-            if not self.builder_tag:
-                if self.ai.minerals > 50:
-                    if self.ai.scv_manager.building_queue_empty:
-                        self.ai.scv_manager.queue_building(structure_type_id=next_to_be_build)
+            if self.ai.minerals > 50:
+                self.ai.scv_manager.queue_building(structure_type_id=next_to_be_build)
 
             else:
                 if self.ai.can_afford(next_to_be_build):
