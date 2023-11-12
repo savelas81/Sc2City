@@ -26,6 +26,7 @@ class Sc2City(BotAI):
 
     async def on_start(self):
         """on_start runs once in beginning of every game"""
+        self.building_placements.load_data()
         self.MA = MapAnalyserInterface(self)
         await self.scv_manager.worker_spit_frame_zero()
 
@@ -37,7 +38,8 @@ class Sc2City(BotAI):
         # enemy_lost_vespene = self.memory.get_enemy_lost_vespene()
         # our_lost_minerals = self.memory.get_our_lost_minerals()
         # our_lost_vespene = self.memory.get_our_lost_vespene()
-        self.strategy_manager.run_strategy()
+        await self.strategy_manager.run_strategy()
+        await self.scv_manager.build_queued_building()
 
     async def on_unit_destroyed(self, unit_tag: int):
         self.memory.forget_unit(unit_tag)

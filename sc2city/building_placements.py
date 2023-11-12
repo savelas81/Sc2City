@@ -29,28 +29,27 @@ class BuildingPlacementSolver:
         self.map_name = ""
         self.start_location_save = Point2((0, 0))
 
-    def get_placement_for(self, structure_type_id=UnitTypeId.BARRACKS):
+    async def get_placement_for(self, structure_type_id=UnitTypeId.BARRACKS):
         if structure_type_id in [UnitTypeId.SUPPLYDEPOT]:
             if self.ai.opener_manager.opener_is_active:
                 for position in self.ai.main_base_ramp.corner_depots:
-                    if self.ai.building_placements.this_valid_building_location(position=position):
+                    if self.ai.building_placements.this_valid_building_location(structure_type_id=structure_type_id, position=position):
                         return position
-                for position in self.supplydepot_positions_priority_1:
-                    if self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
-                        return position
-                for position in self.supplydepot_positions_priority_2:
-                    if self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
-                        return position
-                for position in self.supplydepot_positions_priority_3:
-                    if self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
-                        return position
-                for position in self.supplydepot_positions_priority_4:
-                    if self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
-                        return position
-                for position in self.supplydepot_positions_priority_5:
-                    if self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
-                        return position
-
+            for position in self.supplydepot_positions_priority_1:
+                if self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                    return position
+            for position in self.supplydepot_positions_priority_2:
+                if self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                    return position
+            for position in self.supplydepot_positions_priority_3:
+                if self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                    return position
+            for position in self.supplydepot_positions_priority_4:
+                if self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                    return position
+            for position in self.supplydepot_positions_priority_5:
+                if self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                    return position
 
         if structure_type_id in [UnitTypeId.BARRACKS, UnitTypeId.FACTORY, UnitTypeId.STARPORT]:
             for position in self.building_positions_priority_1:
@@ -68,11 +67,13 @@ class BuildingPlacementSolver:
             for position in self.building_positions_priority_5:
                 if self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
                     return position
+        return False
 
     def this_valid_building_location(self, structure_type_id=UnitTypeId.BARRACKS, position=Point2((0, 0))):
         # TODO this function should check also that this is safe location to build
         # TODO maybe even check enemy units in memory?
         need_addon = False
+        position = Point2(position)
         if structure_type_id in [UnitTypeId.BARRACKS, UnitTypeId.FACTORY, UnitTypeId.STARPORT]:
             need_addon = True
         if self.ai.can_place_single(structure_type_id, position):

@@ -5,8 +5,10 @@ class StrategyManager:
         self.opening_strategy = 3
         self.ai = ai
 
-    def run_strategy(self):
+    async def run_strategy(self):
         if self.ai.opener_manager.opener_is_active():
-            self.ai.opener_manager.run_opener(opening_strategy=self.opening_strategy)
+            await self.ai.opener_manager.run_opener(opening_strategy=self.opening_strategy)
             return
-        pass
+        else:
+            # TODO make mid and end game stuff
+            pass

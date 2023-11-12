@@ -13,8 +13,11 @@ class ScvManager:
         self.repairer_tag_list = []
         self.boys_list = []
         self.builder_tag: int = 0
+        self.active_builders_tag_list = []
         self.next_building_type = None
         self.next_building_position = Point2((0, 0))
+        self.remember_first_builder = True
+        self.first_builder_tag: int = 0
 
     async def worker_spit_frame_zero(self):
         mfs = self.ai.mineral_field.closer_than(10, self.ai.townhalls.first.position)
@@ -36,8 +39,54 @@ class ScvManager:
             return False
 
     async def queue_building(self, structure_type_id=UnitTypeId.BARRACKS):
+        position = await self.ai.building_placements.get_placement_for(structure_type_id=structure_type_id)
+        if self.first_builder_tag != 0:
+            contractor = self.first_builder_tag
+            self.first_builder_tag = 0
+        else:
+            contractor = await self.select_contractor(position=position)
+        if self.remember_first_builder:
+            self.first_builder_tag = contractor
+            self.remember_first_builder = False
+        if not contractor:
+            print("scv_manager: No builder selected!")
+            return
+        if contractor.tag in self.mineral_collector_tag_list:
+            self.mineral_collector_tag_list.remove(contractor.tag)
+        self.builder_tag = contractor.tag
+        self.next_building_type = structure_type_id
+        self.next_building_position = Point2(position)
+        contractor.move(self.next_building_position)
 
-        """choice scv"""
-        """send this scv to building location"""
-        """once enough money build the building"""
-        pass
+    async def select_contractor(self, position: Point2) -> Unit:
+        if not position:
+            print("scv_manager: No position for building!")
+            return None
+        scvs = self.ai.units(UnitTypeId.SCV)
+        for scv in scvs:
+            # TODO select closest by pathing. Now it is basically random
+            if scv.tag not in self.mineral_collector_tag_list:
+                continue
+            else:
+                return scv
+        print("scv_manager: No valid scv for builder!")
+        return None
+
+    async def build_queued_building(self):
+        if await self.building_queue_empty():
+            return
+        if self.ai.can_afford(self.next_building_type):
+            for scv in self.ai.units(UnitTypeId.SCV):
+                if scv.tag == self.builder_tag:
+                    scv.build(self.next_building_type, self.next_building_position)
+                    if self.builder_tag not in self.active_builders_tag_list:
+                        self.active_builders_tag_list.append(self.builder_tag)
+                    self.builder_tag: int = 0
+                    self.next_building_type = None
+                    self.next_building_position = Point2((0, 0))
+                    return
+            print("scv_manager: No scv tags match self.builder_tag")
+            return
+
+
+
