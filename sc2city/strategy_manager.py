@@ -2,7 +2,7 @@
 
 class StrategyManager:
     def __init__(self, ai=None):
-        self.opening_strategy = 3
+        self.opening_strategy = 1
         self.ai = ai
 
     async def run_strategy(self):

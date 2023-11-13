@@ -1,6 +1,18 @@
 {
   "building_positions_priority_1": [
     [
+      154.5,
+      62.5
+    ],
+    [
+      158.5,
+      53.5
+    ],
+    [
+      132.5,
+      56.5
+    ],
+    [
       169.5,
       78.5
     ],
@@ -9,20 +21,8 @@
       53.5
     ],
     [
-      132.5,
-      56.5
-    ],
-    [
-      158.5,
-      53.5
-    ],
-    [
       136.5,
       52.5
-    ],
-    [
-      154.5,
-      62.5
     ]
   ],
   "building_positions_priority_2": [],
@@ -47,48 +47,54 @@
       63.0
     ],
     [
-      146.0,
-      55.0
+      165.0,
+      78.0
     ],
     [
-      137.0,
-      62.0
+      167.0,
+      79.0
     ],
+    [
+      155.0,
+      60.0
+    ]
+  ],
+  "supplydepot_positions_priority_2": [
     [
       135.0,
       58.0
     ],
     [
-      155.0,
-      60.0
-    ],
+      137.0,
+      62.0
+    ]
+  ],
+  "supplydepot_positions_priority_3": [
     [
-      165.0,
-      78.0
+      176.0,
+      61.0
     ],
     [
       168.0,
       56.0
     ],
     [
-      176.0,
-      62.0
-    ],
-    [
       160.0,
       51.0
     ],
     [
-      167.0,
-      79.0
+      146.0,
+      55.0
     ]
   ],
-  "supplydepot_positions_priority_2": [],
-  "supplydepot_positions_priority_3": [],
   "supplydepot_positions_priority_4": [
     [
       182.0,
       100.0
+    ],
+    [
+      178.0,
+      96.0
     ],
     [
       182.0,
@@ -97,10 +103,6 @@
     [
       172.0,
       95.0
-    ],
-    [
-      178.0,
-      96.0
     ],
     [
       182.0,
@@ -120,7 +122,8 @@
   ],
   "turret_positions_priority_2": [],
   "turret_positions_priority_3": [],
-  "macro_orbitals": [
+  "macro_orbitals": [],
+  "expansion_priority_1": [
     [
       142.5,
       52.5
@@ -129,5 +132,7 @@
       150.5,
       81.5
     ]
-  ]
+  ],
+  "expansion_priority_2": [],
+  "expansion_priority_3": []
 }

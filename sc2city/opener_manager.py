@@ -23,6 +23,32 @@ class OpenerManager:
                     UnitTypeId.SCV,
                     UnitTypeId.SCV,
                     UnitTypeId.SUPPLYDEPOT,
+                    UnitTypeId.SCV,
+                    UnitTypeId.SCV,
+                    UnitTypeId.SCV,
+                    UnitTypeId.COMMANDCENTER,
+                    UnitTypeId.SCV,
+                    UnitTypeId.BARRACKS,
+                    UnitTypeId.SCV,
+                    UnitTypeId.REFINERY,
+                    UnitTypeId.SCV,
+                    UnitTypeId.SCV,
+                    UnitTypeId.SCV,
+                    AbilityId.UPGRADETOORBITAL_ORBITALCOMMAND,
+                    UnitTypeId.COMMANDCENTER,
+                    UnitTypeId.SCV,
+                    UnitTypeId.SCV,
+                    UnitTypeId.BARRACKS,
+                    UnitTypeId.SCV,
+                    UnitTypeId.MARINE,
+                    UnitTypeId.MARINE,
+                    UnitTypeId.SCV,
+                    UnitTypeId.FACTORY,
+                    UnitTypeId.SCV,
+                    UnitTypeId.SCV,
+                    UnitTypeId.MARINE,
+                    UnitTypeId.MARINE,
+                    UnitTypeId.FACTORYTECHLAB,
                 ]
             if opening_strategy == 2:
                 self.build_order = []
@@ -57,6 +83,26 @@ class OpenerManager:
                     cc.train(UnitTypeId.SCV)
                     self.build_order.pop(0)
             return
+        if next_to_be_build == UnitTypeId.MARINE:
+            if self.ai.can_afford(next_to_be_build):
+                for addon in self.ai.structures(UnitTypeId.BARRACKSREACTOR).ready:
+                    rax = self.ai.structures(UnitTypeId.BARRACKS).closest_to(addon.add_on_land_position)
+                    if len(rax.orders) < 3:
+                        rax.train(UnitTypeId.MARINE)
+                        self.build_order.pop(0)
+                        return
+                for addon in self.ai.structures(UnitTypeId.BARRACKSTECHLAB).ready:
+                    rax = self.ai.structures(UnitTypeId.BARRACKS).closest_to(addon.add_on_land_position)
+                    if len(rax.orders) < 2:
+                        rax.train(UnitTypeId.MARINE)
+                        self.build_order.pop(0)
+                        return
+                for rax in self.ai.structures(UnitTypeId.BARRACKS).ready:
+                    if len(rax.orders) < 2:
+                        rax.train(UnitTypeId.MARINE)
+                        self.build_order.pop(0)
+                        return
+            return
         if next_to_be_build == UnitTypeId.SUPPLYDEPOT:
             if self.ai.minerals > 30:
                 await self.ai.scv_manager.queue_building(structure_type_id=next_to_be_build)
@@ -83,6 +129,11 @@ class OpenerManager:
         if next_to_be_build == AbilityId.UPGRADETOORBITAL_ORBITALCOMMAND:
             for cc in self.ai.townhalls(UnitTypeId.COMMANDCENTER).ready.idle:
                 cc(AbilityId.UPGRADETOORBITAL_ORBITALCOMMAND)
+                self.build_order.pop(0)
+            return
+        if next_to_be_build == UnitTypeId.COMMANDCENTER:
+            if self.ai.minerals > 250:
+                await self.ai.scv_manager.queue_building(structure_type_id=next_to_be_build)
                 self.build_order.pop(0)
             return
         print("Opener_manager: Unknown " + str(next_to_be_build))

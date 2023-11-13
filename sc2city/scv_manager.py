@@ -18,8 +18,10 @@ class ScvManager:
         self.next_building_position = Point2((0, 0))
         self.remember_first_builder = True
         self.first_builder_tag: int = 0
+        self.expand_to_natural = True
 
     async def worker_spit_frame_zero(self):
+        self.expand_to_natural = await self.ai.get_next_expansion()
         mfs = self.ai.mineral_field.closer_than(10, self.ai.townhalls.first.position)
         workers = self.ai.units(UnitTypeId.SCV)
         for mf in mfs:  # type: Unit
@@ -43,6 +45,9 @@ class ScvManager:
             self.next_building_type = structure_type_id
             return
         position = await self.ai.building_placements.get_placement_for(structure_type_id=structure_type_id)
+        if self.expand_to_natural and structure_type_id == UnitTypeId.COMMANDCENTER:
+            position = self.expand_to_natural
+            self.expand_to_natural = False
         if self.first_builder_tag != 0:
             contractor = self.first_builder_tag
             self.first_builder_tag = 0

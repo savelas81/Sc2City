@@ -24,6 +24,9 @@ class BuildingPlacementSolver:
         self.turret_positions_priority_1 = []
         self.turret_positions_priority_2 = []
         self.turret_positions_priority_3 = []
+        self.expansion_priority_1 = []
+        self.expansion_priority_2 = []
+        self.expansion_priority_3 = []
         self.macro_orbitals = []
         self.positions_dict = {}
         self.map_name = ""
@@ -33,51 +36,67 @@ class BuildingPlacementSolver:
         if structure_type_id in [UnitTypeId.SUPPLYDEPOT]:
             if self.ai.opener_manager.opener_is_active:
                 for position in self.ai.main_base_ramp.corner_depots:
-                    if self.ai.building_placements.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                    if await self.ai.building_placements.this_valid_building_location(structure_type_id=structure_type_id, position=position):
                         return position
             for position in self.supplydepot_positions_priority_1:
-                if self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
                     return position
             for position in self.supplydepot_positions_priority_2:
-                if self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
                     return position
             for position in self.supplydepot_positions_priority_3:
-                if self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
                     return position
             for position in self.supplydepot_positions_priority_4:
-                if self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
                     return position
             for position in self.supplydepot_positions_priority_5:
-                if self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
                     return position
 
         if structure_type_id in [UnitTypeId.BARRACKS, UnitTypeId.FACTORY, UnitTypeId.STARPORT]:
             for position in self.building_positions_priority_1:
-                if self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
                     return position
             for position in self.building_positions_priority_2:
-                if self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
                     return position
             for position in self.building_positions_priority_3:
-                if self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
                     return position
             for position in self.building_positions_priority_4:
-                if self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
                     return position
             for position in self.building_positions_priority_5:
-                if self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
                     return position
-        return False
+        if structure_type_id == UnitTypeId.COMMANDCENTER:
+            for position in self.expansion_priority_1:
+                if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                    return position
+            for position in self.expansion_priority_2:
+                if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                    return position
+            for position in self.expansion_priority_3:
+                if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                    return position
+        if structure_type_id == UnitTypeId.ORBITALCOMMAND:  # special case for macro orbitals
+            for position in self.macro_orbitals:
+                if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                    return position
 
-    def this_valid_building_location(self, structure_type_id=UnitTypeId.BARRACKS, position=Point2((0, 0))):
+        print("Building_placements: No position for " + str(structure_type_id))
+        return None
+
+    async def this_valid_building_location(self, structure_type_id=UnitTypeId.BARRACKS, position=Point2((0, 0))):
         # TODO this function should check also that this is safe location to build
         # TODO maybe even check enemy units in memory?
         need_addon = False
         position = Point2(position)
         if structure_type_id in [UnitTypeId.BARRACKS, UnitTypeId.FACTORY, UnitTypeId.STARPORT]:
             need_addon = True
-        if self.ai.can_place_single(structure_type_id, position):
-            if not need_addon or self.ai.can_place_single(UnitTypeId.SUPPLYDEPOT,
+        if await self.ai.can_place_single(structure_type_id, position):
+            if not need_addon or await self.ai.can_place_single(UnitTypeId.SUPPLYDEPOT,
                                                           position.offset(Point2((2.5, -0.5)))):
                 return True
         return False
@@ -117,8 +136,14 @@ class BuildingPlacementSolver:
                 self.turret_positions_priority_2.append(building.position)
             elif building.type_id == UnitTypeId.PHOTONCANNON:
                 self.turret_positions_priority_3.append(building.position)
-            elif building.type_id == UnitTypeId.NEXUS:
+            elif building.type_id == UnitTypeId.ORBITALCOMMAND:
                 self.macro_orbitals.append(building.position)
+            elif building.type_id == UnitTypeId.NEXUS:
+                self.expansion_priority_1.append(building.position)
+            elif building.type_id == UnitTypeId.PLANETARYFORTRESS:
+                self.expansion_priority_2.append(building.position)
+            elif building.type_id == UnitTypeId.HATCHERY:
+                self.expansion_priority_3.append(building.position)
 
         self.positions_dict["building_positions_priority_1"] = self.building_positions_priority_1
         self.positions_dict["building_positions_priority_2"] = self.building_positions_priority_2
@@ -137,6 +162,9 @@ class BuildingPlacementSolver:
         self.positions_dict["turret_positions_priority_2"] = self.turret_positions_priority_2
         self.positions_dict["turret_positions_priority_3"] = self.turret_positions_priority_3
         self.positions_dict["macro_orbitals"] = self.macro_orbitals
+        self.positions_dict["expansion_priority_1"] = self.expansion_priority_1
+        self.positions_dict["expansion_priority_2"] = self.expansion_priority_2
+        self.positions_dict["expansion_priority_3"] = self.expansion_priority_3
         # print(self.positions_dict)
         self.save_data()
 
@@ -177,6 +205,10 @@ class BuildingPlacementSolver:
                 self.turret_positions_priority_2 = self.positions_dict["turret_positions_priority_2"]
                 self.turret_positions_priority_3 = self.positions_dict["turret_positions_priority_3"]
                 self.macro_orbitals = self.positions_dict["macro_orbitals"]
+                self.expansion_priority_1 = self.positions_dict["expansion_priority_1"]
+                self.expansion_priority_2 = self.positions_dict["expansion_priority_2"]
+                self.expansion_priority_3 = self.positions_dict["expansion_priority_3"]
+
 
 
         except (OSError, IOError) as e:
@@ -240,7 +272,27 @@ class BuildingPlacementSolver:
         for p in self.macro_orbitals:
             pos = Point2(p)
             size = 2.49
+            color = white
+            draw_addon = False
+            self.draw_debug_single(pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon)
+
+        """expansion placement debug"""
+        for p in self.expansion_priority_1:
+            pos = Point2(p)
+            size = 2.45
             color = red
+            draw_addon = False
+            self.draw_debug_single(pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon)
+        for p in self.expansion_priority_2:
+            pos = Point2(p)
+            size = 2.45
+            color = yellow
+            draw_addon = False
+            self.draw_debug_single(pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon)
+        for p in self.expansion_priority_3:
+            pos = Point2(p)
+            size = 2.45
+            color = green
             draw_addon = False
             self.draw_debug_single(pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon)
 
