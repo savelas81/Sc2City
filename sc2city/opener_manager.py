@@ -17,6 +17,8 @@ class OpenerManager:
     async def run_opener(self, opening_strategy=1):
         """[UnitTypeId]"""
         if self.create_opener:
+            """Overwrite for opening strategies, @line 21"""
+            opening_strategy=2
             self.create_opener = False
             if opening_strategy == 1:
                 self.build_order = [
