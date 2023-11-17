@@ -11,7 +11,7 @@ class ScvManager:
         self.mineral_collector_tag_list = []
         self.vespene_collector_tag_list = []
         self.repairer_tag_list = []
-        self.boys_list = []
+        self.boys_tag_list = []
         self.builder_tag: int = 0
         self.active_builders_tag_list = []
         self.next_building_type = None
@@ -19,6 +19,8 @@ class ScvManager:
         self.remember_first_builder = True
         self.first_builder_tag: int = 0
         self.expand_to_natural = True
+        self.scvs_per_refinery = 3  # valid values 0, 2, 3
+        self.target_vespene_collectors = 0
 
     async def worker_spit_frame_zero(self):
         self.expand_to_natural = await self.ai.get_next_expansion()
@@ -114,5 +116,23 @@ class ScvManager:
                 print("scv_manager: No scv tags match self.builder_tag")
                 return
 
+    async def move_scvs(self):
+        await self.distribute_workers()
 
+        pass
 
+    async def distribute_workers(self):
+        if self.ai.opener_manager.opener_is_active:
+            if len(self.vespene_collector_tag_list) < self.target_vespene_collectors:
+                for scv in self.ai.units(UnitTypeId.SCV):
+                    if scv.tag in self.mineral_collector_tag_list:
+                        pass
+            pass
+
+        pass
+
+    async def mine_minerals(self):
+        pass
+
+    async def mine_gas(self):
+        pass
