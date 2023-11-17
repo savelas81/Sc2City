@@ -75,6 +75,14 @@ class OpenerManager:
         if not await self.ai.scv_manager.building_queue_empty():
             return
         next_to_be_build = self.build_order[0]
+        if next_to_be_build == "add_vespene":
+            self.ai.scv_manager.target_vespene_collectors += 1
+            self.build_order.pop(0)
+            return
+        if next_to_be_build == "remove_vespene":
+            self.ai.scv_manager.target_vespene_collectors -= 1
+            self.build_order.pop(0)
+            return
         if next_to_be_build == UnitTypeId.SCV:
             if self.ai.can_afford(next_to_be_build):
                 for cc in self.ai.townhalls.ready:
@@ -82,6 +90,7 @@ class OpenerManager:
                         continue
                     cc.train(UnitTypeId.SCV)
                     self.build_order.pop(0)
+                    return
             return
         if next_to_be_build == UnitTypeId.MARINE:
             if self.ai.can_afford(next_to_be_build):
@@ -113,6 +122,14 @@ class OpenerManager:
                 await self.ai.scv_manager.queue_building(structure_type_id=next_to_be_build)
                 self.build_order.pop(0)
             return
+        if next_to_be_build == UnitTypeId.FACTORY:
+            if (self.ai.minerals > 60
+                    and self.ai.vespene > 60
+                    and (self.ai.structures(UnitTypeId.SUPPLYDEPOT).ready
+                         or self.ai.structures(UnitTypeId.BARRACKSFLYING))):
+                await self.ai.scv_manager.queue_building(structure_type_id=next_to_be_build)
+                self.build_order.pop(0)
+            return
         if next_to_be_build in [UnitTypeId.BARRACKSREACTOR, UnitTypeId.BARRACKSTECHLAB]:
             if self.ai.can_afford(next_to_be_build):
                 for rax in self.ai.structures(UnitTypeId.BARRACKS).ready.idle:
@@ -122,6 +139,15 @@ class OpenerManager:
                         return
                 print("Opener_manager: No raxes without add_ons available!")
             return
+        if next_to_be_build in [UnitTypeId.FACTORYREACTOR, UnitTypeId.FACTORYTECHLAB]:
+            if self.ai.can_afford(next_to_be_build):
+                for rax in self.ai.structures(UnitTypeId.FACTORY).ready.idle:
+                    if not rax.add_on_tag:
+                        rax.build(next_to_be_build)
+                        self.build_order.pop(0)
+                        return
+                print("Opener_manager: No factories without add_ons available!")
+            return
         if next_to_be_build == UnitTypeId.REFINERY:
             await self.ai.scv_manager.queue_building(structure_type_id=next_to_be_build)
             self.build_order.pop(0)
@@ -130,6 +156,7 @@ class OpenerManager:
             for cc in self.ai.townhalls(UnitTypeId.COMMANDCENTER).ready.idle:
                 cc(AbilityId.UPGRADETOORBITAL_ORBITALCOMMAND)
                 self.build_order.pop(0)
+                return
             return
         if next_to_be_build == UnitTypeId.COMMANDCENTER:
             if self.ai.minerals > 250:
