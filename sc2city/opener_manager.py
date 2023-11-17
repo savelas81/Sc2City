@@ -115,7 +115,7 @@ class OpenerManager:
             return
         if next_to_be_build in [UnitTypeId.BARRACKSREACTOR, UnitTypeId.BARRACKSTECHLAB]:
             if self.ai.can_afford(next_to_be_build):
-                for rax in self.ai.structures(UnitTypeId.BARRACKS).ready:
+                for rax in self.ai.structures(UnitTypeId.BARRACKS).ready.idle:
                     if not rax.add_on_tag:
                         rax.build(next_to_be_build)
                         self.build_order.pop(0)
