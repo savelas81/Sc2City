@@ -40,7 +40,7 @@ class Sc2City(BotAI):
         # our_lost_minerals = self.memory.get_our_lost_minerals()
         # our_lost_vespene = self.memory.get_our_lost_vespene()
         await self.strategy_manager.run_strategy()
-        await self.scv_manager.build_queued_building()
+        await self.scv_manager.move_scvs()
 
         """quick fix for mules"""
         for orbital in self.townhalls(UnitTypeId.ORBITALCOMMAND):
