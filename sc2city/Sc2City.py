@@ -48,6 +48,9 @@ class Sc2City(BotAI):
                 mfs = self.mineral_field.closer_than(10, orbital)
                 mf = mfs.random
                 orbital(AbilityId.CALLDOWNMULE_CALLDOWNMULE, mf)
+        """quick fix to lower depots"""
+        for depot in self.structures(UnitTypeId.SUPPLYDEPOT):
+            depot(AbilityId.MORPH_SUPPLYDEPOT_LOWER)
 
     async def on_unit_destroyed(self, unit_tag: int):
         self.memory.forget_unit(unit_tag)
