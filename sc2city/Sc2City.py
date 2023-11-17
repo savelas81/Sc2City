@@ -13,6 +13,7 @@ from strategy_manager import StrategyManager
 from building_placements import BuildingPlacementSolver
 from opener_manager import OpenerManager
 from scv_manager import ScvManager
+from sc2.ids.ability_id import AbilityId
 
 
 class Sc2City(BotAI):
@@ -40,6 +41,13 @@ class Sc2City(BotAI):
         # our_lost_vespene = self.memory.get_our_lost_vespene()
         await self.strategy_manager.run_strategy()
         await self.scv_manager.build_queued_building()
+
+        """quick fix for mules"""
+        for orbital in self.townhalls(UnitTypeId.ORBITALCOMMAND):
+            if orbital.energy >= 50:
+                mfs = self.mineral_field.closer_than(10, orbital)
+                mf = mfs.random
+                orbital(AbilityId.CALLDOWNMULE_CALLDOWNMULE, mf)
 
     async def on_unit_destroyed(self, unit_tag: int):
         self.memory.forget_unit(unit_tag)
