@@ -114,7 +114,7 @@ class OpenerManager:
                     UnitTypeId.SCV,
                     UnitTypeId.SCV,
                     UnitTypeId.SCV,
-            ]
+                ]
             if opening_strategy == 1:
                 self.build_order = [
                     UnitTypeId.SCV,
@@ -530,7 +530,7 @@ class OpenerManager:
                         rax.train(next_to_be_build)
                         self.build_order.pop(0)
                         return
-            print("Opener_manager: No raxes for marine production available!")
+                print("Opener_manager: No raxes for marine production available!")
             return
         if next_to_be_build == UnitTypeId.MARAUDER:
             if self.ai.can_afford(next_to_be_build):
@@ -540,7 +540,7 @@ class OpenerManager:
                         rax.train(next_to_be_build)
                         self.build_order.pop(0)
                         return
-            print("Opener_manager: No raxes with techlabs for marauder production available!")
+                print("Opener_manager: No raxes with techlabs for marauder production available!")
             return
 
         if next_to_be_build == UnitTypeId.SUPPLYDEPOT:
@@ -557,6 +557,14 @@ class OpenerManager:
             if (self.ai.minerals > 60
                     and self.ai.vespene > 60
                     and (self.ai.structures(UnitTypeId.BARRACKS).ready
+                         or self.ai.structures(UnitTypeId.BARRACKSFLYING))):
+                await self.ai.scv_manager.queue_building(structure_type_id=next_to_be_build)
+                self.build_order.pop(0)
+            return
+        if next_to_be_build == UnitTypeId.STARPORT:
+            if (self.ai.minerals > 60
+                    and self.ai.vespene > 60
+                    and (self.ai.structures([UnitTypeId.FACTORY, UnitTypeId.FACTORYFLYING]).ready
                          or self.ai.structures(UnitTypeId.BARRACKSFLYING))):
                 await self.ai.scv_manager.queue_building(structure_type_id=next_to_be_build)
                 self.build_order.pop(0)
@@ -595,7 +603,7 @@ class OpenerManager:
                     print("Upgrade: " + str(next_to_be_build))
                     facility(next_to_be_build)
                     self.build_order.pop(0)
-            print("No idle BARRACKSTECHLAB available!")
+                print("No idle BARRACKSTECHLAB available!")
             return
         if next_to_be_build in [AbilityId.ENGINEERINGBAYRESEARCH_TERRANINFANTRYWEAPONSLEVEL1]:
             for facility in self.ai.structures(UnitTypeId.ENGINEERINGBAY).ready.idle:
@@ -603,7 +611,7 @@ class OpenerManager:
                     print("Upgrade: " + str(next_to_be_build))
                     facility(next_to_be_build)
                     self.build_order.pop(0)
-            print("No idle ENGINEERINGBAY available!")
+                print("No idle ENGINEERINGBAY available!")
             return
         if next_to_be_build == UnitTypeId.COMMANDCENTER:
             if self.ai.minerals > 250:
