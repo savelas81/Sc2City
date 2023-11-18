@@ -5,7 +5,7 @@ from sc2.data import Race
 from sc2 import maps
 from sc2.main import *
 from sc2.data import Difficulty
-from test import BuildingPlacementSolver
+from building_placements import BuildingPlacementSolver
 from sc2.unit import Unit
 from sc2.ids.unit_typeid import UnitTypeId
 from sc2.units import Units
