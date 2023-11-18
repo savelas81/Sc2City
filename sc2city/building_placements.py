@@ -70,6 +70,18 @@ class BuildingPlacementSolver:
             for position in self.building_positions_priority_5:
                 if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
                     return position
+
+        if structure_type_id in [UnitTypeId.ENGINEERINGBAY, UnitTypeId.GHOSTACADEMY, UnitTypeId.ARMORY]:
+            for position in self.auxiliary_buildings_1:
+                if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                    return position
+            for position in self.auxiliary_buildings_2:
+                if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                    return position
+            for position in self.auxiliary_buildings_3:
+                if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                    return position
+
         if structure_type_id == UnitTypeId.COMMANDCENTER:
             for position in self.expansion_priority_1:
                 if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
