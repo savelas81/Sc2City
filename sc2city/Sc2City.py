@@ -10,7 +10,7 @@ from sc2.ids.unit_typeid import UnitTypeId
 from bot_memory import UnitsInMemory
 from MA_interface import MapAnalyserInterface
 from strategy_manager import StrategyManager
-from test import BuildingPlacementSolver
+from building_placements import BuildingPlacementSolver
 from opener_manager import OpenerManager
 from scv_manager import ScvManager
 from sc2.ids.ability_id import AbilityId
