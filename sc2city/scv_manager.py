@@ -32,6 +32,7 @@ class ScvManager:
         self.repairer_tag_list = []
         self.boys_tag_list = []
         self.builder_tag: int = 0
+        self.scout_tag_list = []
         self.active_builders_tag_list = []
         self.next_building_type = None
         self.next_building_position = Point2((0, 0))
@@ -113,8 +114,6 @@ class ScvManager:
     async def move_scvs(self):
         await self.distribute_workers()
         await self.build_queued_building()
-        # await self.mine_minerals()
-        # await self.mine_gas()
 
     async def build_queued_building(self):
         if await self.building_queue_empty():
@@ -203,6 +202,9 @@ class ScvManager:
                 continue
             elif scv.tag in self.boys_tag_list:
                 """reserved for BOYS related stuff"""
+                continue
+            elif scv.tag in self.scout_tag_list:
+                """reserved for scout related stuff"""
                 continue
             elif scv.is_idle:
                 # print("scv_manager: Idle SCV.")
