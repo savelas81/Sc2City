@@ -18,7 +18,7 @@ class OpenerManager:
         """[UnitTypeId]"""
         if self.create_opener:
             """Overwrite for opening strategies, @line 21"""
-            opening_strategy = 2
+            opening_strategy = 4
             self.create_opener = False
             if opening_strategy == 1:
                 self.build_order = [
@@ -356,6 +356,38 @@ class OpenerManager:
                     UnitTypeId.SCV,
                     UnitTypeId.SCV,
                 ]
+            if opening_strategy == 4:
+                self.build_order = [
+                    UnitTypeId.SCV,
+                    UnitTypeId.SCV,
+                    UnitTypeId.SUPPLYDEPOT,
+                    UnitTypeId.SCV,
+                    UnitTypeId.BARRACKS,
+                    UnitTypeId.SCV,
+                    UnitTypeId.REFINERY,
+                    UnitTypeId.SCV,
+                    UnitTypeId.SCV,
+                    ONWAAR
+                    "add_vespene",
+                    "add_vespene",
+                    "add_vespene",
+                    UnitTypeId.SCV,
+                    AbilityId.UPGRADETOORBITAL_ORBITALCOMMAND,
+                    UnitTypeId.COMMANDCENTER,
+                    UnitTypeId.BARRACKSREACTOR,
+                    UnitTypeId.SUPPLYDEPOT,
+                    UnitTypeId.SCV,
+                    UnitTypeId.SCV,
+                    UnitTypeId.REAPER,
+                    UnitTypeId.REAPER,
+                    UnitTypeId.SCV,
+                    UnitTypeId.SCV,
+                    UnitTypeId.SCV,
+                    UnitTypeId.REAPER,
+                    UnitTypeId.REAPER,
+                    AbilityId.UPGRADETOORBITAL_ORBITALCOMMAND,
+                    UnitTypeId.SCV,
+                    ]
         if len(self.build_order) == 0:
             self.opener_active = False
             print("Opener_manager: Opener completed.")
