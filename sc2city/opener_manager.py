@@ -56,7 +56,6 @@ class OpenerManager:
                     UnitTypeId.SCV,
                     UnitTypeId.SCV,
                     UnitTypeId.SCV,
-                    AbilityId.UPGRADETOORBITAL_ORBITALCOMMAND,
                     UnitTypeId.STARPORT,
                     UnitTypeId.SCV,
                     UnitTypeId.BARRACKSREACTOR,
@@ -701,10 +700,23 @@ class OpenerManager:
             self.build_order.pop(0)
             return
         if next_to_be_build == AbilityId.UPGRADETOORBITAL_ORBITALCOMMAND:
-            for cc in self.ai.townhalls(UnitTypeId.COMMANDCENTER).ready.idle:
-                cc(AbilityId.UPGRADETOORBITAL_ORBITALCOMMAND)
-                self.build_order.pop(0)
-                return
+            if self.ai.can_afford(next_to_be_build) and (
+                self.ai.structures(UnitTypeId.BARRACKS).ready
+                or self.ai.structures(UnitTypeId.BARRACKSFLYING)
+            ):
+                for cc in self.ai.townhalls(UnitTypeId.COMMANDCENTER).ready.idle:
+                    cc(AbilityId.UPGRADETOORBITAL_ORBITALCOMMAND)
+                    self.build_order.pop(0)
+                    return
+            return
+        if next_to_be_build == AbilityId.UPGRADETOPLANETARYFORTRESS_PLANETARYFORTRESS:
+            if self.ai.can_afford(next_to_be_build) and (
+                self.ai.structures(UnitTypeId.ENGINEERINGBAY).ready
+            ):
+                for cc in self.ai.townhalls(UnitTypeId.COMMANDCENTER).ready.idle:
+                    cc(AbilityId.UPGRADETOORBITAL_ORBITALCOMMAND)
+                    self.build_order.pop(0)
+                    return
             return
         if next_to_be_build in [
             AbilityId.BARRACKSTECHLABRESEARCH_STIMPACK,
