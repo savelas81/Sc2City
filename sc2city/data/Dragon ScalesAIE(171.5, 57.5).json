@@ -3,18 +3,30 @@
     [
       154.5,
       62.5
-    ],
-    [
-      158.5,
-      53.5
-    ],
+    ]
+  ],
+  "building_positions_priority_2": [
     [
       132.5,
       56.5
-    ],
+    ]
+  ],
+  "building_positions_priority_3": [
     [
       169.5,
       78.5
+    ]
+  ],
+  "building_positions_priority_4": [
+    [
+      158.5,
+      53.5
+    ]
+  ],
+  "building_positions_priority_5": [
+    [
+      157.5,
+      71.5
     ],
     [
       148.5,
@@ -23,12 +35,12 @@
     [
       136.5,
       52.5
+    ],
+    [
+      132.5,
+      47.5
     ]
   ],
-  "building_positions_priority_2": [],
-  "building_positions_priority_3": [],
-  "building_positions_priority_4": [],
-  "building_positions_priority_5": [],
   "auxiliary_buildings_1": [
     [
       173.5,
@@ -39,20 +51,26 @@
       53.5
     ]
   ],
-  "auxiliary_buildings_2": [],
-  "auxiliary_buildings_3": [],
+  "auxiliary_buildings_2": [
+    [
+      180.5,
+      63.5
+    ]
+  ],
+  "auxiliary_buildings_3": [
+    [
+      164.5,
+      48.5
+    ],
+    [
+      176.5,
+      50.5
+    ]
+  ],
   "supplydepot_positions_priority_1": [
     [
       152.0,
       63.0
-    ],
-    [
-      165.0,
-      78.0
-    ],
-    [
-      167.0,
-      79.0
     ],
     [
       155.0,
@@ -61,33 +79,33 @@
   ],
   "supplydepot_positions_priority_2": [
     [
-      135.0,
-      58.0
-    ],
-    [
       137.0,
       62.0
+    ],
+    [
+      136.0,
+      60.0
+    ],
+    [
+      135.0,
+      58.0
     ]
   ],
   "supplydepot_positions_priority_3": [
     [
-      176.0,
-      61.0
+      165.0,
+      78.0
     ],
     [
-      168.0,
-      56.0
-    ],
-    [
-      160.0,
-      51.0
-    ],
-    [
-      146.0,
-      55.0
+      167.0,
+      78.0
     ]
   ],
   "supplydepot_positions_priority_4": [
+    [
+      182.0,
+      98.0
+    ],
     [
       182.0,
       100.0
@@ -97,8 +115,8 @@
       96.0
     ],
     [
-      182.0,
-      103.0
+      160.0,
+      51.0
     ],
     [
       172.0,
@@ -106,10 +124,47 @@
     ],
     [
       182.0,
-      98.0
+      103.0
     ]
   ],
-  "supplydepot_positions_priority_5": [],
+  "supplydepot_positions_priority_5": [
+    [
+      145.0,
+      44.0
+    ],
+    [
+      180.0,
+      58.0
+    ],
+    [
+      141.0,
+      45.0
+    ],
+    [
+      170.0,
+      50.0
+    ],
+    [
+      146.0,
+      54.0
+    ],
+    [
+      176.0,
+      62.0
+    ],
+    [
+      149.0,
+      47.0
+    ],
+    [
+      168.0,
+      56.0
+    ],
+    [
+      143.0,
+      44.0
+    ]
+  ],
   "turret_positions_priority_1": [
     [
       147.0,
@@ -118,6 +173,14 @@
     [
       175.0,
       53.0
+    ],
+    [
+      157.0,
+      64.0
+    ],
+    [
+      138.0,
+      60.0
     ]
   ],
   "turret_positions_priority_2": [],
@@ -127,12 +190,13 @@
     [
       142.5,
       52.5
-    ],
+    ]
+  ],
+  "expansion_priority_2": [],
+  "expansion_priority_3": [
     [
       150.5,
       81.5
     ]
-  ],
-  "expansion_priority_2": [],
-  "expansion_priority_3": []
+  ]
 }
