@@ -76,6 +76,7 @@ class BuildingPlacementSolver:
             UnitTypeId.ENGINEERINGBAY,
             UnitTypeId.GHOSTACADEMY,
             UnitTypeId.ARMORY,
+            UnitTypeId.FUSIONCORE,
         ]:
             for position in [
                 *self.auxiliary_buildings_1,
