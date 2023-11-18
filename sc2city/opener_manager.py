@@ -18,7 +18,7 @@ class OpenerManager:
         """[UnitTypeId]"""
         if self.create_opener:
             """Overwrite for opening strategies, @line 21"""
-            opening_strategy=2
+            opening_strategy = 2
             self.create_opener = False
             if opening_strategy == 1:
                 self.build_order = [
@@ -40,12 +40,6 @@ class OpenerManager:
                     UnitTypeId.SCV,
                     UnitTypeId.BARRACKS,
                     UnitTypeId.SCV,
-                    "add_vespene",
-                    "add_vespene",
-                    "add_vespene",
-                    "add_vespene",
-                    "add_vespene",
-                    "add_vespene",
                     AbilityId.UPGRADETOORBITAL_ORBITALCOMMAND,
                     UnitTypeId.SCV,
                     UnitTypeId.BARRACKSTECHLAB,
@@ -86,12 +80,6 @@ class OpenerManager:
                     UnitTypeId.SCV,
                     UnitTypeId.FACTORY,
                     UnitTypeId.SCV,
-                    "add_vespene",
-                    "add_vespene",
-                    "add_vespene",
-                    "add_vespene",
-                    "add_vespene",
-                    "add_vespene",
                     UnitTypeId.BARRACKSREACTOR,
                     UnitTypeId.SUPPLYDEPOT,
                     UnitTypeId.MARAUDER,
@@ -191,13 +179,7 @@ class OpenerManager:
                     UnitTypeId.REFINERY,
                     UnitTypeId.REFINERY,
                     UnitTypeId.SCV,
-                    "add_vespene",
-                    "add_vespene",
-                    "add_vespene",
                     UnitTypeId.BARRACKS,
-                    "add_vespene",
-                    "add_vespene",
-                    "add_vespene",
                     UnitTypeId.SCV,
                     UnitTypeId.BARRACKSTECHLAB,
                     UnitTypeId.SCV,
@@ -228,9 +210,6 @@ class OpenerManager:
                     UnitTypeId.MARAUDER,
                     UnitTypeId.SCV,
                     UnitTypeId.SCV,
-                    "add_vespene",
-                    "add_vespene",
-                    "add_vespene",
                     UnitTypeId.ENGINEERINGBAY,
                     UnitTypeId.SCV,
                     UnitTypeId.SUPPLYDEPOT,
@@ -350,12 +329,20 @@ class OpenerManager:
         if not await self.ai.scv_manager.building_queue_empty():
             return
         next_to_be_build = self.build_order[0]
-        if next_to_be_build == "add_vespene":
-            self.ai.scv_manager.target_vespene_collectors += 1
+        if next_to_be_build == "scvs_per_refinery_0":
+            self.ai.scv_manager.scvs_per_refinery = 0
             self.build_order.pop(0)
             return
-        if next_to_be_build == "remove_vespene":
-            self.ai.scv_manager.target_vespene_collectors -= 1
+        if next_to_be_build == "scvs_per_refinery_1":
+            self.ai.scv_manager.scvs_per_refinery = 1
+            self.build_order.pop(0)
+            return
+        if next_to_be_build == "scvs_per_refinery_2":
+            self.ai.scv_manager.scvs_per_refinery = 2
+            self.build_order.pop(0)
+            return
+        if next_to_be_build == "scvs_per_refinery_3":
+            self.ai.scv_manager.scvs_per_refinery = 3
             self.build_order.pop(0)
             return
         if next_to_be_build == UnitTypeId.SCV:
@@ -433,6 +420,12 @@ class OpenerManager:
                 self.build_order.pop(0)
                 return
             return
+        if next_to_be_build == AbilityId.BARRACKSTECHLABRESEARCH_STIMPACK:
+            for facility in self.ai.structures(UnitTypeId.BARRACKSTECHLAB).ready.idle:
+                if self.ai.can_afford(AbilityId.BARRACKSTECHLABRESEARCH_STIMPACK):
+                    print("upgrade STIMPACK")
+                    facility(AbilityId.BARRACKSTECHLABRESEARCH_STIMPACK)
+                    self.build_order.pop(0)
         if next_to_be_build == UnitTypeId.COMMANDCENTER:
             if self.ai.minerals > 250:
                 await self.ai.scv_manager.queue_building(structure_type_id=next_to_be_build)

@@ -24,6 +24,7 @@ class Sc2City(BotAI):
         self.building_placements = BuildingPlacementSolver(self)
         self.opener_manager = OpenerManager(self)
         self.scv_manager = ScvManager(self)
+        self.iteration = 0
 
     async def on_start(self):
         """on_start runs once in beginning of every game"""
@@ -33,6 +34,7 @@ class Sc2City(BotAI):
         await self.scv_manager.worker_spit_frame_zero()
 
     async def on_step(self, iteration):
+        self.iteration = iteration
         self.memory.update_units_in_memory(enemy_units=self.all_enemy_units, our_units=(self.units|self.structures))
         """creates influence maps from units in memory."""
         self.MA.create_influence_maps(memory=self.memory)

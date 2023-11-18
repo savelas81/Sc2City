@@ -38,8 +38,7 @@ class ScvManager:
         self.remember_first_builder = True
         self.first_builder_tag: int = 0
         self.expand_to_natural = True
-        self.scvs_per_refinery = 3  # valid values 0, 2, 3
-        self.target_vespene_collectors = 0
+        self.scvs_per_refinery = 3  # valid values 0-3
 
     async def worker_spit_frame_zero(self):
         self.expand_to_natural = await self.ai.get_next_expansion()
@@ -114,7 +113,7 @@ class ScvManager:
             return
         if self.next_building_type == UnitTypeId.REFINERY:
             if self.ai.can_afford(self.next_building_type):
-                for cc in self.ai.townhalls:
+                for cc in self.ai.townhalls.sorted(lambda unit: unit.is_ready, reverse=True):
                     geysers = self.ai.vespene_geyser.closer_than(10.0, cc)
                     for geyser in geysers:
                         point = geyser.position.towards(self.ai.game_info.map_center, 2)
@@ -145,17 +144,25 @@ class ScvManager:
                 return
 
     async def distribute_workers(self):
-        """Send idle scvs to mine minerals
-           select closes scv to mine gas if needed
-           stop gas miner if too many (will be assigned to minerals in next iteration"""
+        """Calculate custom_assigned_harvesters for CC, REFINERY and MINERALFIELD"""
         for structure in (self.ai.gas_buildings | self.ai.townhalls | self.ai.mineral_field):
             structure.custom_assigned_harvesters = 0
         for target_refinery_tag in self.vespene_collector_dict.values():
-            for refinery in self.ai.gas_buildings.ready:
-                if refinery.tag == target_refinery_tag:
-                    refinery.custom_assigned_harvesters += 1
-                    break
+            refinery = self.ai.gas_buildings.ready.find_by_tag(target_refinery_tag)
+            if refinery:
+                refinery.custom_assigned_harvesters += 1
+                continue
+        for scv in self.ai.units(UnitTypeId.SCV):
+            if scv.tag in self.mineral_collector_dict:
+                target_mf_tag = self.mineral_collector_dict[scv.tag]
+                mf = self.ai.mineral_field.find_by_tag(target_mf_tag)
+                if mf:
+                    mf.custom_assigned_harvesters += 1
+                    cc = self.ai.townhalls.ready.not_flying.closest_to(mf)
+                    cc.custom_assigned_harvesters += 1
+                    continue
 
+        """Send idle scvs to mine minerals"""
         for scv in self.ai.units(UnitTypeId.SCV):
             if scv.tag == self.builder_tag:
                 continue
@@ -168,22 +175,13 @@ class ScvManager:
                     if scv.tag not in self.vespene_collector_dict:
                         self.active_builders_tag_list.remove(scv.tag)
                         self.vespene_collector_dict[scv.tag] = scv.orders[0].target
-                        self.target_vespene_collectors += 1
                 continue
-            # elif scv.tag in self.vespene_collector_dict:
-            #     target_refinery_tag = self.vespene_collector_dict[scv.tag]
-            #     for refinery in self.ai.gas_buildings.ready:
-            #         if refinery.tag == target_refinery_tag:
-            #             refinery.custom_assigned_harvesters += 1
-            #             break
             elif scv.tag in self.mineral_collector_dict:
-                target_mf_tag = self.mineral_collector_dict[scv.tag]
-                for mf in self.ai.mineral_field:
-                    if mf.tag == target_mf_tag:
-                        mf.custom_assigned_harvesters += 1
-                        cc = self.ai.townhalls.ready.not_flying.closest_to(mf)
-                        cc.custom_assigned_harvesters += 1
-                        break
+                """reserved for mineral collector related stuff"""
+                continue
+            elif scv.tag in self.vespene_collector_dict:
+                """reserved for vespene collector related stuff"""
+                continue
             elif scv.tag in self.repairer_tag_list:
                 """reserved for repairer related stuff"""
                 continue
@@ -204,18 +202,38 @@ class ScvManager:
                 mf = mfs.sorted(lambda x: x.custom_assigned_harvesters).first
                 self.mineral_collector_dict[scv.tag] = mf.tag
 
-        if self.ai.opener_manager.opener_is_active:
-            if len(self.vespene_collector_dict) < self.target_vespene_collectors:
-                pass
-        else:
-            # TODO saturate gas buildings based on self.scvs_per_refinery
-            pass
+        """select closes scv to mine gas if needed"""
+        """stop gas miner if too many (will be assigned to minerals in next iteration"""
+        if self.ai.iteration % 4 == 0:
+            for refinery in self.ai.gas_buildings.ready:
+                if refinery.custom_assigned_harvesters < self.scvs_per_refinery:
+                    scv = await self.select_contractor(position=refinery.position)
+                    if scv:
+                        await self.remove_unit_tag_from_lists(unit_tag=scv.tag)
+                        self.vespene_collector_dict[scv.tag] = refinery.tag
+                        scv.gather(refinery)
+                        break
+                if refinery.custom_assigned_harvesters > self.scvs_per_refinery:
+                    scv_to_stop = None
+                    for scv in self.ai.units(UnitTypeId.SCV):
+                        if scv.tag in self.vespene_collector_dict:
+                            scv_target_refinery_tag = self.vespene_collector_dict[scv.tag]
+                            if scv_target_refinery_tag == refinery.tag:
+                                scv_to_stop = scv
+                                break
+                    if scv_to_stop:
+                        scv_to_stop.move(scv_to_stop.position)
+                        await self.remove_unit_tag_from_lists(scv_to_stop.tag)
+                        break
+
 
         for scv in self.ai.units(UnitTypeId.SCV):
             if scv.tag in self.mineral_collector_dict:
                 target_mineralfield_tag = self.mineral_collector_dict[scv.tag]
                 await self.speed_mine_minerals_single(scv=scv, target_mineralfield_tag=target_mineralfield_tag)
-
+            elif scv.tag in self.vespene_collector_dict:
+                target_refinery_tag = self.vespene_collector_dict[scv.tag]
+                await self.speed_mine_gas_single(scv=scv, target_refinery_tag=target_refinery_tag)
 
     async def remove_unit_tag_from_lists(self, unit_tag: int):
         if unit_tag in self.mineral_collector_dict:
@@ -233,10 +251,10 @@ class ScvManager:
 
     async def speed_mine_minerals_single(self, scv: Unit, target_mineralfield_tag: int):
         transition_distance = 1.8
-        min_distance = 0.5
+        min_distance = 0.4
         if scv.is_carrying_resource:
             if len(scv.orders) < 2:
-                target = self.ai.townhalls.closest_to(scv)
+                target = self.ai.townhalls.ready.closest_to(scv)
                 if scv.distance_to(target) < transition_distance + target.radius + scv.radius:
                     if scv.distance_to(target) < min_distance + target.radius + scv.radius:
                         scv(AbilityId.SMART, target, queue=False)
@@ -247,7 +265,7 @@ class ScvManager:
             return
         else:
             target = self.ai.mineral_field.find_by_tag(tag=target_mineralfield_tag)
-            if scv.is_idle:
+            if scv.is_idle and target:
                 scv.gather(target)
                 return
             if len(scv.orders) < 2:
@@ -274,5 +292,32 @@ class ScvManager:
                             scv(AbilityId.SMART, target, queue=True)
                 return
 
-    async def speed_mine_gas_single(self, scv: Unit):
-        pass
+    async def speed_mine_gas_single(self, scv: Unit, target_refinery_tag: int):
+        transition_distance = 1.8
+        min_distance = 0.4
+        if scv.is_carrying_resource:
+            if len(scv.orders) < 2:
+                target = self.ai.townhalls.ready.closest_to(scv)
+                if scv.distance_to(target) < transition_distance + target.radius + scv.radius:
+                    if scv.distance_to(target) < min_distance + target.radius + scv.radius:
+                        scv(AbilityId.SMART, target, queue=False)
+                        return
+                    waypoint = target.position.towards(scv, target.radius + scv.radius)
+                    scv.move(waypoint)
+                    scv(AbilityId.SMART, target, queue=True)
+            return
+        else:
+            target = self.ai.gas_buildings.find_by_tag(tag=target_refinery_tag)
+            if scv.is_idle and target:
+                scv.gather(target)
+                return
+            if len(scv.orders) < 2:
+                if target:
+                    if (min_distance + target.radius + scv.radius
+                            < scv.distance_to(target)
+                            < transition_distance + target.radius + scv.radius):
+                        waypoint = target.position.towards(scv, target.radius + scv.radius)
+                        scv.move(waypoint)
+                        scv(AbilityId.SMART, target, queue=True)
+                return
+
