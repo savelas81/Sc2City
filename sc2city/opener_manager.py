@@ -587,6 +587,15 @@ class OpenerManager:
                         return
                 print("Opener_manager: No factories without add_ons available!")
             return
+        if next_to_be_build in [UnitTypeId.STARPORTREACTOR, UnitTypeId.STARPORTTECHLAB]:
+            if self.ai.can_afford(next_to_be_build):
+                for rax in self.ai.structures(UnitTypeId.STARPORT).ready.idle:
+                    if not rax.add_on_tag:
+                        rax.build(next_to_be_build)
+                        self.build_order.pop(0)
+                        return
+                print("Opener_manager: No starports without add_ons available!")
+            return
         if next_to_be_build == UnitTypeId.REFINERY:
             await self.ai.scv_manager.queue_building(structure_type_id=next_to_be_build)
             self.build_order.pop(0)
