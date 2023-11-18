@@ -62,6 +62,7 @@ class ScvManager:
             return False
 
     async def queue_building(self, structure_type_id=UnitTypeId.BARRACKS):
+        print("scv_manager: queue building: " + str(structure_type_id))
         if structure_type_id == UnitTypeId.REFINERY:
             self.next_building_type = structure_type_id
             return
@@ -186,14 +187,14 @@ class ScvManager:
                 """reserved for BOYS related stuff"""
                 continue
             elif scv.is_idle:
-                print("scv_manager: Idle SCV.")
+                # print("scv_manager: Idle SCV.")
                 await self.remove_unit_tag_from_lists(scv.tag)
                 cc = self.ai.townhalls.ready.not_flying.sorted(lambda x: x.custom_assigned_harvesters).first
                 mfs = self.ai.mineral_field.closer_than(10, cc)
                 mf = mfs.sorted(lambda x: x.custom_assigned_harvesters).first
                 self.mineral_collector_dict[scv.tag] = mf.tag
             else:
-                print("scv_manager: Scv has no dedicated group. Assign to mineral collection")
+                # print("scv_manager: Scv has no dedicated group. Assign to mineral collection")
                 cc = self.ai.townhalls.ready.not_flying.sorted(lambda x: x.custom_assigned_harvesters).first
                 mfs = self.ai.mineral_field.closer_than(10, cc)
                 mf = mfs.sorted(lambda x: x.custom_assigned_harvesters).first

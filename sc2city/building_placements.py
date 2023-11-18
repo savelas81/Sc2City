@@ -28,6 +28,8 @@ class BuildingPlacementSolver:
         self.expansion_priority_2 = []
         self.expansion_priority_3 = []
         self.macro_orbitals = []
+        self.bunkers = []
+        self.sensor_towers = []
         self.positions_dict = {}
         self.map_name = ""
         self.start_location_save = Point2((0, 0))
@@ -82,6 +84,17 @@ class BuildingPlacementSolver:
                 if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
                     return position
 
+        if structure_type_id in [UnitTypeId.MISSILETURRET]:
+            for position in self.turret_positions_priority_1:
+                if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                    return position
+            for position in self.turret_positions_priority_2:
+                if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                    return position
+            for position in self.turret_positions_priority_3:
+                if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                    return position
+
         if structure_type_id == UnitTypeId.COMMANDCENTER:
             for position in self.expansion_priority_1:
                 if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
@@ -94,6 +107,14 @@ class BuildingPlacementSolver:
                     return position
         if structure_type_id == UnitTypeId.ORBITALCOMMAND:  # special case for macro orbitals
             for position in self.macro_orbitals:
+                if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                    return position
+        if structure_type_id == UnitTypeId.BUNKER:  # special case for macro orbitals
+            for position in self.bunkers:
+                if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
+                    return position
+        if structure_type_id == UnitTypeId.SENSORTOWER:  # special case for macro orbitals
+            for position in self.sensor_towers:
                 if await self.this_valid_building_location(structure_type_id=structure_type_id, position=position):
                     return position
 
@@ -156,6 +177,10 @@ class BuildingPlacementSolver:
                 self.expansion_priority_2.append(building.position)
             elif building.type_id == UnitTypeId.HATCHERY:
                 self.expansion_priority_3.append(building.position)
+            elif building.type_id == UnitTypeId.BUNKER:
+                self.bunkers.append(building.position)
+            elif building.type_id == UnitTypeId.SENSORTOWER:
+                self.sensor_towers.append(building.position)
 
         self.positions_dict["building_positions_priority_1"] = self.building_positions_priority_1
         self.positions_dict["building_positions_priority_2"] = self.building_positions_priority_2
@@ -177,6 +202,8 @@ class BuildingPlacementSolver:
         self.positions_dict["expansion_priority_1"] = self.expansion_priority_1
         self.positions_dict["expansion_priority_2"] = self.expansion_priority_2
         self.positions_dict["expansion_priority_3"] = self.expansion_priority_3
+        self.positions_dict["bunkers"] = self.bunkers
+        self.positions_dict["sensor_towers"] = self.sensor_towers
         # print(self.positions_dict)
         self.save_data()
 
@@ -220,6 +247,9 @@ class BuildingPlacementSolver:
                 self.expansion_priority_1 = self.positions_dict["expansion_priority_1"]
                 self.expansion_priority_2 = self.positions_dict["expansion_priority_2"]
                 self.expansion_priority_3 = self.positions_dict["expansion_priority_3"]
+                self.bunkers = self.positions_dict["bunkers"]
+                self.sensor_towers = self.positions_dict["sensor_towers"]
+
 
 
 
