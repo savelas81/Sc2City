@@ -367,10 +367,6 @@ class OpenerManager:
                     UnitTypeId.REFINERY,
                     UnitTypeId.SCV,
                     UnitTypeId.SCV,
-                    ONWAAR
-                    "add_vespene",
-                    "add_vespene",
-                    "add_vespene",
                     UnitTypeId.SCV,
                     AbilityId.UPGRADETOORBITAL_ORBITALCOMMAND,
                     UnitTypeId.COMMANDCENTER,
