@@ -18,7 +18,7 @@ class OpenerManager:
         """[UnitTypeId]"""
         if self.create_opener:
             """Overwrite for opening strategies, @line 21"""
-            opening_strategy = 2
+            opening_strategy = 0
             self.create_opener = False
             if opening_strategy == 0:
                 self.build_order = [
@@ -574,10 +574,75 @@ class OpenerManager:
                 )
                 self.build_order.pop(0)
             return
+        if next_to_be_build in [UnitTypeId.ARMORY]:
+            if (
+                self.ai.minerals > 60
+                and self.ai.vespene > 60
+                and self.ai.structures(
+                    [UnitTypeId.FACTORY]
+                ).ready
+            ):
+                await self.ai.scv_manager.queue_building(
+                    structure_type_id=next_to_be_build
+                )
+                self.build_order.pop(0)
+            return
+        if next_to_be_build in [UnitTypeId.SENSORTOWER, UnitTypeId.MISSILETURRET]:
+            if (
+                self.ai.minerals > 50
+                and self.ai.structures(
+                    [UnitTypeId.ENGINEERINGBAY]
+                ).ready
+            ):
+                await self.ai.scv_manager.queue_building(
+                    structure_type_id=next_to_be_build
+                )
+                self.build_order.pop(0)
+            return
         if next_to_be_build == UnitTypeId.FACTORY:
             if (
                 self.ai.minerals > 60
                 and self.ai.vespene > 60
+                and (
+                    self.ai.structures(UnitTypeId.BARRACKS).ready
+                    or self.ai.structures(UnitTypeId.BARRACKSFLYING)
+                )
+            ):
+                await self.ai.scv_manager.queue_building(
+                    structure_type_id=next_to_be_build
+                )
+                self.build_order.pop(0)
+            return
+        if next_to_be_build == UnitTypeId.GHOSTACADEMY:
+            if (
+                self.ai.minerals > 60
+                and (
+                    self.ai.structures(UnitTypeId.BARRACKS).ready
+                    or self.ai.structures(UnitTypeId.BARRACKSFLYING)
+                )
+            ):
+                await self.ai.scv_manager.queue_building(
+                    structure_type_id=next_to_be_build
+                )
+                self.build_order.pop(0)
+            return
+        if next_to_be_build == UnitTypeId.FUSIONCORE:
+            if (
+                self.ai.minerals > 60
+                and self.ai.vespene > 100
+                and (
+                    self.ai.structures(UnitTypeId.STARPORT).ready
+                    or self.ai.structures(UnitTypeId.STARPORTFLYING)
+                )
+            ):
+                await self.ai.scv_manager.queue_building(
+                    structure_type_id=next_to_be_build
+                )
+                self.build_order.pop(0)
+            return
+        if next_to_be_build == UnitTypeId.BUNKER:
+            if (
+                self.ai.minerals > 50
                 and (
                     self.ai.structures(UnitTypeId.BARRACKS).ready
                     or self.ai.structures(UnitTypeId.BARRACKSFLYING)
