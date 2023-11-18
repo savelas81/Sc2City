@@ -155,6 +155,7 @@ class ScvManager:
                 return
 
     async def distribute_workers(self):
+        # TODO distribute scvs mineral miners between bases
         """Calculate custom_assigned_harvesters for CC, REFINERY and MINERALFIELD"""
         for structure in (
             self.ai.gas_buildings | self.ai.townhalls | self.ai.mineral_field
