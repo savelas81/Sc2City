@@ -36,6 +36,7 @@ class UnitsInMemory:
             self.killed_enemy_units.append(unit)
         elif unit_tag in self.our_units_in_memory_by_tag:
             unit = self.our_units_in_memory_by_tag.pop(unit_tag)
+            self.ai.scv_manager.remove_unit_tag_from_lists(unit_tag=unit_tag)
             self.lost_friendly_units.append(unit)
 
     @property
