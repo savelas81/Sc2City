@@ -19,9 +19,13 @@ def run_ladder_game(bot):
     parser.add_argument("--GamePort", type=int, nargs="?", help="Game port")
     parser.add_argument("--StartPort", type=int, nargs="?", help="Start port")
     parser.add_argument("--LadderServer", type=str, nargs="?", help="Ladder server")
-    parser.add_argument("--ComputerOpponent", type=str, nargs="?", help="Computer opponent")
+    parser.add_argument(
+        "--ComputerOpponent", type=str, nargs="?", help="Computer opponent"
+    )
     parser.add_argument("--ComputerRace", type=str, nargs="?", help="Computer race")
-    parser.add_argument("--ComputerDifficulty", type=str, nargs="?", help="Computer difficulty")
+    parser.add_argument(
+        "--ComputerDifficulty", type=str, nargs="?", help="Computer difficulty"
+    )
     parser.add_argument("--OpponentId", type=str, nargs="?", help="Opponent ID")
     parser.add_argument("--RealTime", action="store_true", help="Real time flag")
     args, _unknown = parser.parse_known_args()
@@ -50,7 +54,13 @@ def run_ladder_game(bot):
         portconfig.players = [[ports[3], ports[4]]]
 
     # Join ladder game
-    g = join_ladder_game(host=host, port=host_port, players=[bot], realtime=realtime, portconfig=portconfig)
+    g = join_ladder_game(
+        host=host,
+        port=host_port,
+        players=[bot],
+        realtime=realtime,
+        portconfig=portconfig,
+    )
 
     # Run it
     result = asyncio.get_event_loop().run_until_complete(g)
@@ -58,12 +68,16 @@ def run_ladder_game(bot):
 
 
 # Modified version of sc2.main._join_game to allow custom host and port, and to not spawn an additional sc2process (thanks to alkurbatov for fix)
-async def join_ladder_game(host, port, players, realtime, portconfig, save_replay_as=None, game_time_limit=None):
+async def join_ladder_game(
+    host, port, players, realtime, portconfig, save_replay_as=None, game_time_limit=None
+):
     ws_url = f"ws://{host}:{port}/sc2api"
     ws_connection = await aiohttp.ClientSession().ws_connect(ws_url, timeout=120)
     client = Client(ws_connection)
     try:
-        result = await sc2.main._play_game(players[0], client, realtime, portconfig, game_time_limit)
+        result = await sc2.main._play_game(
+            players[0], client, realtime, portconfig, game_time_limit
+        )
         if save_replay_as is not None:
             await client.save_replay(save_replay_as)
         # await client.leave()

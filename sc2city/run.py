@@ -23,10 +23,9 @@ if __name__ == "__main__":
     else:
         # Local game
         print("Starting local game...")
-        run_game(maps.get("DragonScalesAIE"),
-                 [bot, Computer(Race.Protoss, Difficulty.VeryHard)],
-                 realtime=False,
-                 save_replay_as="replay.SC2Replay")
-
-
-
+        run_game(
+            maps.get("DragonScalesAIE"),
+            [bot, Computer(Race.Protoss, Difficulty.VeryHard)],
+            realtime=False,
+            save_replay_as="replay.SC2Replay",
+        )

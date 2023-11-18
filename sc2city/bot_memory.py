@@ -7,7 +7,6 @@ import sc2
 from sc2.game_data import Cost
 
 
-
 class UnitsInMemory:
     def __init__(self, ai=None):
         self.ai = ai
@@ -49,6 +48,7 @@ class UnitsInMemory:
             value = self.ai.calculate_unit_value(unit.type_id)
             minerals += value.minerals
         return minerals
+
     def get_enemy_lost_vespene(self) -> int:
         vespene = 0
         value: Cost
@@ -64,6 +64,7 @@ class UnitsInMemory:
             value = self.ai.calculate_unit_value(unit.type_id)
             minerals += value.minerals
         return minerals
+
     def get_our_lost_vespene(self) -> int:
         vepene = 0
         value: Cost
