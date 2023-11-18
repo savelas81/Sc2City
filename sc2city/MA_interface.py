@@ -24,7 +24,7 @@ class MapAnalyserInterface:
         self.reaper_grid = self.map_data.get_climber_grid(default_weight=1)
         extra_ground_distance = 3
         extra_air_distance = 3
-        for enemy_unit in memory.enemy_units_in_memory():
+        for enemy_unit in memory.enemy_units_in_memory:
             self.ai.client.debug_sphere_out(
                 p=enemy_unit, r=enemy_unit.radius, color=(255, 0, 0)
             )

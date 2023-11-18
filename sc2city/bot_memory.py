@@ -38,9 +38,11 @@ class UnitsInMemory:
             unit = self.our_units_in_memory_by_tag.pop(unit_tag)
             self.lost_friendly_units.append(unit)
 
-    def enemy_units_in_memory(self) -> Units:
-        return self.enemy_units_in_memory_by_tag.values()
+    @property
+    def enemy_units_in_memory(self) -> set[int]:
+        return set(self.enemy_units_in_memory_by_tag.values())
 
+    @property
     def get_enemy_lost_minerals(self) -> int:
         minerals = 0
         value: Cost
@@ -49,6 +51,7 @@ class UnitsInMemory:
             minerals += value.minerals
         return minerals
 
+    @property
     def get_enemy_lost_vespene(self) -> int:
         vespene = 0
         value: Cost
@@ -57,6 +60,7 @@ class UnitsInMemory:
             vespene += value.vespene
         return vespene
 
+    @property
     def get_our_lost_minerals(self) -> int:
         minerals = 0
         value: Cost
@@ -65,6 +69,7 @@ class UnitsInMemory:
             minerals += value.minerals
         return minerals
 
+    @property
     def get_our_lost_vespene(self) -> int:
         vepene = 0
         value: Cost
