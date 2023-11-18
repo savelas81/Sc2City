@@ -420,14 +420,14 @@ class OpenerManager:
                 self.build_order.pop(0)
             return
         if next_to_be_build == UnitTypeId.BARRACKS:
-            if self.ai.minerals > 60 and self.ai.structures(UnitTypeId.SUPPLYDEPOT).ready:
+            if self.ai.minerals > 60 and self.ai.structures([UnitTypeId.SUPPLYDEPOT, UnitTypeId.SUPPLYDEPOTLOWERED]).ready:
                 await self.ai.scv_manager.queue_building(structure_type_id=next_to_be_build)
                 self.build_order.pop(0)
             return
         if next_to_be_build == UnitTypeId.FACTORY:
             if (self.ai.minerals > 60
                     and self.ai.vespene > 60
-                    and (self.ai.structures(UnitTypeId.SUPPLYDEPOT).ready
+                    and (self.ai.structures(UnitTypeId.BARRACKS).ready
                          or self.ai.structures(UnitTypeId.BARRACKSFLYING))):
                 await self.ai.scv_manager.queue_building(structure_type_id=next_to_be_build)
                 self.build_order.pop(0)
@@ -460,12 +460,14 @@ class OpenerManager:
                 self.build_order.pop(0)
                 return
             return
-        if next_to_be_build == AbilityId.BARRACKSTECHLABRESEARCH_STIMPACK:
+        if next_to_be_build in [AbilityId.BARRACKSTECHLABRESEARCH_STIMPACK, AbilityId.RESEARCH_COMBATSHIELD]:
             for facility in self.ai.structures(UnitTypeId.BARRACKSTECHLAB).ready.idle:
-                if self.ai.can_afford(AbilityId.BARRACKSTECHLABRESEARCH_STIMPACK):
-                    print("upgrade STIMPACK")
-                    facility(AbilityId.BARRACKSTECHLABRESEARCH_STIMPACK)
+                if self.ai.can_afford(next_to_be_build):
+                    print("Upgrade: " + str(next_to_be_build))
+                    facility(next_to_be_build)
                     self.build_order.pop(0)
+            print("No idle BARRACKSTECHLAB available!")
+            return
         if next_to_be_build == UnitTypeId.COMMANDCENTER:
             if self.ai.minerals > 250:
                 await self.ai.scv_manager.queue_building(structure_type_id=next_to_be_build)

@@ -80,8 +80,7 @@ class ScvManager:
         if not contractor:
             print("scv_manager: No builder selected!")
             return
-        if contractor.tag in self.mineral_collector_dict:
-            self.mineral_collector_dict.pop(contractor.tag)
+        await self.remove_unit_tag_from_lists(contractor.tag)
         self.builder_tag = contractor.tag
         self.next_building_type = structure_type_id
         self.next_building_position = Point2(position)
@@ -166,8 +165,6 @@ class ScvManager:
         for scv in self.ai.units(UnitTypeId.SCV):
             if scv.tag == self.builder_tag:
                 continue
-            if scv.is_selected:
-                print("For debug only")
             if scv.tag in self.active_builders_tag_list:
                 if scv.is_idle:
                     self.active_builders_tag_list.remove(scv.tag)
@@ -228,6 +225,8 @@ class ScvManager:
 
 
         for scv in self.ai.units(UnitTypeId.SCV):
+            if scv.is_selected:
+                print("For debug only")
             if scv.tag in self.mineral_collector_dict:
                 target_mineralfield_tag = self.mineral_collector_dict[scv.tag]
                 await self.speed_mine_minerals_single(scv=scv, target_mineralfield_tag=target_mineralfield_tag)
@@ -271,7 +270,9 @@ class ScvManager:
             if len(scv.orders) < 2:
                 if target:
                     if len(scv.orders) == 1 and scv.orders[0].target != target.tag:
-                        self.mineral_collector_dict[scv.tag] = target.tag
+                        if scv.orders[0].target not in self.ai.mineral_field.tags:
+                            print("scv_manager: scv has invalid target ID")
+                        self.mineral_collector_dict[scv.tag] = scv.orders[0].target
                         return
                     if (min_distance + target.radius + scv.radius
                             < scv.distance_to(target)
@@ -280,7 +281,7 @@ class ScvManager:
                         closest = Point2((0, 0))
                         min_dist = math.inf
                         for pos in mining_positions:
-                            if not self.ai.in_placement_grid(pos):
+                            if not self.ai.in_pathing_grid(pos):
                                 continue
                             dist = pos.distance_to(scv)
                             if dist < min_dist:
