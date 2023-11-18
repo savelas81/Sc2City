@@ -18,7 +18,7 @@ class OpenerManager:
         """[UnitTypeId]"""
         if self.create_opener:
             """Overwrite for opening strategies, @line 21"""
-            opening_strategy = 4
+            opening_strategy = 1
             self.create_opener = False
             if opening_strategy == 1:
                 self.build_order = [
