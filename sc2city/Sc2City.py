@@ -30,7 +30,7 @@ class Sc2City(BotAI):
         self.client.game_step = 4  #  2 for ladder 4 for testing
         self.building_placements.load_data()
         self.MA = MapAnalyserInterface(self)
-        await self.scv_manager.worker_spit_frame_zero()
+        await self.scv_manager.worker_split_frame_zero()
 
     async def on_step(self, iteration):
         self.iteration = iteration

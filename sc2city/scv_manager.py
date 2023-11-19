@@ -41,7 +41,7 @@ class ScvManager:
         self.expand_to_natural = True
         self.scvs_per_refinery = 3  # valid values 0-3
 
-    async def worker_spit_frame_zero(self):
+    async def worker_split_frame_zero(self):
         self.expand_to_natural = await self.ai.get_next_expansion()
         mfs = self.ai.mineral_field.closer_than(10, self.ai.townhalls.first.position)
         workers = self.ai.units(UnitTypeId.SCV)
