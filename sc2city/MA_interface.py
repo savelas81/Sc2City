@@ -18,9 +18,7 @@ class MapAnalyserInterface:
     def create_influence_maps(self, memory):
         self.enemy_ground_grid = self.map_data.get_pyastar_grid(default_weight=1)
         self.enemy_air_grid = self.map_data.get_clean_air_grid(default_weight=1)
-        self.enemy_ground_to_air_grid = self.map_data.get_clean_air_grid(
-            default_weight=1
-        )
+        self.enemy_ground_to_air_grid = self.map_data.get_clean_air_grid(default_weight=1)
         self.reaper_grid = self.map_data.get_climber_grid(default_weight=1)
         extra_ground_distance = 3
         extra_air_distance = 3

@@ -13,6 +13,7 @@ from strategy_manager import StrategyManager
 from building_placements import BuildingPlacementSolver
 from opener_manager import OpenerManager
 from scv_manager import ScvManager
+from scout_manager import ScoutManager
 from sc2.ids.ability_id import AbilityId
 
 
@@ -23,7 +24,9 @@ class Sc2City(BotAI):
         self.building_placements = BuildingPlacementSolver(self)
         self.opener_manager = OpenerManager(self)
         self.scv_manager = ScvManager(self)
+        self.scout_manager = ScoutManager(self)
         self.iteration = 0
+        self.send_scv_scout = True
 
     async def on_start(self):
         """on_start runs once in beginning of every game"""
@@ -44,7 +47,14 @@ class Sc2City(BotAI):
         # our_lost_minerals = self.memory.get_our_lost_minerals()
         # our_lost_vespene = self.memory.get_our_lost_vespene()
         await self.strategy_manager.run_strategy()
+        await self.scout_manager.update_points_need_scouting()
+        await self.scout_manager.move_scout()
         await self.scv_manager.move_scvs()
+        if self.send_scv_scout and self.time >= 37:
+            self.send_scv_scout = False
+            await self.scout_manager.create_scouting_grid_for_enemy_main()
+            await self.scout_manager.assign_unit_tag_scout(self.workers.random.tag)
+
 
         """quick fix for mules"""
         for orbital in self.townhalls(UnitTypeId.ORBITALCOMMAND):

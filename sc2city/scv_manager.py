@@ -115,6 +115,10 @@ class ScvManager:
         await self.distribute_workers()
         await self.build_queued_building()
 
+    async def add_unit_tag_scout_list(self, unit_tag: int):
+        await self.remove_unit_tag_from_lists(unit_tag=unit_tag)
+        self.scout_tag_list.append(unit_tag)
+
     async def build_queued_building(self):
         if await self.building_queue_empty():
             return
