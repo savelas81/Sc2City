@@ -36,7 +36,7 @@ class Sc2City(BotAI):
 
     async def on_start(self):
         """on_start runs once in beginning of every game"""
-        self.client.game_step = 8  #  2 for ladder 4 for testing
+        self.client.game_step = 2  #  2 for ladder 4 for testing
         self.building_placements.load_data()
         self.MA = MapAnalyserInterface(self)
         await self.scv_manager.worker_split_frame_zero()
