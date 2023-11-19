@@ -17,14 +17,17 @@ class ScoutManager:
         self.next_point = None
         self.retreat = False
         self.debug = True
+        self.scout_enemy_natural = True
 
     async def assign_unit_tag_scout(self, unit_tag: int):
         self.scout_tag = unit_tag
-        self.ai.scv_manager.add_unit_tag_scout_list(unit_tag=unit_tag)
+        if unit_tag in self.ai.units(UnitTypeId.SCV).tags:
+            await self.ai.scv_manager.remove_unit_tag_from_lists(unit_tag=unit_tag)
+            await self.ai.scv_manager.add_unit_tag_scout_list(unit_tag=unit_tag)
 
     async def remove_scout(self):
         if self.scout_tag:
-            self.ai.scv_manager.remove_unit_tag_from_lists(unit_tag=self.scout_tag)
+            await self.ai.scv_manager.remove_unit_tag_from_lists(unit_tag=self.scout_tag)
         self.scout_tag = None
         self.points_need_scouting = None
         self.next_point = None
@@ -36,8 +39,15 @@ class ScoutManager:
 
     async def move_scout(self):
         scout: Unit = self.ai.units.find_by_tag(self.scout_tag)
-        if scout and self.points_need_scouting is not None:
-
+        if not scout:
+            return
+        if self.scout_enemy_natural:
+            if not self.ai.is_visible(self.ai.enemy_expansions.natural):
+                scout.move(self.ai.enemy_expansions.natural)
+                return
+            else:
+                self.scout_enemy_natural = False
+        if self.points_need_scouting is not None:
             if self.points_need_scouting.any():
                 if scout.type_id == UnitTypeId.REAPER:
                     grid = copy.copy(self.ai.MA.reaper_grid)

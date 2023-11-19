@@ -137,6 +137,14 @@ class ScvManager:
                             if contractor is None:
                                 return
                             contractor.build(UnitTypeId.REFINERY, geyser)
+                            print("Scv building "
+                                  + str(self.next_building_type)
+                                  + " at time "
+                                  + str(self.ai.time_formatted)
+                                  + " minerals "
+                                  + str(self.ai.minerals)
+                                  + " vespene "
+                                  + str(self.ai.vespene))
                             if contractor.tag in self.mineral_collector_dict:
                                 self.mineral_collector_dict.pop(contractor.tag)
                             if contractor.tag not in self.active_builders_tag_list:
@@ -148,6 +156,14 @@ class ScvManager:
                 for scv in self.ai.units(UnitTypeId.SCV):
                     if scv.tag == self.builder_tag:
                         scv.build(self.next_building_type, self.next_building_position)
+                        print("Scv building "
+                              + str(self.next_building_type)
+                              + " at time "
+                              + str(self.ai.time_formatted)
+                              + " minerals "
+                              + str(self.ai.minerals)
+                              + " vespene "
+                              + str(self.ai.vespene))
                         if self.builder_tag not in self.active_builders_tag_list:
                             self.active_builders_tag_list.append(self.builder_tag)
                         self.builder_tag: int = 0
@@ -181,6 +197,8 @@ class ScvManager:
 
         """Send idle scvs to mine minerals"""
         for scv in self.ai.units(UnitTypeId.SCV):
+            if scv.is_selected:
+                print("For debug only")
             if scv.tag == self.builder_tag:
                 continue
             if scv.tag in self.active_builders_tag_list:
@@ -273,6 +291,8 @@ class ScvManager:
             self.mineral_collector_dict.pop(unit_tag)
         if unit_tag in self.repairer_tag_list:
             self.repairer_tag_list.remove(unit_tag)
+        if unit_tag in self.scout_tag_list:
+            self.scout_tag_list.remove(unit_tag)
         if unit_tag in self.boys_tag_list:
             self.boys_tag_list.remove(unit_tag)
         if unit_tag in self.active_builders_tag_list:
@@ -312,7 +332,8 @@ class ScvManager:
                     if len(scv.orders) == 1 and scv.orders[0].target != target.tag:
                         if scv.orders[0].target not in self.ai.mineral_field.tags:
                             print("scv_manager: scv has invalid target ID")
-                        self.mineral_collector_dict[scv.tag] = scv.orders[0].target
+                        else:
+                            self.mineral_collector_dict[scv.tag] = scv.orders[0].target
                         return
                     if (
                         min_distance + target.radius + scv.radius

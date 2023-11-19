@@ -14,26 +14,32 @@ from building_placements import BuildingPlacementSolver
 from opener_manager import OpenerManager
 from scv_manager import ScvManager
 from scout_manager import ScoutManager
+from cache_first_frame import EnemyExpansions
 from sc2.ids.ability_id import AbilityId
 
 
 class Sc2City(BotAI):
+
     def __init__(self):
+        self.raw_affects_selection = False  # True = Fast gameplay
         self.memory = UnitsInMemory(self)
         self.strategy_manager = StrategyManager(self)
         self.building_placements = BuildingPlacementSolver(self)
         self.opener_manager = OpenerManager(self)
         self.scv_manager = ScvManager(self)
         self.scout_manager = ScoutManager(self)
+        self.enemy_expansions = EnemyExpansions(self)
         self.iteration = 0
         self.send_scv_scout = True
 
     async def on_start(self):
         """on_start runs once in beginning of every game"""
-        self.client.game_step = 4  #  2 for ladder 4 for testing
+        self.client.game_step = 8  #  2 for ladder 4 for testing
         self.building_placements.load_data()
         self.MA = MapAnalyserInterface(self)
         await self.scv_manager.worker_split_frame_zero()
+        await self.enemy_expansions.cache_enemy_expansions()
+
 
     async def on_step(self, iteration):
         self.iteration = iteration
