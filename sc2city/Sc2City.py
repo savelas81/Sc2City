@@ -12,6 +12,7 @@ from MA_interface import MapAnalyserInterface
 from strategy_manager import StrategyManager
 from building_placements import BuildingPlacementSolver
 from opener_manager import OpenerManager
+from mid_game_manager import MidGameManager
 from scv_manager import ScvManager
 from scout_manager import ScoutManager
 from cache_first_frame import EnemyExpansions
@@ -26,6 +27,7 @@ class Sc2City(BotAI):
         self.strategy_manager = StrategyManager(self)
         self.building_placements = BuildingPlacementSolver(self)
         self.opener_manager = OpenerManager(self)
+        self.mid_game_manager = MidGameManager(self)
         self.scv_manager = ScvManager(self)
         self.scout_manager = ScoutManager(self)
         self.enemy_expansions = EnemyExpansions(self)

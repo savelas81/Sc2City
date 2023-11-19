@@ -11,7 +11,7 @@ class OpenerManager:
         self.corner_depot_positions = None
         self.builder_tag = None
 
-    def opener_is_active(self):
+    def manager_is_active(self):
         return self.opener_active
 
     async def run_opener(self, opening_strategy=1):

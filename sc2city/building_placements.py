@@ -36,7 +36,7 @@ class BuildingPlacementSolver:
 
     async def get_placement_for(self, structure_type_id=UnitTypeId.BARRACKS):
         if structure_type_id in [UnitTypeId.SUPPLYDEPOT]:
-            if self.ai.opener_manager.opener_is_active:
+            if self.ai.opener_manager.manager_is_active:
                 for position in self.ai.main_base_ramp.corner_depots:
                     if await self.ai.building_placements.this_valid_building_location(
                         structure_type_id=structure_type_id, position=position
