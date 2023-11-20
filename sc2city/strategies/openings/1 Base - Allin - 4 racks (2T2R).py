@@ -9,9 +9,6 @@ class FourRaxAllInSequence:
 
     def sequence(self) -> typing.List[typing.Any]:
         return [
-            """
-            # For this buildorder we try to maximize mules if there's no stealth units are on the map           
-            """
             UnitRequest(
                 conditional=None,
                 AI=self.AI,
