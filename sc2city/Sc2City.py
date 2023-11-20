@@ -3,7 +3,6 @@ from sc2.bot_ai import BotAI
 from sc2.ids.unit_typeid import UnitTypeId
 from bot_memory import UnitsInMemory
 from MA_interface import MapAnalyserInterface
-from strategy_manager import StrategyManager
 from building_placements import BuildingPlacementSolver
 from opener_manager import OpenerManager
 from mid_game_manager import MidGameManager
@@ -12,6 +11,7 @@ from sc2.ids.ability_id import AbilityId
 from managers import (
     ScvManager,
     ScoutManager,
+    StrategyManager,
 )
 
 class Sc2City(BotAI):
