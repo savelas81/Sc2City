@@ -120,16 +120,32 @@ class ScvManager:
         return None
 
     async def move_scvs(self):
+        # await self.placeholder_tracker()
         await self.distribute_workers()
         await self.build_queued_building()
 
-    # async def placeholder_tracker(self):
-    #     for holder in self.AI.placeholders:
-    #         if holder in self.remember_placeholders:
-    #             continue
-    #         else:
-    #             self.remember_placeholders.append(holder)
-    #     for
+    async def placeholder_tracker(self):
+        for holder in self.AI.placeholders:
+            if holder in self.remember_placeholders:
+                continue
+            else:
+                self.remember_placeholders.append(holder)
+        holder_to_be_deleted = None
+        for holder_in_memory in self.remember_placeholders:
+            if self.AI.structures.closer_than(1, holder_in_memory):
+                structure = self.AI.structures.closest_to(holder_in_memory)
+                if structure.type_id == holder_in_memory.type_id:
+                    print("Building started successfully.")
+                    holder_to_be_deleted = holder_in_memory
+                    break
+            elif not self.AI.placeholders.closer_than(1, holder_in_memory):
+                loguru.logger.info(
+                    f"Was not able to start building Type ID: {str(holder_in_memory.type_id)}"
+                )
+                self.interrupted_building_types.append(holder_in_memory.type_id)
+                holder_to_be_deleted = holder_in_memory
+        if holder_to_be_deleted:
+            self.remember_placeholders.remove(holder_to_be_deleted)
 
     async def add_unit_tag_scout_list(self, unit_tag: int):
         await self.remove_unit_tag_from_lists(unit_tag=unit_tag)
