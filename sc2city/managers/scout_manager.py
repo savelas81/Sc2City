@@ -11,7 +11,7 @@ import loguru
 
 class ScoutManager:
     def __init__(self, ai=None):
-        self.ai = ai
+        self.AI = ai
         self.scout_tag = None
         self.points_need_scouting = None
         self.next_point = None
@@ -21,13 +21,13 @@ class ScoutManager:
 
     async def assign_unit_tag_scout(self, unit_tag: int):
         self.scout_tag = unit_tag
-        if unit_tag in self.ai.units(UnitTypeId.SCV).tags:
-            await self.ai.scv_manager.remove_unit_tag_from_lists(unit_tag=unit_tag)
-            await self.ai.scv_manager.add_unit_tag_scout_list(unit_tag=unit_tag)
+        if unit_tag in self.AI.units(UnitTypeId.SCV).tags:
+            await self.AI.scv_manager.remove_unit_tag_from_lists(unit_tag=unit_tag)
+            await self.AI.scv_manager.add_unit_tag_scout_list(unit_tag=unit_tag)
 
     async def remove_scout(self):
         if self.scout_tag:
-            await self.ai.scv_manager.remove_unit_tag_from_lists(unit_tag=self.scout_tag)
+            await self.AI.scv_manager.remove_unit_tag_from_lists(unit_tag=self.scout_tag)
         self.scout_tag = None
         self.points_need_scouting = None
         self.next_point = None
@@ -35,39 +35,39 @@ class ScoutManager:
 
     async def create_scouting_grid_for_enemy_main(self):
         """gets all grid points from enemy main base"""
-        self.points_need_scouting = self.ai.MA.map_data.where_all(self.ai.enemy_start_locations[0])[0].array
+        self.points_need_scouting = self.AI.MA.map_data.where_all(self.AI.enemy_start_locations[0])[0].array
 
     async def move_scout(self):
-        scout: Unit = self.ai.units.find_by_tag(self.scout_tag)
+        scout: Unit = self.AI.units.find_by_tag(self.scout_tag)
         if not scout:
             return
         if self.scout_enemy_natural:
-            if not self.ai.is_visible(self.ai.enemy_expansions.natural):
-                scout.move(self.ai.enemy_expansions.natural)
+            if not self.AI.is_visible(self.AI.enemy_expansions.natural):
+                scout.move(self.AI.enemy_expansions.natural)
                 return
             else:
                 self.scout_enemy_natural = False
         if self.points_need_scouting is not None:
             if self.points_need_scouting.any():
                 if scout.type_id == UnitTypeId.REAPER:
-                    grid = copy.copy(self.ai.MA.reaper_grid)
+                    grid = copy.copy(self.AI.MA.reaper_grid)
                 elif scout.is_flying:
-                    grid = copy.copy(self.ai.MA.enemy_air_grid)
+                    grid = copy.copy(self.AI.MA.enemy_air_grid)
                 else:
-                    grid = copy.copy(self.ai.MA.enemy_ground_grid)
+                    grid = copy.copy(self.AI.MA.enemy_ground_grid)
                 condition_list = [self.points_need_scouting == 1, self.points_need_scouting != 1]
                 choice_list = [grid, math.inf]
                 scouting_grid = np.select(condition_list, choice_list)
-                lowest_cost_points = self.ai.MA.map_data.lowest_cost_points_array(
+                lowest_cost_points = self.AI.MA.map_data.lowest_cost_points_array(
                     from_pos=scout.position,
                     radius=500,
                     grid=scouting_grid)
 
-                if self.ai.iteration % 4 == 0:
-                    self.next_point = self.ai.MA.map_data.closest_towards_point(points=lowest_cost_points,
+                if self.AI.iteration % 4 == 0:
+                    self.next_point = self.AI.MA.map_data.closest_towards_point(points=lowest_cost_points,
                                                                                 target=scout.position)
                 if self.next_point is not None and self.next_point.any():
-                    path = self.ai.MA.map_data.pathfind(start=scout.position.rounded,
+                    path = self.AI.MA.map_data.pathfind(start=scout.position.rounded,
                                                         goal=self.next_point,
                                                         grid=grid,
                                                         sensitivity=3)
@@ -88,7 +88,7 @@ class ScoutManager:
             await self.remove_scout()
             return
         else:
-            visibility = np.transpose(self.ai.state.visibility.data_numpy)
+            visibility = np.transpose(self.AI.state.visibility.data_numpy)
             condition_list = [visibility == 2, visibility != 2]
             choice_list = [0, 1]
             remove_scouted_points = np.select(condition_list, choice_list)
@@ -98,10 +98,10 @@ class ScoutManager:
                 for y in range(0, self.points_need_scouting.shape[1]):
                     if self.points_need_scouting[x, y] == 1:
                         p= Point2((x, y))
-                        h2 = self.ai.get_terrain_z_height(p)
+                        h2 = self.AI.get_terrain_z_height(p)
                         pos = Point3((p.x, p.y, h2))
                         size = 0.45
                         p0 = Point3((pos.x - size, pos.y - size, pos.z + size))
                         p1 = Point3((pos.x + size, pos.y + size, pos.z - 0))
                         c = Point3((255, 0, 0))
-                        self.ai.client.debug_box_out(p0, p1, color=c)
+                        self.AI.client.debug_box_out(p0, p1, color=c)

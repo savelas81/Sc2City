@@ -7,11 +7,11 @@ from strategy_manager import StrategyManager
 from building_placements import BuildingPlacementSolver
 from opener_manager import OpenerManager
 from mid_game_manager import MidGameManager
-from scout_manager import ScoutManager
 from cache_first_frame import EnemyExpansions
 from sc2.ids.ability_id import AbilityId
 from managers import (
     ScvManager,
+    ScoutManager,
 )
 
 class Sc2City(BotAI):
@@ -31,7 +31,7 @@ class Sc2City(BotAI):
 
     async def on_start(self):
         """on_start runs once in beginning of every game"""
-        self.client.game_step = 2  #  2 for ladder 4 for testing
+        self.client.game_step = 8  #  2 for ladder 4 for testing
         self.building_placements.load_data()
         self.MA = MapAnalyserInterface(self)
         await self.scv_manager.worker_split_frame_zero()
