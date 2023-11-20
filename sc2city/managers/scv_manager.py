@@ -25,8 +25,8 @@ async def get_mining_positions(mineral_field: Unit) -> List[Point2]:
 
 
 class ScvManager:
-    def __init__(self, AI=None):
-        self.AI = AI
+    def __init__(self, ai=None):
+        self.AI = ai
         self.mineral_collector_dict = {}
         self.vespene_collector_dict = {}
         self.repairer_tag_list = []
@@ -332,6 +332,7 @@ class ScvManager:
                     if len(scv.orders) == 1 and scv.orders[0].target != target.tag:
                         if scv.orders[0].target not in self.AI.mineral_field.tags:
                             print("scv_manager: scv has invalid target ID")
+                            scv.gather(target)
                         else:
                             self.mineral_collector_dict[scv.tag] = scv.orders[0].target
                         return
