@@ -21,9 +21,11 @@ from sc2 import maps
 from managers import (
     CalculationManager,
     MemoryManager,
-
     UnitRequestExecutor,
 )
+
+from requests import UnitRequest, RequestBehaviors
+
 
 # Classes:
 class SC2City(BotAI):

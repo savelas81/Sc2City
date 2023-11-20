@@ -64,7 +64,9 @@ class UnitRequestExecutor:
                 self.verifying.append(unit_request)
 
                 if self.debug:
-                    loguru.logger.info(f"Appending unit request with ID {unit_request.ID} to queue.")
+                    loguru.logger.info(
+                        f"Appending unit request with ID {unit_request.ID} to queue."
+                    )
                     loguru.logger.info("-" * 30)
 
         for unit_request in self.verifying:
@@ -76,7 +78,9 @@ class UnitRequestExecutor:
                 completed.add(unit_request)
 
                 if self.debug:
-                    loguru.logger.info(f"Unit request with ID {unit_request.ID} has completed successfully.. removing.")
+                    loguru.logger.info(
+                        f"Unit request with ID {unit_request.ID} has completed successfully.. removing."
+                    )
 
         for unit_request in completed:
             if unit_request in self.verifying:

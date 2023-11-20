@@ -72,7 +72,7 @@ class MemoryManager:
                 self.enemy_unit_tag_to_unit_object.update({enemy_unit.tag: enemy_unit})
 
         # Friendly Units:
-        for friendly_unit in self.AI.units:
+        for friendly_unit in [*self.AI.structures, *self.AI.units]:
             if self.friendly_unit_tag_to_unit_object.get(friendly_unit.tag) is None:
                 self.friendly_unit_tag_to_unit_object[friendly_unit.tag] = friendly_unit
 
