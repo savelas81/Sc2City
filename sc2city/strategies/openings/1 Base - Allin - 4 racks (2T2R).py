@@ -38,12 +38,8 @@ class FourRaxAllInSequence:
                 target_value_or_quantity_value=2,
             ),
             """
-            #2 seconds before the first refinery is done, send a scv to mine gas (closest SCV that's not mining a 'close mineralpatch')
-            #0 seconds after the first refinery is done, send a scv to mine gas (closest SCV that's not mining a 'close mineralpatch')
-            #2 seconds after the first refinery is done, send a scv to mine gas (closest SCV that's not mining a 'close mineralpatch')
-            
-            #2 seconds before the second refinery is done, send a scv to mine gas (closest SCV that's not mining a 'close mineralpatch')
-            #0 seconds after the second refinery is done, send a scv to mine gas (closest SCV that's not mining a 'close mineralpatch')       
+            # 1:03 Set amount of gas miners worldwide to 3     
+            # 1:12 Set amount of gas miners worldwide to 5
             """
             BuildRequest(
                 ID=UnitTypeId.BARRACKS,
