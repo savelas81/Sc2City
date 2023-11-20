@@ -1,9 +1,22 @@
-import json
+# Imports:
+
+# StarCraft II:
+# > Position:
 from sc2.position import Point2, Point3
-from sc2.ids.unit_typeid import UnitTypeId
-from sc2.unit import Unit
+
+# > Units:
 from sc2.units import Units
 
+# > Unit:
+from sc2.unit import Unit
+
+# > IDs:
+from sc2.ids.unit_typeid import UnitTypeId
+
+# JSON:
+import json
+
+# Classes:
 
 class BuildingPlacementSolver:
     def __init__(self, ai=None):

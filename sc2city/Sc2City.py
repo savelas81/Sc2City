@@ -7,7 +7,7 @@ from sc2.bot_ai import BotAI
 # > IDs:
 
 # MapAnalyzer:
-from sc2city.interfaces.MA_interface import MapAnalyserInterface
+from sc2city.interfaces import MapAnalyserInterface
 
 # Miscellaneous:
 from cache_first_frame import EnemyExpansions
@@ -31,7 +31,6 @@ class Sc2City(BotAI):
         self.raw_affects_selection = False
 
         # Managers:
-        self.BuildingPlacementSolver: BuildingPlacementSolver = BuildingPlacementSolver(self)
         self.StrategyManager: StrategyManager = StrategyManager(self)
 
         self.CalculationManager: CalculationManager = CalculationManager(AI=self)
@@ -50,7 +49,9 @@ class Sc2City(BotAI):
         self.client.game_step = 8
 
         # Miscellaneous:
-        self.MapAnalyzerInterface: MapAnalyserInterface = MapAnalyserInterface(self)
+        self.BuildingPlacementSolver: BuildingPlacementSolver = BuildingPlacementSolver(self)
+        self.MapAnalyzerInterface: MapAnalyserInterface = MapAnalyserInterface(AI=self)
+
         self.BuildingPlacementSolver.load_data()
 
         # Startup functions:

@@ -499,23 +499,23 @@ class OpenerManager:
             self.opener_active = False
             print("Opener_manager: Opener completed.")
             return
-        if not await self.AI.scv_manager.building_queue_empty():
+        if not await self.AI.SCVManager.building_queue_empty():
             return
         next_to_be_build = self.build_order[0]
         if next_to_be_build == "scvs_per_refinery_0":
-            self.AI.scv_manager.scvs_per_refinery = 0
+            self.AI.SCVManager.scvs_per_refinery = 0
             self.build_order.pop(0)
             return
         if next_to_be_build == "scvs_per_refinery_1":
-            self.AI.scv_manager.scvs_per_refinery = 1
+            self.AI.SCVManager.scvs_per_refinery = 1
             self.build_order.pop(0)
             return
         if next_to_be_build == "scvs_per_refinery_2":
-            self.AI.scv_manager.scvs_per_refinery = 2
+            self.AI.SCVManager.scvs_per_refinery = 2
             self.build_order.pop(0)
             return
         if next_to_be_build == "scvs_per_refinery_3":
-            self.AI.scv_manager.scvs_per_refinery = 3
+            self.AI.SCVManager.scvs_per_refinery = 3
             self.build_order.pop(0)
             return
         if next_to_be_build == UnitTypeId.SCV:
@@ -573,7 +573,7 @@ class OpenerManager:
 
         if next_to_be_build == UnitTypeId.SUPPLYDEPOT:
             if self.AI.minerals > 30:
-                await self.AI.scv_manager.queue_building(
+                await self.AI.SCVManager.queue_building(
                     structure_type_id=next_to_be_build
                 )
                 self.build_order.pop(0)
@@ -585,7 +585,7 @@ class OpenerManager:
                     [UnitTypeId.SUPPLYDEPOT, UnitTypeId.SUPPLYDEPOTLOWERED]
                 ).ready
             ):
-                await self.AI.scv_manager.queue_building(
+                await self.AI.SCVManager.queue_building(
                     structure_type_id=next_to_be_build
                 )
                 self.build_order.pop(0)
@@ -598,7 +598,7 @@ class OpenerManager:
                     [UnitTypeId.FACTORY]
                 ).ready
             ):
-                await self.AI.scv_manager.queue_building(
+                await self.AI.SCVManager.queue_building(
                     structure_type_id=next_to_be_build
                 )
                 self.build_order.pop(0)
@@ -610,7 +610,7 @@ class OpenerManager:
                     [UnitTypeId.ENGINEERINGBAY]
                 ).ready
             ):
-                await self.AI.scv_manager.queue_building(
+                await self.AI.SCVManager.queue_building(
                     structure_type_id=next_to_be_build
                 )
                 self.build_order.pop(0)
@@ -624,7 +624,7 @@ class OpenerManager:
                     or self.AI.structures(UnitTypeId.BARRACKSFLYING)
                 )
             ):
-                await self.AI.scv_manager.queue_building(
+                await self.AI.SCVManager.queue_building(
                     structure_type_id=next_to_be_build
                 )
                 self.build_order.pop(0)
@@ -637,7 +637,7 @@ class OpenerManager:
                     or self.AI.structures(UnitTypeId.BARRACKSFLYING)
                 )
             ):
-                await self.AI.scv_manager.queue_building(
+                await self.AI.SCVManager.queue_building(
                     structure_type_id=next_to_be_build
                 )
                 self.build_order.pop(0)
@@ -651,7 +651,7 @@ class OpenerManager:
                     or self.AI.structures(UnitTypeId.STARPORTFLYING)
                 )
             ):
-                await self.AI.scv_manager.queue_building(
+                await self.AI.SCVManager.queue_building(
                     structure_type_id=next_to_be_build
                 )
                 self.build_order.pop(0)
@@ -664,7 +664,7 @@ class OpenerManager:
                     or self.AI.structures(UnitTypeId.BARRACKSFLYING)
                 )
             ):
-                await self.AI.scv_manager.queue_building(
+                await self.AI.SCVManager.queue_building(
                     structure_type_id=next_to_be_build
                 )
                 self.build_order.pop(0)
@@ -680,7 +680,7 @@ class OpenerManager:
                     or self.AI.structures(UnitTypeId.BARRACKSFLYING)
                 )
             ):
-                await self.AI.scv_manager.queue_building(
+                await self.AI.SCVManager.queue_building(
                     structure_type_id=next_to_be_build
                 )
                 self.build_order.pop(0)
@@ -713,7 +713,7 @@ class OpenerManager:
                 print("Opener_manager: No starports without add_ons available!")
             return
         if next_to_be_build == UnitTypeId.REFINERY:
-            await self.AI.scv_manager.queue_building(structure_type_id=next_to_be_build)
+            await self.AI.SCVManager.queue_building(structure_type_id=next_to_be_build)
             self.build_order.pop(0)
             return
         if next_to_be_build == AbilityId.UPGRADETOORBITAL_ORBITALCOMMAND:
@@ -758,7 +758,7 @@ class OpenerManager:
             return
         if next_to_be_build == UnitTypeId.COMMANDCENTER:
             if self.AI.minerals > 250:
-                await self.AI.scv_manager.queue_building(
+                await self.AI.SCVManager.queue_building(
                     structure_type_id=next_to_be_build
                 )
                 self.build_order.pop(0)

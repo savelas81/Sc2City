@@ -72,7 +72,7 @@ class ScvManager:
         if structure_type_id == UnitTypeId.REFINERY:
             self.next_building_type = structure_type_id
             return
-        position = await self.AI.building_placements.get_placement_for(
+        position = await self.AI.BuildingPlacementSolver.get_placement_for(
             structure_type_id=structure_type_id
         )
         if position is None:
@@ -262,29 +262,29 @@ class ScvManager:
 
         """select closes scv to mine gas if needed"""
         """stop gas miner if too many (will be assigned to minerals in next iteration"""
-        if self.AI.iteration % 4 == 0:
-            for refinery in self.AI.gas_buildings.ready:
-                if refinery.custom_assigned_harvesters < self.scvs_per_refinery:
-                    scv = await self.select_contractor(position=refinery.position)
-                    if scv:
-                        await self.remove_unit_tag_from_lists(unit_tag=scv.tag)
-                        self.vespene_collector_dict[scv.tag] = refinery.tag
-                        scv.gather(refinery)
-                        break
-                if refinery.custom_assigned_harvesters > self.scvs_per_refinery:
-                    scv_to_stop = None
-                    for scv in self.AI.units(UnitTypeId.SCV):
-                        if scv.tag in self.vespene_collector_dict:
-                            scv_target_refinery_tag = self.vespene_collector_dict[
-                                scv.tag
-                            ]
-                            if scv_target_refinery_tag == refinery.tag:
-                                scv_to_stop = scv
-                                break
-                    if scv_to_stop:
-                        scv_to_stop.move(scv_to_stop.position)
-                        await self.remove_unit_tag_from_lists(scv_to_stop.tag)
-                        break
+        for refinery in self.AI.gas_buildings.ready:
+            if refinery.custom_assigned_harvesters < self.scvs_per_refinery:
+                scv = await self.select_contractor(position=refinery.position)
+                if scv:
+                    await self.remove_unit_tag_from_lists(unit_tag=scv.tag)
+                    self.vespene_collector_dict[scv.tag] = refinery.tag
+                    scv.gather(refinery)
+                    break
+
+            if refinery.custom_assigned_harvesters > self.scvs_per_refinery:
+                scv_to_stop = None
+                for scv in self.AI.units(UnitTypeId.SCV):
+                    if scv.tag in self.vespene_collector_dict:
+                        scv_target_refinery_tag = self.vespene_collector_dict[
+                            scv.tag
+                        ]
+                        if scv_target_refinery_tag == refinery.tag:
+                            scv_to_stop = scv
+                            break
+                if scv_to_stop:
+                    scv_to_stop.move(scv_to_stop.position)
+                    await self.remove_unit_tag_from_lists(scv_to_stop.tag)
+                    break
 
             cc_with_excess_workers: Unit = Unit([], self.AI)
             for cc in self.AI.townhalls:

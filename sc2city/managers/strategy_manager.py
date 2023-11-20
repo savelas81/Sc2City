@@ -1,16 +1,32 @@
+# Imports:
+
+# StarCraft II:
+# > Bot AI:
+from sc2.bot_ai import BotAI
+
+# Classes:
+
+"""
+TODO: Documentation here..
+"""
+
 class StrategyManager:
-    def __init__(self, ai=None):
-        self.opening_strategy = 1
-        self.ai = ai
+    def __init__(self, AI: BotAI = None):
+        # Miscellaneous:
+        self.AI: BotAI = AI
+
+        # Integers:
+        self.opening_strategy: int = 1
 
     async def run_strategy(self):
-        if self.ai.opener_manager.manager_is_active():
-            await self.ai.opener_manager.run_opener(
+        if self.AI.OpenerManager.manager_is_active:
+            await self.AI.OpenerManager.run_opener(
                 opening_strategy=self.opening_strategy
             )
+
             return
-        if self.ai.mid_game_manager.manager_is_active():
-            await self.ai.mid_game_manager.run_manager()
+        if self.AI.MidGameManager.manager_is_active:
+            await self.AI.MidGameManager.run_manager()
         else:
             # TODO end game stuff
             pass
