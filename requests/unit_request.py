@@ -7,6 +7,9 @@ from sc2.bot_ai import BotAI
 # > Units:
 from sc2.units import Units
 
+# > Units:
+from sc2.unit import Unit
+
 # > IDs:
 from sc2.ids.unit_typeid import UnitTypeId
 
@@ -28,6 +31,7 @@ UNIT_TYPE_ID_TO_PRODUCTION_FACILITY: typing.Dict[UnitTypeId, typing.Set[UnitType
         UnitTypeId.ORBITALCOMMAND,
     },
     UnitTypeId.MARINE: {UnitTypeId.BARRACKS},
+    UnitTypeId.MARAUDER: {UnitTypeId.BARRACKS},
 }
 
 # Classes:
@@ -42,7 +46,7 @@ UNIT_TYPE_ID_TO_PRODUCTION_FACILITY: typing.Dict[UnitTypeId, typing.Set[UnitType
 """
 
 
-# TODO: Make priorities for units.. e.g marines go to reactors
+# TODO: Make priorities for units.. e.g marines go to reactors Check: def sort_and_filter_production_facilitie
 # TODO: Possibly a queue manager
 class UnitRequest(Request):
     # Initialization:
@@ -136,3 +140,41 @@ class UnitRequest(Request):
                     self.successions += 1
             else:
                 return False
+
+
+    def sort_and_filter_production_facilitie(self, faclilities: Units) -> Optional[Units]:
+        facilities_without_add_on = sc2.units.Units([], self.AI) # empty units object
+        facilities_with_reactor = sc2.units.Units([], self.AI)
+        facilities_with_techlab = sc2.units.Units([], self.AI)
+        townhall_types = [UnitTypeId.COMMANDCENTER, UnitTypeId.PLANETARYFORTRESS, UnitTypeId.ORBITALCOMMAND]
+        sorted_and_filtered_facilities = sc2.units.Units([], self.AI)
+        need_tehclab = [
+            UnitTypeId.MARAUDER,
+            UnitTypeId.GHOST,
+            UnitTypeId.SIEGETANK,
+            UnitTypeId.CYCLONE,
+            UnitTypeId.THOR,
+            UnitTypeId.MARAUDER,
+            UnitTypeId.RAVEN,
+            UnitTypeId.BANSHEE,
+            UnitTypeId.BATTLECRUISER,
+        ]
+
+        for facility in faclilities.ready:
+            if facility.type_id in townhall_types:
+                if facility.is_idle:
+                    sorted_and_filtered_facilities.append(facility)
+        if sorted_and_filtered_facilities:
+            return sorted_and_filtered_facilities
+
+        for facility in faclilities.ready:
+            if facility.has_ractor and len(facility.orders) < 2 and self.ID not in need_tehclab:
+                facilities_with_reactor.apped(facility)
+            elif facility.has_techlab and facility.is_idle:
+                facilities_with_reactor.apped(facility)
+            elif facility.is_idle and self.ID not in need_tehclab:
+                facilities_without_add_on.append(facility)
+        sorted_and_filtered_facilities.append(facilities_with_reactor)
+        sorted_and_filtered_facilities.append(facilities_with_techlab)
+        sorted_and_filtered_facilities.append(facilities_without_add_on)
+        return sorted_and_filtered_facilities
