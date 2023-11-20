@@ -270,8 +270,10 @@ class ScvManager:
                 mf = mfs.sorted(lambda x: x.custom_assigned_harvesters).first
                 self.mineral_collector_dict[scv.tag] = mf.tag
 
-        """select closes scv to mine gas if needed"""
-        """stop gas miner if too many (will be assigned to minerals in next iteration"""
+        """
+        # select closes scv to mine gas if needed
+        # stop gas miner if too many (will be assigned to minerals in next iteration
+        # at some point, differentiate between a 'close' mineral patch and a 'far' one. You always want to grab vesperine miners and builders from the far away patch miners."""
         for refinery in self.AI.gas_buildings.ready:
             if (refinery.custom_assigned_harvesters < self.scvs_per_refinery
                     and self.gas_miners_total < len(self.vespene_collector_dict)):
