@@ -160,10 +160,9 @@ class UnitRequest(Request):
             UnitTypeId.BATTLECRUISER,
         ]
 
-        for facility in faclilities.ready:
+        for facility in faclilities.ready.idle:
             if facility.type_id in townhall_types:
-                if facility.is_idle:
-                    sorted_and_filtered_facilities.append(facility)
+                sorted_and_filtered_facilities.append(facility)
         if sorted_and_filtered_facilities:
             return sorted_and_filtered_facilities
 
