@@ -5,12 +5,15 @@
 from sc2.bot_ai import BotAI
 
 # > IDs:
+from sc2.ids.unit_typeid import UnitTypeId
 
 # MapAnalyzer:
 from sc2city.interfaces import MapAnalyzerInterface
 
 # Miscellaneous:
 from cache_first_frame import EnemyExpansions
+
+from requests import BuildRequest, UnitRequest, RequestBehaviors
 
 # Managers:
 from managers import (
@@ -22,6 +25,7 @@ from managers import (
     MidGameManager,
     BuildingPlacementSolver,
     CalculationManager,
+    UnitRequestExecutor,
 )
 
 class Sc2City(BotAI):
@@ -35,6 +39,9 @@ class Sc2City(BotAI):
 
         self.CalculationManager: CalculationManager = CalculationManager(AI=self)
         self.MemoryManager: MemoryManager = MemoryManager(AI=self, debug=True)
+
+        # Executors:
+        self.UnitRequestExecutor: UnitRequestExecutor = UnitRequestExecutor(AI=self, debug=True)
 
         # TODO: Refactor!!!
         self.OpenerManager: OpenerManager = OpenerManager(AI=self)
@@ -61,6 +68,26 @@ class Sc2City(BotAI):
         await self.SCVManager.worker_split_frame_zero()
         await self.enemy_expansions.cache_enemy_expansions()
 
+        self.UnitRequestExecutor.queue_request(
+            UnitRequest(
+                conditional=None,
+                AI=self,
+                ID=UnitTypeId.SCV,
+                target_value_or_quantity_value_behavior=RequestBehaviors.TARGET_BEHAVIOR,
+                target_value_or_quantity_value=19
+            ),
+        )
+
+        self.x: BuildRequest = BuildRequest(
+            ID=UnitTypeId.SUPPLYDEPOT,
+            AI=self,
+        )
+
+        self.y: BuildRequest = BuildRequest(
+            ID=UnitTypeId.BARRACKS,
+            AI=self,
+        )
+
     async def on_step(self, iteration) -> None:
         self.iteration = iteration
         # Create Influence Maps:
@@ -74,7 +101,10 @@ class Sc2City(BotAI):
         await self.scout_manager.move_scout()
         await self.SCVManager.move_scvs()
 
-
+        if not self.x.is_request_done:
+            await self.x.execute()
+        if self.x.is_request_done:
+            await self.y.execute()
 
         # TODO: Refactor this... make it its own module.
         """

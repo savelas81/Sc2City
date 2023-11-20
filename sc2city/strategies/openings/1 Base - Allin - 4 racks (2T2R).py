@@ -22,18 +22,21 @@ class FourRaxAllInSequence:
                 target_value_or_quantity_value=RequestBehaviors.QUANTITY_BEHAVIOR,
                 target_value_or_quantity_value=1,
             ),
+            # Depot when u can
             BuildRequest(
                 ID=UnitTypeId.BARRACKS,
                 AI=self.AI,
                 target_value_or_quantity_value=RequestBehaviors.QUANTITY_BEHAVIOR,
                 target_value_or_quantity_value=1,
             ),
+            # Barracks when u can
             BuildRequest(
                 ID=UnitTypeId.REFINERY,
                 AI=self.AI,
                 target_value_or_quantity_value=RequestBehaviors.QUANTITY_BEHAVIOR,
                 target_value_or_quantity_value=2,
             ),
+            # When u can....
             """
             # 1:03 Set amount of gas miners worldwide to 3     
             # 1:12 Set amount of gas miners worldwide to 5
@@ -44,6 +47,7 @@ class FourRaxAllInSequence:
                 target_value_or_quantity_value=RequestBehaviors.QUANTITY_BEHAVIOR,
                 target_value_or_quantity_value=1,
             ),
+            # When u can
             """BuildRequest(
                 ID=UnitTypeId.ORBITALCOMMAND,
                 AI=self.AI,
@@ -56,7 +60,8 @@ class FourRaxAllInSequence:
                 target_value_or_quantity_value=RequestBehaviors.QUANTITY_BEHAVIOR,
                 target_value_or_quantity_value=1,
             ),
-            """BuildRequest(
+            # when u can
+            """UpgradeRequest(
                 ID=UnitTypeId.STIMPACK,
                 AI=self.AI,
                 target_value_or_quantity_value=RequestBehaviors.QUANTITY_BEHAVIOR,
@@ -80,6 +85,7 @@ class FourRaxAllInSequence:
                 AI=self.AI,
                 target_value_or_quantity_value=RequestBehaviors.QUANTITY_BEHAVIOR,
                 target_value_or_quantity_value=1,
+                conditional=lambda AI: AI.already_pending(UnitTypeId.MARAUDER) + AI.units.of_type(UnitTypeId.MARAUDER) >= 2
             ),
             UnitRequest(
                 conditional=None,
@@ -92,7 +98,7 @@ class FourRaxAllInSequence:
             # 2:15 Set amount of gas miners worldwide to 4
             """
             """BuildRequest(
-                ID=UnitTypeId.SHIELDWALL,
+                ID=UpgradeId.SHIELDWALL,
                 AI=self.AI,
                 target_value_or_quantity_value=RequestBehaviors.QUANTITY_BEHAVIOR,
                 target_value_or_quantity_value=1,

@@ -499,7 +499,7 @@ class OpenerManager:
             self.opener_active = False
             print("Opener_manager: Opener completed.")
             return
-        if not await self.AI.SCVManager.building_queue_empty():
+        if not self.AI.SCVManager.building_queue_empty:
             return
         next_to_be_build = self.build_order[0]
         if next_to_be_build == "scvs_per_refinery_0":

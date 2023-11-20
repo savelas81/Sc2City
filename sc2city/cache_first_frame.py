@@ -1,6 +1,5 @@
 import math
 
-
 class EnemyExpansions:
 
     def __init__(self, ai=None):

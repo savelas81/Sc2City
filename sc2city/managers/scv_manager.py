@@ -63,7 +63,8 @@ class ScvManager:
             worker.gather(mf)
             self.mineral_collector_dict[worker.tag] = mf.tag
 
-    async def building_queue_empty(self) -> bool:
+    @property
+    def building_queue_empty(self) -> bool:
         if self.next_building_type is None:
             return True
         else:
@@ -135,8 +136,9 @@ class ScvManager:
         self.scout_tag_list.append(unit_tag)
 
     async def build_queued_building(self):
-        if await self.building_queue_empty():
+        if self.building_queue_empty:
             return
+
         if self.next_building_type == UnitTypeId.REFINERY:
             if self.AI.can_afford(self.next_building_type):
                 for cc in self.AI.townhalls.sorted(
