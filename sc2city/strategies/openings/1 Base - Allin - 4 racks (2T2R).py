@@ -25,9 +25,6 @@ class FourRaxAllInSequence:
                 target_value_or_quantity_value=RequestBehaviors.QUANTITY_BEHAVIOR,
                 target_value_or_quantity_value=1,
             ),
-            """
-            # Select a mineral mining SCV at 0:37, use the return cargo ability (if available) and send it scouting           
-            """
             BuildRequest(
                 ID=UnitTypeId.BARRACKS,
                 AI=self.AI,
@@ -41,12 +38,12 @@ class FourRaxAllInSequence:
                 target_value_or_quantity_value=2,
             ),
             """
-            #2 seconds before the first refinery is done, send a scv to mine gas (closest SCV that's not mining a 'close mineralpatch'
-            #0 seconds after the first refinery is done, send a scv to mine gas (closest SCV that's not mining a 'close mineralpatch'
-            #2 seconds after the first refinery is done, send a scv to mine gas (closest SCV that's not mining a 'close mineralpatch'
+            #2 seconds before the first refinery is done, send a scv to mine gas (closest SCV that's not mining a 'close mineralpatch')
+            #0 seconds after the first refinery is done, send a scv to mine gas (closest SCV that's not mining a 'close mineralpatch')
+            #2 seconds after the first refinery is done, send a scv to mine gas (closest SCV that's not mining a 'close mineralpatch')
             
-            #2 seconds before the second refinery is done, send a scv to mine gas (closest SCV that's not mining a 'close mineralpatch'
-            #0 seconds after the second refinery is done, send a scv to mine gas (closest SCV that's not mining a 'close mineralpatch'          
+            #2 seconds before the second refinery is done, send a scv to mine gas (closest SCV that's not mining a 'close mineralpatch')
+            #0 seconds after the second refinery is done, send a scv to mine gas (closest SCV that's not mining a 'close mineralpatch')       
             """
             BuildRequest(
                 ID=UnitTypeId.BARRACKS,
