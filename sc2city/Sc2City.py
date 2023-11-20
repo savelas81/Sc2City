@@ -38,7 +38,7 @@ class Sc2City(BotAI):
         self.MemoryManager: MemoryManager = MemoryManager(AI=self, debug=True)
 
         # TODO: Refactor!!!
-        self.OpenerManager: OpenerManager = OpenerManager(self)
+        self.OpenerManager: OpenerManager = OpenerManager(AI=self)
         self.MidGameManager: MidGameManager = MidGameManager(self)
         self.SCVManager: ScvManager = ScvManager(self)
         self.scout_manager = ScoutManager(self)

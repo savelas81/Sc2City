@@ -1,11 +1,17 @@
+# Imports:
+
+# StarCraft II:
+# > Bot AI:
+from sc2.bot_ai import BotAI
+
 from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.ability_id import AbilityId
 
 
 # Classes:
 class OpenerManager:
-    def __init__(self, AI: BotAI =None):
-        self.AI = AI
+    def __init__(self, AI: BotAI = None):
+        self.AI: BotAI = AI
         self.opener_active = True
         self.build_order = []
         self.create_opener = True
