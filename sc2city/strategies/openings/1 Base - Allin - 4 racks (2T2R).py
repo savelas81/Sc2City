@@ -92,7 +92,7 @@ class FourRaxAllInSequence:
                 target_value_or_quantity_value=1
             ),
             """
-            # Send a gas mining SCV back to mineral mining. Prefer a refinery with 3 miners over one with 2 or whatever
+            # 2:15 Set amount of gas miners worldwide to 4
             """
             """BuildRequest(
                 ID=UnitTypeId.SHIELDWALL,
@@ -179,7 +179,7 @@ class FourRaxAllInSequence:
                 target_value_or_quantity_value=2
             ),
             """
-            # Send a gas mining SCV back to mineral mining. Prefer a refinery with 3 miners over one with 2 or whatever
+            # 4:06 Set amount of gas miners worldwide to 3
             """
             BuildRequest(
                 ID=UnitTypeId.BARRACKSREACTOR,
