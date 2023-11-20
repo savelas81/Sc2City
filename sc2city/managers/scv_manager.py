@@ -44,7 +44,9 @@ class ScvManager:
         self.remember_first_builder = True
         self.first_builder_tag: int = 0
         self.expand_to_natural = True
+        self.gas_miners_total = 50
         self.scvs_per_refinery = 3  # valid values 0-3
+        self.remember_placeholders = []
 
     async def worker_split_frame_zero(self):
         self.expand_to_natural = await self.AI.get_next_expansion()
@@ -119,6 +121,14 @@ class ScvManager:
     async def move_scvs(self):
         await self.distribute_workers()
         await self.build_queued_building()
+
+    # async def placeholder_tracker(self):
+    #     for holder in self.AI.placeholders:
+    #         if holder in self.remember_placeholders:
+    #             continue
+    #         else:
+    #             self.remember_placeholders.append(holder)
+    #     for
 
     async def add_unit_tag_scout_list(self, unit_tag: int):
         await self.remove_unit_tag_from_lists(unit_tag=unit_tag)
@@ -263,15 +273,16 @@ class ScvManager:
         """select closes scv to mine gas if needed"""
         """stop gas miner if too many (will be assigned to minerals in next iteration"""
         for refinery in self.AI.gas_buildings.ready:
-            if refinery.custom_assigned_harvesters < self.scvs_per_refinery:
+            if (refinery.custom_assigned_harvesters < self.scvs_per_refinery
+                    and self.gas_miners_total < len(self.vespene_collector_dict)):
                 scv = await self.select_contractor(position=refinery.position)
                 if scv:
                     await self.remove_unit_tag_from_lists(unit_tag=scv.tag)
                     self.vespene_collector_dict[scv.tag] = refinery.tag
                     scv.gather(refinery)
                     break
-
-            if refinery.custom_assigned_harvesters > self.scvs_per_refinery:
+            if (refinery.custom_assigned_harvesters > self.scvs_per_refinery
+                    or self.gas_miners_total > len(self.vespene_collector_dict)):
                 scv_to_stop = None
                 for scv in self.AI.units(UnitTypeId.SCV):
                     if scv.tag in self.vespene_collector_dict:
@@ -286,7 +297,7 @@ class ScvManager:
                     await self.remove_unit_tag_from_lists(scv_to_stop.tag)
                     break
 
-            cc_with_excess_workers: Unit = Unit([], self.AI)
+            cc_with_excess_workers = None
             for cc in self.AI.townhalls:
                 if cc.custom_surplus_harvesters > 1:
                     cc_with_excess_workers = cc
