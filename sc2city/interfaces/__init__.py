@@ -1,1 +1,1 @@
-from .MA_interface import MapAnalyserInterface
+from .MA_interface import MapAnalyzerInterface

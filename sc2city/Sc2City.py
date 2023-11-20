@@ -7,7 +7,7 @@ from sc2.bot_ai import BotAI
 # > IDs:
 
 # MapAnalyzer:
-from sc2city.interfaces import MapAnalyserInterface
+from sc2city.interfaces import MapAnalyzerInterface
 
 # Miscellaneous:
 from cache_first_frame import EnemyExpansions
@@ -53,7 +53,7 @@ class Sc2City(BotAI):
 
         # Miscellaneous:
         self.BuildingPlacementSolver: BuildingPlacementSolver = BuildingPlacementSolver(self)
-        self.MapAnalyzerInterface: MapAnalyserInterface = MapAnalyserInterface(AI=self)
+        self.MapAnalyzerInterface: MapAnalyzerInterface = MapAnalyzerInterface(AI=self)
 
         self.BuildingPlacementSolver.load_data()
 
@@ -64,7 +64,7 @@ class Sc2City(BotAI):
     async def on_step(self, iteration) -> None:
         self.iteration = iteration
         # Create Influence Maps:
-        self.MapAnalyzerInterface.create_influence_maps(memory=self.MemoryManager)
+        self.MapAnalyzerInterface.create_influence_maps()
 
         # Call on the managers' functions.
         self.MemoryManager.remember_units()

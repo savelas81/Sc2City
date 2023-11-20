@@ -14,9 +14,6 @@ from sc2city.MapAnalyzer.MapData import MapData
 # Typing:
 import typing
 
-# Loguru:
-import loguru
-
 # Numpy:
 import numpy
 
