@@ -12,6 +12,7 @@ from managers import (
     ScoutManager,
     StrategyManager,
     OpenerManager,
+    CalculationManager,
 )
 
 class Sc2City(BotAI):
