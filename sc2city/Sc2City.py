@@ -1,11 +1,5 @@
-import sc2
-from sc2.data import Result
 from sc2.main import *
 from sc2.bot_ai import BotAI
-from sc2 import maps
-from sc2.unit import Unit
-from sc2.units import Units
-from sc2.position import Point2, Point3
 from sc2.ids.unit_typeid import UnitTypeId
 from bot_memory import UnitsInMemory
 from MA_interface import MapAnalyserInterface
@@ -13,11 +7,12 @@ from strategy_manager import StrategyManager
 from building_placements import BuildingPlacementSolver
 from opener_manager import OpenerManager
 from mid_game_manager import MidGameManager
-from scv_manager import ScvManager
 from scout_manager import ScoutManager
 from cache_first_frame import EnemyExpansions
 from sc2.ids.ability_id import AbilityId
-
+from managers import (
+    ScvManager,
+)
 
 class Sc2City(BotAI):
 
