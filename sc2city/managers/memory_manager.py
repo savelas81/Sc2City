@@ -7,7 +7,7 @@ import sc2
 from sc2.game_data import Cost
 
 
-class UnitsInMemory:
+class MemoryManager:
     def __init__(self, ai=None):
         self.ai = ai
         # self.enemy_units_in_memory = Units([], self.ai)

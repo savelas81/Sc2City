@@ -1,7 +1,7 @@
 from sc2.main import *
 from sc2.bot_ai import BotAI
 from sc2.ids.unit_typeid import UnitTypeId
-from bot_memory import UnitsInMemory
+from sc2city.managers.memory_manager import MemoryManager
 from MA_interface import MapAnalyserInterface
 from building_placements import BuildingPlacementSolver
 from sc2city.managers.mid_game_manager import MidGameManager
@@ -18,7 +18,7 @@ class Sc2City(BotAI):
 
     def __init__(self):
         self.raw_affects_selection = False  # True = Fast gameplay
-        self.memory = UnitsInMemory(self)
+        self.memory = MemoryManager(self)
         self.strategy_manager = StrategyManager(self)
         self.building_placements = BuildingPlacementSolver(self)
         self.opener_manager = OpenerManager(self)
