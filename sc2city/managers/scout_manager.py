@@ -22,12 +22,12 @@ class ScoutManager:
     async def assign_unit_tag_scout(self, unit_tag: int):
         self.scout_tag = unit_tag
         if unit_tag in self.AI.units(UnitTypeId.SCV).tags:
-            await self.AI.scv_manager.remove_unit_tag_from_lists(unit_tag=unit_tag)
-            await self.AI.scv_manager.add_unit_tag_scout_list(unit_tag=unit_tag)
+            await self.AI.SCVManager.remove_unit_tag_from_lists(unit_tag=unit_tag)
+            await self.AI.SCVManager.add_unit_tag_scout_list(unit_tag=unit_tag)
 
     async def remove_scout(self):
         if self.scout_tag:
-            await self.AI.scv_manager.remove_unit_tag_from_lists(unit_tag=self.scout_tag)
+            await self.AI.SCVManager.remove_unit_tag_from_lists(unit_tag=self.scout_tag)
         self.scout_tag = None
         self.points_need_scouting = None
         self.next_point = None
@@ -35,7 +35,7 @@ class ScoutManager:
 
     async def create_scouting_grid_for_enemy_main(self):
         """gets all grid points from enemy main base"""
-        self.points_need_scouting = self.AI.MA.map_data.where_all(self.AI.enemy_start_locations[0])[0].array
+        self.points_need_scouting = self.AI.MapAnalyzerInterface.MapData.where_all(self.AI.enemy_start_locations[0])[0].array
 
     async def move_scout(self):
         scout: Unit = self.AI.units.find_by_tag(self.scout_tag)
@@ -50,24 +50,24 @@ class ScoutManager:
         if self.points_need_scouting is not None:
             if self.points_need_scouting.any():
                 if scout.type_id == UnitTypeId.REAPER:
-                    grid = copy.copy(self.AI.MA.reaper_grid)
+                    grid = copy.copy(self.AI.MapAnalyzerInterface.reaper_grid)
                 elif scout.is_flying:
-                    grid = copy.copy(self.AI.MA.enemy_air_grid)
+                    grid = copy.copy(self.AI.MapAnalyzerInterface.enemy_air_grid)
                 else:
-                    grid = copy.copy(self.AI.MA.enemy_ground_grid)
+                    grid = copy.copy(self.AI.MapAnalyzerInterface.enemy_ground_grid)
                 condition_list = [self.points_need_scouting == 1, self.points_need_scouting != 1]
                 choice_list = [grid, math.inf]
                 scouting_grid = np.select(condition_list, choice_list)
-                lowest_cost_points = self.AI.MA.map_data.lowest_cost_points_array(
+                lowest_cost_points = self.AI.MapAnalyzerInterface.MapData.lowest_cost_points_array(
                     from_pos=scout.position,
                     radius=500,
                     grid=scouting_grid)
 
                 if self.AI.iteration % 4 == 0:
-                    self.next_point = self.AI.MA.map_data.closest_towards_point(points=lowest_cost_points,
+                    self.next_point = self.AI.MapAnalyzerInterface.MapData.closest_towards_point(points=lowest_cost_points,
                                                                                 target=scout.position)
                 if self.next_point is not None and self.next_point.any():
-                    path = self.AI.MA.map_data.pathfind(start=scout.position.rounded,
+                    path = self.AI.MapAnalyzerInterface.MapData.pathfind(start=scout.position.rounded,
                                                         goal=self.next_point,
                                                         grid=grid,
                                                         sensitivity=3)

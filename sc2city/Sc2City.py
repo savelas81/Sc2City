@@ -43,6 +43,9 @@ class Sc2City(BotAI):
         self.scout_manager = ScoutManager(self)
         self.enemy_expansions = EnemyExpansions(self)
 
+        # Iteration:
+        self.iteration = 0
+
     # Methods:
     async def on_start(self) -> None:
         # Configuration:
@@ -59,6 +62,7 @@ class Sc2City(BotAI):
         await self.enemy_expansions.cache_enemy_expansions()
 
     async def on_step(self, iteration) -> None:
+        self.iteration = iteration
         # Create Influence Maps:
         self.MapAnalyzerInterface.create_influence_maps(memory=self.MemoryManager)
 

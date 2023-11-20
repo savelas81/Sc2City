@@ -27,7 +27,7 @@ class OpenerManager:
         if self.send_scv_scout and self.AI.time >= 37:
             self.send_scv_scout = False
             await self.AI.scout_manager.create_scouting_grid_for_enemy_main()
-            scv = await self.AI.scv_manager.select_contractor(self.AI.start_location)
+            scv = await self.AI.SCVManager.select_contractor(self.AI.start_location)
             if scv:
                 await self.AI.scout_manager.assign_unit_tag_scout(scv.tag)
 
