@@ -60,7 +60,6 @@ class FourRaxAllInSequence:
                 target_value_or_quantity_value=RequestBehaviors.QUANTITY_BEHAVIOR,
                 target_value_or_quantity_value=1,
             ),
-            # when u can
             """UpgradeRequest(
                 ID=UnitTypeId.STIMPACK,
                 AI=self.AI,
