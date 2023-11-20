@@ -1,25 +1,44 @@
+# Imports:
+
+# StarCraft II:
+# > Bot AI:
+from sc2.bot_ai import BotAI
+
+# MapAnalyzer:
+# > MapData:
 from MapAnalyzer.MapData import MapData
-from sc2.units import Units
-from sc2.unit import Unit
-from sc2.position import Point2, Point3
+
+# StarCraft II:
+# > Position:
+from sc2.position import Point3
+
+# Numpy:
 import numpy as np
 
 
 class MapAnalyserInterface:
-    def __init__(self, ai=None):
-        self.ai = ai
-        self.debug = True
+    # Initialization:
+    def __init__(self, AI: BotAI = None) -> None:
+        # Miscellaneous:
+        self.AI: BotAI = AI
+        self.MapData: MapData = MapData(AI, loglevel="INFO")
+
+        # Booleans:
+        self.debug: bool = True
+
+        # Grids:
+        self.enemy_ground_to_air_grid = None
         self.enemy_ground_grid = None
         self.enemy_air_grid = None
-        self.enemy_ground_to_air_grid = None
         self.reaper_grid = None
-        self.map_data = MapData(self.ai, loglevel="INFO")
 
-    def create_influence_maps(self, memory):
-        self.enemy_ground_grid = self.map_data.get_pyastar_grid(default_weight=1)
-        self.enemy_air_grid = self.map_data.get_clean_air_grid(default_weight=1)
-        self.enemy_ground_to_air_grid = self.map_data.get_clean_air_grid(default_weight=1)
-        self.reaper_grid = self.map_data.get_climber_grid(default_weight=1)
+    # Methods:
+    def create_influence_maps(self, memory) -> None:
+        self.enemy_ground_to_air_grid: np.ndarry = self.map_data.get_clean_air_grid(default_weight=1)
+        self.enemy_ground_grid: np.ndarray = self.map_data.get_pyastar_grid(default_weight=1)
+        self.enemy_air_grid: np.ndarry = self.map_data.get_clean_air_grid(default_weight=1)
+
+        self.reaper_grid: np.ndarray = self.map_data.get_climber_grid(default_weight=1)
         extra_ground_distance = 3
         extra_air_distance = 3
         for enemy_unit in memory.enemy_units_in_memory:

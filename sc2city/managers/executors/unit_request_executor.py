@@ -14,7 +14,7 @@ import typing
 import loguru
 
 # Requests:
-from requests import UnitRequest
+from sc2city.requests import UnitRequest
 
 
 # Classes:

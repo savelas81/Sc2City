@@ -1,15 +1,10 @@
-from sc2.bot_ai import BotAI
 import random
-from sc2.player import Bot, Computer
+from sc2.player import Computer
 from sc2.data import Race
 from sc2 import maps
 from sc2.main import *
 from sc2.data import Difficulty
-from building_placements import BuildingPlacementSolver
-from sc2.unit import Unit
-from sc2.ids.unit_typeid import UnitTypeId
-from sc2.units import Units
-from sc2.position import Point2, Point3
+from sc2city.managers.allocators.building_placements import BuildingPlacementSolver
 
 
 class BuildingPlacementDebugger(BotAI):
