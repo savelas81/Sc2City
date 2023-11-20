@@ -1,7 +1,11 @@
+import typing
+
 import loguru
+from sc2.bot_ai import BotAI
 from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.ability_id import AbilityId
 from sc2.unit import Unit
+from sc2.units import Units
 from sc2.position import Point2
 from typing import TYPE_CHECKING, Dict, List, Optional, Set, Tuple, Union
 import math
@@ -25,8 +29,9 @@ async def get_mining_positions(mineral_field: Unit) -> List[Point2]:
 
 
 class ScvManager:
-    def __init__(self, ai=None):
-        self.AI = ai
+    def __init__(self, AI: BotAI = None):
+        # Miscellaneous:
+        self.AI: BotAI = AI
         self.mineral_collector_dict = {}
         self.vespene_collector_dict = {}
         self.repairer_tag_list = []
@@ -180,6 +185,7 @@ class ScvManager:
                 self.AI.gas_buildings | self.AI.townhalls | self.AI.mineral_field
         ):
             structure.custom_assigned_harvesters = 0
+            structure.custom_surplus_harvesters = 0
         for target_refinery_tag in self.vespene_collector_dict.values():
             refinery = self.AI.gas_buildings.ready.find_by_tag(target_refinery_tag)
             if refinery:
@@ -194,6 +200,14 @@ class ScvManager:
                     cc = self.AI.townhalls.ready.not_flying.closest_to(mf)
                     cc.custom_assigned_harvesters += 1
                     continue
+
+        for refinery in self.AI.gas_buildings.ready:
+            refinery.custom_surplus_harvesters = refinery.custom_assigned_harvesters - 3
+        for cc in self.AI.townhalls.ready.not_flying:
+            mfs_amount = self.AI.mineral_field.closer_than(10, cc).amount
+            cc.custom_surplus_harvesters = cc.custom_assigned_harvesters - mfs_amount
+        for mf in self.AI.mineral_field:
+            mf.custom_surplus_harvesters = mf.custom_assigned_harvesters - 2
 
         """Send idle scvs to mine minerals"""
         for scv in self.AI.units(UnitTypeId.SCV):
@@ -232,7 +246,7 @@ class ScvManager:
                 # print("scv_manager: Idle SCV.")
                 await self.remove_unit_tag_from_lists(scv.tag)
                 cc = self.AI.townhalls.ready.not_flying.sorted(
-                    lambda x: x.custom_assigned_harvesters
+                    lambda x: x.distance_to(scv)
                 ).first
                 mfs = self.AI.mineral_field.closer_than(10, cc)
                 mf = mfs.sorted(lambda x: x.custom_assigned_harvesters).first
@@ -240,7 +254,7 @@ class ScvManager:
             else:
                 print("scv_manager: Scv has no dedicated group. Assign to mineral collection")
                 cc = self.AI.townhalls.ready.not_flying.sorted(
-                    lambda x: x.custom_assigned_harvesters
+                    lambda x: x.distance_to(scv)
                 ).first
                 mfs = self.AI.mineral_field.closer_than(10, cc)
                 mf = mfs.sorted(lambda x: x.custom_assigned_harvesters).first
@@ -270,6 +284,20 @@ class ScvManager:
                     if scv_to_stop:
                         scv_to_stop.move(scv_to_stop.position)
                         await self.remove_unit_tag_from_lists(scv_to_stop.tag)
+                        break
+
+            cc_with_excess_workers: Unit = Unit([], self.AI)
+            for cc in self.AI.townhalls:
+                if cc.custom_surplus_harvesters > 1:
+                    cc_with_excess_workers = cc
+                    break
+            if cc_with_excess_workers:
+                for cc in self.AI.townhalls.sorted(lambda x: x.distance_to(scv)):
+                    if cc.custom_surplus_harvesters < 0:
+                        scv = await self.select_contractor(position=cc_with_excess_workers.position)
+                        mf = self.AI.mineral_field.closer_than(10, cc).sorted(lambda x: x.custom_surplus_harvesters).first
+                        scv.gather(mf)
+                        self.mineral_collector_dict[scv.tag] = mf.tag
                         break
 
         for scv in self.AI.units(UnitTypeId.SCV):
