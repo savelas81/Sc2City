@@ -101,8 +101,8 @@ class ScvManager:
             print("scv_manager: No position for building!")
             return None
         scvs = self.AI.units(UnitTypeId.SCV)
-        for scv in scvs:
-            # TODO select closest by pathing. Now it is basically random
+        for scv in scvs.sorted(lambda x: x.distance_to(position)):
+            # TODO select closest by pathing. Now by distance.
             if scv.tag not in self.mineral_collector_dict:
                 continue
             if scv.is_carrying_resource:
@@ -238,7 +238,7 @@ class ScvManager:
                 mf = mfs.sorted(lambda x: x.custom_assigned_harvesters).first
                 self.mineral_collector_dict[scv.tag] = mf.tag
             else:
-                # print("scv_manager: Scv has no dedicated group. Assign to mineral collection")
+                print("scv_manager: Scv has no dedicated group. Assign to mineral collection")
                 cc = self.AI.townhalls.ready.not_flying.sorted(
                     lambda x: x.custom_assigned_harvesters
                 ).first
