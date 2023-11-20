@@ -2,9 +2,10 @@ from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.ability_id import AbilityId
 
 
+# Classes:
 class OpenerManager:
-    def __init__(self, ai=None):
-        self.AI = ai
+    def __init__(self, AI: BotAI =None):
+        self.AI = AI
         self.opener_active = True
         self.build_order = []
         self.create_opener = True
@@ -12,6 +13,7 @@ class OpenerManager:
         self.builder_tag = None
         self.send_scv_scout = True
 
+    @property
     def manager_is_active(self):
         return self.opener_active
 
@@ -486,6 +488,7 @@ class OpenerManager:
                     AbilityId.UPGRADETOORBITAL_ORBITALCOMMAND,
                     UnitTypeId.SCV,
                 ]
+
         if len(self.build_order) == 0:
             self.opener_active = False
             print("Opener_manager: Opener completed.")

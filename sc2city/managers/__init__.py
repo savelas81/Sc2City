@@ -5,3 +5,4 @@ from .opener_manager import OpenerManager
 from .mid_game_manager import MidGameManager
 from .memory_manager import MemoryManager
 from .calculation_manager import CalculationManager
+from .allocators import BuildingPlacementSolver
