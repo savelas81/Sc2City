@@ -148,7 +148,7 @@ class UnitRequest(Request):
         facilities_with_techlab = sc2.units.Units([], self.AI)
         townhall_types = [UnitTypeId.COMMANDCENTER, UnitTypeId.PLANETARYFORTRESS, UnitTypeId.ORBITALCOMMAND]
         sorted_and_filtered_facilities = sc2.units.Units([], self.AI)
-        need_tehclab = [
+        need_techlab = [
             UnitTypeId.MARAUDER,
             UnitTypeId.GHOST,
             UnitTypeId.SIEGETANK,
@@ -167,11 +167,11 @@ class UnitRequest(Request):
             return sorted_and_filtered_facilities
 
         for facility in faclilities.ready:
-            if facility.has_ractor and len(facility.orders) < 2 and self.ID not in need_tehclab:
+            if facility.has_ractor and len(facility.orders) < 2 and self.ID not in need_techlab:
                 facilities_with_reactor.apped(facility)
             elif facility.has_techlab and facility.is_idle:
                 facilities_with_reactor.apped(facility)
-            elif facility.is_idle and self.ID not in need_tehclab:
+            elif facility.is_idle and self.ID not in need_techlab:
                 facilities_without_add_on.append(facility)
         sorted_and_filtered_facilities.append(facilities_with_reactor)
         sorted_and_filtered_facilities.append(facilities_with_techlab)
