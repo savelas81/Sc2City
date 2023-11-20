@@ -4,21 +4,29 @@ from sc2.ids.ability_id import AbilityId
 
 class OpenerManager:
     def __init__(self, ai=None):
-        self.ai = ai
+        self.AI = ai
         self.opener_active = True
         self.build_order = []
         self.create_opener = True
         self.corner_depot_positions = None
         self.builder_tag = None
+        self.send_scv_scout = True
 
     def manager_is_active(self):
         return self.opener_active
 
     async def run_opener(self, opening_strategy=1):
+        if self.send_scv_scout and self.AI.time >= 37:
+            self.send_scv_scout = False
+            await self.AI.scout_manager.create_scouting_grid_for_enemy_main()
+            scv = await self.AI.scv_manager.select_contractor(self.AI.start_location)
+            if scv:
+                await self.AI.scout_manager.assign_unit_tag_scout(scv.tag)
+
         """[UnitTypeId]"""
         if self.create_opener:
             """Overwrite for opening strategies, @line 21"""
-            opening_strategy = 0
+            # opening_strategy = 0
             self.create_opener = False
             if opening_strategy == 0:
                 self.build_order = [
@@ -482,28 +490,28 @@ class OpenerManager:
             self.opener_active = False
             print("Opener_manager: Opener completed.")
             return
-        if not await self.ai.scv_manager.building_queue_empty():
+        if not await self.AI.scv_manager.building_queue_empty():
             return
         next_to_be_build = self.build_order[0]
         if next_to_be_build == "scvs_per_refinery_0":
-            self.ai.scv_manager.scvs_per_refinery = 0
+            self.AI.scv_manager.scvs_per_refinery = 0
             self.build_order.pop(0)
             return
         if next_to_be_build == "scvs_per_refinery_1":
-            self.ai.scv_manager.scvs_per_refinery = 1
+            self.AI.scv_manager.scvs_per_refinery = 1
             self.build_order.pop(0)
             return
         if next_to_be_build == "scvs_per_refinery_2":
-            self.ai.scv_manager.scvs_per_refinery = 2
+            self.AI.scv_manager.scvs_per_refinery = 2
             self.build_order.pop(0)
             return
         if next_to_be_build == "scvs_per_refinery_3":
-            self.ai.scv_manager.scvs_per_refinery = 3
+            self.AI.scv_manager.scvs_per_refinery = 3
             self.build_order.pop(0)
             return
         if next_to_be_build == UnitTypeId.SCV:
-            if self.ai.can_afford(next_to_be_build):
-                for cc in self.ai.townhalls.ready:
+            if self.AI.can_afford(next_to_be_build):
+                for cc in self.AI.townhalls.ready:
                     if (
                         cc.is_active
                         and cc.orders[0].ability.id
@@ -515,24 +523,24 @@ class OpenerManager:
                     return
             return
         if next_to_be_build == UnitTypeId.MARINE:
-            if self.ai.can_afford(next_to_be_build):
-                for addon in self.ai.structures(UnitTypeId.BARRACKSREACTOR).ready:
-                    rax = self.ai.structures(UnitTypeId.BARRACKS).closest_to(
+            if self.AI.can_afford(next_to_be_build):
+                for addon in self.AI.structures(UnitTypeId.BARRACKSREACTOR).ready:
+                    rax = self.AI.structures(UnitTypeId.BARRACKS).closest_to(
                         addon.add_on_land_position
                     )
                     if len(rax.orders) < 3:
                         rax.train(UnitTypeId.MARINE)
                         self.build_order.pop(0)
                         return
-                for addon in self.ai.structures(UnitTypeId.BARRACKSTECHLAB).ready:
-                    rax = self.ai.structures(UnitTypeId.BARRACKS).closest_to(
+                for addon in self.AI.structures(UnitTypeId.BARRACKSTECHLAB).ready:
+                    rax = self.AI.structures(UnitTypeId.BARRACKS).closest_to(
                         addon.add_on_land_position
                     )
                     if len(rax.orders) < 1:
                         rax.train(UnitTypeId.MARINE)
                         self.build_order.pop(0)
                         return
-                for rax in self.ai.structures(UnitTypeId.BARRACKS).ready:
+                for rax in self.AI.structures(UnitTypeId.BARRACKS).ready:
                     if len(rax.orders) < 1:
                         rax.train(next_to_be_build)
                         self.build_order.pop(0)
@@ -540,9 +548,9 @@ class OpenerManager:
                 print("Opener_manager: No raxes for marine production available!")
             return
         if next_to_be_build == UnitTypeId.MARAUDER:
-            if self.ai.can_afford(next_to_be_build):
-                for addon in self.ai.structures(UnitTypeId.BARRACKSTECHLAB).ready:
-                    rax = self.ai.structures(UnitTypeId.BARRACKS).closest_to(
+            if self.AI.can_afford(next_to_be_build):
+                for addon in self.AI.structures(UnitTypeId.BARRACKSTECHLAB).ready:
+                    rax = self.AI.structures(UnitTypeId.BARRACKS).closest_to(
                         addon.add_on_land_position
                     )
                     if len(rax.orders) < 1:
@@ -555,122 +563,122 @@ class OpenerManager:
             return
 
         if next_to_be_build == UnitTypeId.SUPPLYDEPOT:
-            if self.ai.minerals > 30:
-                await self.ai.scv_manager.queue_building(
+            if self.AI.minerals > 30:
+                await self.AI.scv_manager.queue_building(
                     structure_type_id=next_to_be_build
                 )
                 self.build_order.pop(0)
             return
         if next_to_be_build in [UnitTypeId.BARRACKS, UnitTypeId.ENGINEERINGBAY]:
             if (
-                self.ai.minerals > 60
-                and self.ai.structures(
+                self.AI.minerals > 60
+                and self.AI.structures(
                     [UnitTypeId.SUPPLYDEPOT, UnitTypeId.SUPPLYDEPOTLOWERED]
                 ).ready
             ):
-                await self.ai.scv_manager.queue_building(
+                await self.AI.scv_manager.queue_building(
                     structure_type_id=next_to_be_build
                 )
                 self.build_order.pop(0)
             return
         if next_to_be_build in [UnitTypeId.ARMORY]:
             if (
-                self.ai.minerals > 60
-                and self.ai.vespene > 60
-                and self.ai.structures(
+                self.AI.minerals > 60
+                and self.AI.vespene > 60
+                and self.AI.structures(
                     [UnitTypeId.FACTORY]
                 ).ready
             ):
-                await self.ai.scv_manager.queue_building(
+                await self.AI.scv_manager.queue_building(
                     structure_type_id=next_to_be_build
                 )
                 self.build_order.pop(0)
             return
         if next_to_be_build in [UnitTypeId.SENSORTOWER, UnitTypeId.MISSILETURRET]:
             if (
-                self.ai.minerals > 50
-                and self.ai.structures(
+                self.AI.minerals > 50
+                and self.AI.structures(
                     [UnitTypeId.ENGINEERINGBAY]
                 ).ready
             ):
-                await self.ai.scv_manager.queue_building(
+                await self.AI.scv_manager.queue_building(
                     structure_type_id=next_to_be_build
                 )
                 self.build_order.pop(0)
             return
         if next_to_be_build == UnitTypeId.FACTORY:
             if (
-                self.ai.minerals > 60
-                and self.ai.vespene > 60
+                self.AI.minerals > 60
+                and self.AI.vespene > 60
                 and (
-                    self.ai.structures(UnitTypeId.BARRACKS).ready
-                    or self.ai.structures(UnitTypeId.BARRACKSFLYING)
+                    self.AI.structures(UnitTypeId.BARRACKS).ready
+                    or self.AI.structures(UnitTypeId.BARRACKSFLYING)
                 )
             ):
-                await self.ai.scv_manager.queue_building(
+                await self.AI.scv_manager.queue_building(
                     structure_type_id=next_to_be_build
                 )
                 self.build_order.pop(0)
             return
         if next_to_be_build == UnitTypeId.GHOSTACADEMY:
             if (
-                self.ai.minerals > 60
+                self.AI.minerals > 60
                 and (
-                    self.ai.structures(UnitTypeId.BARRACKS).ready
-                    or self.ai.structures(UnitTypeId.BARRACKSFLYING)
+                    self.AI.structures(UnitTypeId.BARRACKS).ready
+                    or self.AI.structures(UnitTypeId.BARRACKSFLYING)
                 )
             ):
-                await self.ai.scv_manager.queue_building(
+                await self.AI.scv_manager.queue_building(
                     structure_type_id=next_to_be_build
                 )
                 self.build_order.pop(0)
             return
         if next_to_be_build == UnitTypeId.FUSIONCORE:
             if (
-                self.ai.minerals > 60
-                and self.ai.vespene > 100
+                self.AI.minerals > 60
+                and self.AI.vespene > 100
                 and (
-                    self.ai.structures(UnitTypeId.STARPORT).ready
-                    or self.ai.structures(UnitTypeId.STARPORTFLYING)
+                    self.AI.structures(UnitTypeId.STARPORT).ready
+                    or self.AI.structures(UnitTypeId.STARPORTFLYING)
                 )
             ):
-                await self.ai.scv_manager.queue_building(
+                await self.AI.scv_manager.queue_building(
                     structure_type_id=next_to_be_build
                 )
                 self.build_order.pop(0)
             return
         if next_to_be_build == UnitTypeId.BUNKER:
             if (
-                self.ai.minerals > 50
+                self.AI.minerals > 50
                 and (
-                    self.ai.structures(UnitTypeId.BARRACKS).ready
-                    or self.ai.structures(UnitTypeId.BARRACKSFLYING)
+                    self.AI.structures(UnitTypeId.BARRACKS).ready
+                    or self.AI.structures(UnitTypeId.BARRACKSFLYING)
                 )
             ):
-                await self.ai.scv_manager.queue_building(
+                await self.AI.scv_manager.queue_building(
                     structure_type_id=next_to_be_build
                 )
                 self.build_order.pop(0)
             return
         if next_to_be_build == UnitTypeId.STARPORT:
             if (
-                self.ai.minerals > 60
-                and self.ai.vespene > 60
+                self.AI.minerals > 60
+                and self.AI.vespene > 60
                 and (
-                    self.ai.structures(
+                    self.AI.structures(
                         [UnitTypeId.FACTORY, UnitTypeId.FACTORYFLYING]
                     ).ready
-                    or self.ai.structures(UnitTypeId.BARRACKSFLYING)
+                    or self.AI.structures(UnitTypeId.BARRACKSFLYING)
                 )
             ):
-                await self.ai.scv_manager.queue_building(
+                await self.AI.scv_manager.queue_building(
                     structure_type_id=next_to_be_build
                 )
                 self.build_order.pop(0)
             return
         if next_to_be_build in [UnitTypeId.BARRACKSREACTOR, UnitTypeId.BARRACKSTECHLAB]:
-            if self.ai.can_afford(next_to_be_build):
-                for rax in self.ai.structures(UnitTypeId.BARRACKS).ready.idle:
+            if self.AI.can_afford(next_to_be_build):
+                for rax in self.AI.structures(UnitTypeId.BARRACKS).ready.idle:
                     if not rax.add_on_tag:
                         rax.build(next_to_be_build)
                         self.build_order.pop(0)
@@ -678,8 +686,8 @@ class OpenerManager:
                 print("Opener_manager: No raxes without add_ons available!")
             return
         if next_to_be_build in [UnitTypeId.FACTORYREACTOR, UnitTypeId.FACTORYTECHLAB]:
-            if self.ai.can_afford(next_to_be_build):
-                for rax in self.ai.structures(UnitTypeId.FACTORY).ready.idle:
+            if self.AI.can_afford(next_to_be_build):
+                for rax in self.AI.structures(UnitTypeId.FACTORY).ready.idle:
                     if not rax.add_on_tag:
                         rax.build(next_to_be_build)
                         self.build_order.pop(0)
@@ -687,8 +695,8 @@ class OpenerManager:
                 print("Opener_manager: No factories without add_ons available!")
             return
         if next_to_be_build in [UnitTypeId.STARPORTREACTOR, UnitTypeId.STARPORTTECHLAB]:
-            if self.ai.can_afford(next_to_be_build):
-                for rax in self.ai.structures(UnitTypeId.STARPORT).ready.idle:
+            if self.AI.can_afford(next_to_be_build):
+                for rax in self.AI.structures(UnitTypeId.STARPORT).ready.idle:
                     if not rax.add_on_tag:
                         rax.build(next_to_be_build)
                         self.build_order.pop(0)
@@ -696,24 +704,24 @@ class OpenerManager:
                 print("Opener_manager: No starports without add_ons available!")
             return
         if next_to_be_build == UnitTypeId.REFINERY:
-            await self.ai.scv_manager.queue_building(structure_type_id=next_to_be_build)
+            await self.AI.scv_manager.queue_building(structure_type_id=next_to_be_build)
             self.build_order.pop(0)
             return
         if next_to_be_build == AbilityId.UPGRADETOORBITAL_ORBITALCOMMAND:
-            if self.ai.can_afford(next_to_be_build) and (
-                self.ai.structures(UnitTypeId.BARRACKS).ready
-                or self.ai.structures(UnitTypeId.BARRACKSFLYING)
+            if self.AI.can_afford(next_to_be_build) and (
+                self.AI.structures(UnitTypeId.BARRACKS).ready
+                or self.AI.structures(UnitTypeId.BARRACKSFLYING)
             ):
-                for cc in self.ai.townhalls(UnitTypeId.COMMANDCENTER).ready.idle:
+                for cc in self.AI.townhalls(UnitTypeId.COMMANDCENTER).ready.idle:
                     cc(AbilityId.UPGRADETOORBITAL_ORBITALCOMMAND)
                     self.build_order.pop(0)
                     return
             return
         if next_to_be_build == AbilityId.UPGRADETOPLANETARYFORTRESS_PLANETARYFORTRESS:
-            if self.ai.can_afford(next_to_be_build) and (
-                self.ai.structures(UnitTypeId.ENGINEERINGBAY).ready
+            if self.AI.can_afford(next_to_be_build) and (
+                self.AI.structures(UnitTypeId.ENGINEERINGBAY).ready
             ):
-                for cc in self.ai.townhalls(UnitTypeId.COMMANDCENTER).ready.idle:
+                for cc in self.AI.townhalls(UnitTypeId.COMMANDCENTER).ready.idle:
                     cc(AbilityId.UPGRADETOORBITAL_ORBITALCOMMAND)
                     self.build_order.pop(0)
                     return
@@ -722,8 +730,8 @@ class OpenerManager:
             AbilityId.BARRACKSTECHLABRESEARCH_STIMPACK,
             AbilityId.RESEARCH_COMBATSHIELD,
         ]:
-            for facility in self.ai.structures(UnitTypeId.BARRACKSTECHLAB).ready.idle:
-                if self.ai.can_afford(next_to_be_build):
+            for facility in self.AI.structures(UnitTypeId.BARRACKSTECHLAB).ready.idle:
+                if self.AI.can_afford(next_to_be_build):
                     print("Upgrade: " + str(next_to_be_build))
                     facility(next_to_be_build)
                     self.build_order.pop(0)
@@ -732,16 +740,16 @@ class OpenerManager:
         if next_to_be_build in [
             AbilityId.ENGINEERINGBAYRESEARCH_TERRANINFANTRYWEAPONSLEVEL1
         ]:
-            for facility in self.ai.structures(UnitTypeId.ENGINEERINGBAY).ready.idle:
-                if self.ai.can_afford(next_to_be_build):
+            for facility in self.AI.structures(UnitTypeId.ENGINEERINGBAY).ready.idle:
+                if self.AI.can_afford(next_to_be_build):
                     print("Upgrade: " + str(next_to_be_build))
                     facility(next_to_be_build)
                     self.build_order.pop(0)
                 print("No idle ENGINEERINGBAY available!")
             return
         if next_to_be_build == UnitTypeId.COMMANDCENTER:
-            if self.ai.minerals > 250:
-                await self.ai.scv_manager.queue_building(
+            if self.AI.minerals > 250:
+                await self.AI.scv_manager.queue_building(
                     structure_type_id=next_to_be_build
                 )
                 self.build_order.pop(0)

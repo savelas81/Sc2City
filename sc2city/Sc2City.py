@@ -4,7 +4,7 @@ from sc2.ids.unit_typeid import UnitTypeId
 from bot_memory import UnitsInMemory
 from MA_interface import MapAnalyserInterface
 from building_placements import BuildingPlacementSolver
-from opener_manager import OpenerManager
+from sc2city.managers.opener_manager import OpenerManager
 from mid_game_manager import MidGameManager
 from cache_first_frame import EnemyExpansions
 from sc2.ids.ability_id import AbilityId
@@ -12,6 +12,7 @@ from managers import (
     ScvManager,
     ScoutManager,
     StrategyManager,
+    OpenerManager,
 )
 
 class Sc2City(BotAI):
@@ -27,7 +28,6 @@ class Sc2City(BotAI):
         self.scout_manager = ScoutManager(self)
         self.enemy_expansions = EnemyExpansions(self)
         self.iteration = 0
-        self.send_scv_scout = True
 
     async def on_start(self):
         """on_start runs once in beginning of every game"""
@@ -53,10 +53,6 @@ class Sc2City(BotAI):
         await self.scout_manager.update_points_need_scouting()
         await self.scout_manager.move_scout()
         await self.scv_manager.move_scvs()
-        if self.send_scv_scout and self.time >= 37:
-            self.send_scv_scout = False
-            await self.scout_manager.create_scouting_grid_for_enemy_main()
-            await self.scout_manager.assign_unit_tag_scout(self.workers.random.tag)
 
 
         """quick fix for mules"""
