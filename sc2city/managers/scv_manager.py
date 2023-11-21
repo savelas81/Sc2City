@@ -47,6 +47,8 @@ class ScvManager:
         self.gas_miners_total = 50
         self.scvs_per_refinery = 3  # valid values 0-3
         self.remember_placeholders = []
+        self.interrupted_building_types = []
+        self.queue_delay = 3
 
     async def worker_split_frame_zero(self):
         self.expand_to_natural = await self.AI.get_next_expansion()
@@ -65,7 +67,11 @@ class ScvManager:
 
     @property
     def building_queue_empty(self) -> bool:
-        if self.next_building_type is None:
+        if (self.next_building_type is None
+                and self.queue_delay <= 0
+                and not self.AI.placeholders
+                and len(self.remember_placeholders) == 0
+                and len(self.interrupted_building_types) == 0):
             return True
         else:
             return False
@@ -120,29 +126,31 @@ class ScvManager:
         return None
 
     async def move_scvs(self):
-        # await self.placeholder_tracker()
+        self.queue_delay -= 1
+        await self.placeholder_tracker()
         await self.distribute_workers()
         await self.build_queued_building()
 
     async def placeholder_tracker(self):
         for holder in self.AI.placeholders:
+            self.queue_delay = 3
             if holder in self.remember_placeholders:
                 continue
             else:
                 self.remember_placeholders.append(holder)
         holder_to_be_deleted = None
         for holder_in_memory in self.remember_placeholders:
-            if self.AI.structures.closer_than(1, holder_in_memory):
-                structure = self.AI.structures.closest_to(holder_in_memory)
+            if self.AI.structures.closer_than(1, holder_in_memory.position):
+                structure = self.AI.structures.closest_to(holder_in_memory.position)
                 if structure.type_id == holder_in_memory.type_id:
                     print("Building started successfully.")
                     holder_to_be_deleted = holder_in_memory
                     break
-            elif not self.AI.placeholders.closer_than(1, holder_in_memory):
+            elif self.queue_delay <= 0 and not self.AI.placeholders.closer_than(1, holder_in_memory):
                 loguru.logger.info(
                     f"Was not able to start building Type ID: {str(holder_in_memory.type_id)}"
                 )
-                self.interrupted_building_types.append(holder_in_memory.type_id)
+                await self.queue_building(holder_in_memory.type_id)
                 holder_to_be_deleted = holder_in_memory
         if holder_to_be_deleted:
             self.remember_placeholders.remove(holder_to_be_deleted)
@@ -152,7 +160,7 @@ class ScvManager:
         self.scout_tag_list.append(unit_tag)
 
     async def build_queued_building(self):
-        if self.building_queue_empty:
+        if self.building_queue_empty or self.next_building_type is None:
             return
 
         if self.next_building_type == UnitTypeId.REFINERY:
@@ -170,6 +178,7 @@ class ScvManager:
                             if contractor is None:
                                 return
                             contractor.build(UnitTypeId.REFINERY, geyser)
+                            self.queue_delay = 3
                             print("Scv building "
                                   + str(self.next_building_type)
                                   + " at time "
@@ -189,6 +198,7 @@ class ScvManager:
                 for scv in self.AI.units(UnitTypeId.SCV):
                     if scv.tag == self.builder_tag:
                         scv.build(self.next_building_type, self.next_building_position)
+                        self.queue_delay = 3
                         print("Scv building "
                               + str(self.next_building_type)
                               + " at time "
@@ -268,7 +278,11 @@ class ScvManager:
                 """reserved for BOYS related stuff"""
                 continue
             elif scv.tag in self.scout_tag_list:
-                """reserved for scout related stuff"""
+                if scv.is_idle:
+                    loguru.logger.info(
+                        f"Scout idle"
+                    )
+
                 continue
             elif scv.is_idle:
                 # print("scv_manager: Idle SCV.")
