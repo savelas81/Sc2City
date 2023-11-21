@@ -26,6 +26,7 @@ from managers import (
     BuildingPlacementSolver,
     CalculationManager,
     UnitRequestExecutor,
+    MapType,
 )
 
 
@@ -56,6 +57,9 @@ class Sc2City(BotAI):
         # Iteration:
         self.iteration = 0
 
+        # MapType
+        self.map_type = MapType.STANDARD
+
     # Methods:
     async def on_start(self) -> None:
         # Configuration:
@@ -69,7 +73,7 @@ class Sc2City(BotAI):
             AI=self, debug=True
         )
 
-        self.BuildingPlacementSolver.load_data()
+        self.BuildingPlacementSolver.load_data(self.map_type)
 
         # Startup functions:
         await self.SCVManager.worker_split_frame_zero()

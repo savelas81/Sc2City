@@ -6,11 +6,13 @@ from sc2.main import *
 from sc2.data import Difficulty
 from sc2city.managers.allocators.building_placements import BuildingPlacementSolver
 from sc2.ids.unit_typeid import UnitTypeId
+from sc2city.managers.allocators import MapType
 
 
 class BuildingPlacementExtractor(BotAI):
     def __init__(self):
         self.placement_solver = BuildingPlacementSolver(self)
+        self.map_type = MapType.STANDARD
 
     async def on_start(self):
         pass
@@ -22,7 +24,7 @@ class BuildingPlacementExtractor(BotAI):
         if rax.distance_to(cc) > 30:
             pass
         elif iteration == 30:
-            self.placement_solver.save_placements(buildings=self.structures)
+            self.placement_solver.save_placements(buildings=self.structures, map_type=self.map_type)
 
 
 def main():

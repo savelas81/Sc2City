@@ -6,4 +6,5 @@ from .mid_game_manager import MidGameManager
 from .memory_manager import MemoryManager
 from .calculation_manager import CalculationManager
 from .allocators import BuildingPlacementSolver
+from .allocators import MapType
 from .executors import UnitRequestExecutor

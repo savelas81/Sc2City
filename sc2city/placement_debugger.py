@@ -5,14 +5,16 @@ from sc2 import maps
 from sc2.main import *
 from sc2.data import Difficulty
 from sc2city.managers.allocators.building_placements import BuildingPlacementSolver
+from sc2city.managers.allocators import MapType
 
 
 class BuildingPlacementDebugger(BotAI):
     def __init__(self):
         self.placement_solver = BuildingPlacementSolver(self)
+        self.map_type = MapType.STANDARD
 
     async def on_start(self):
-        self.placement_solver.load_data()
+        self.placement_solver.load_data(map_type=self.map_type)
 
     async def on_step(self, iteration):
         self.placement_solver.draw_debug()

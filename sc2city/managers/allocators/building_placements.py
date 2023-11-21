@@ -16,7 +16,15 @@ from sc2.ids.unit_typeid import UnitTypeId
 # JSON:
 import json
 
+# Enum:
+import enum
+
+
 # Classes:
+class MapType(enum.Enum):
+    ONEBASE = enum.auto()
+    STANDARD = enum.auto()
+    PROXY = enum.auto()
 
 
 class BuildingPlacementSolver:
@@ -173,7 +181,7 @@ class BuildingPlacementSolver:
                 return True
         return False
 
-    def save_placements(self, buildings: Units):
+    def save_placements(self, buildings: Units, map_type: MapType):
         building: Unit
         for building in buildings:
             match building.type_id:
@@ -271,24 +279,38 @@ class BuildingPlacementSolver:
         self.positions_dict["bunkers"] = self.bunkers
         self.positions_dict["sensor_towers"] = self.sensor_towers
         # print(self.positions_dict)
-        self.save_data()
+        self.save_data(map_type=map_type)
 
-    def save_data(self):
+    def save_data(self, map_type: MapType):
         map_name = self.ai.game_info.map_name
         cc_position = self.ai.structures(UnitTypeId.COMMANDCENTER).first.position
-        map_id = "data/" + str(map_name) + str(cc_position) + ".json"
+        match map_type:
+            case MapType.STANDARD:
+                map_id = "data/standard/" + str(map_name) + str(cc_position) + ".json"
+            case MapType.ONEBASE:
+                map_id = "data/onebase/" + str(map_name) + str(cc_position) + ".json"
+            case MapType.PROXY:
+                map_id = "data/proxy/" + str(map_name) + str(cc_position) + ".json"
+        # map_id = "data/" + str(map_name) + str(cc_position) + ".json"
         # map_id = 'data/test.json'
-        print(map_id)
         try:
             with open(map_id, "w") as file:
                 json.dump(self.positions_dict, file, indent=2)
+                print(map_id)
         except (OSError, IOError) as e:
             print(str(e))
 
-    def load_data(self):
+    def load_data(self, map_type: MapType):
         map_name = self.ai.game_info.map_name
         cc_position = self.ai.structures(UnitTypeId.COMMANDCENTER).first.position
-        map_id = "data/" + str(map_name) + str(cc_position) + ".json"
+        match map_type:
+            case MapType.STANDARD:
+                map_id = "data/standard/" + str(map_name) + str(cc_position) + ".json"
+            case MapType.ONEBASE:
+                map_id = "data/onebase/" + str(map_name) + str(cc_position) + ".json"
+            case MapType.PROXY:
+                map_id = "data/proxy/" + str(map_name) + str(cc_position) + ".json"
+        # map_id = "data/" + str(map_name) + str(cc_position) + ".json"
         # map_id = 'data/test.json'
         try:
             with open(map_id, "r") as file:
