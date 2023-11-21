@@ -16,32 +16,41 @@ from sc2.ids.ability_id import AbilityId
 # Typing:
 import typing
 
+# Loguru:
+import loguru
+
 # Math:
 import math
 
 # Constants:
-TRANSITION_DISTANCE: int = 1.8
-MINIMUM_DISTANCE: float = 0.4
+TRANSITION_DISTANCE: float = 1.8
+MINERAL_DISTANCE: float = 0.4
 
 SCV_RADIUS: float = 0.375
 
-# Utility:
-
+# Classes:
 """
-DOC HERE SAVELAS EVEN THOUGH IT IS OBVIOUS WHAT IT DOES!!!!
-
-TODO: Savelas add the documentation u stingy little butthole
-# TODO: Clean this up.... I WILL DO ITCHRONCIES WILL DO IT 
+* A utility class that contains methods for SCVManager to use.
+*
+* @param AI --> The SC2City AI object.
+*
 """
 
 
-# Class:
 class SCVManagerUtil:
     def __init__(self, AI: BotAI = None) -> None:
         # Miscellaneous:
         self.AI: BotAI = AI
 
     # Methods:
+    """
+    * A method to get all the possible mining positions.
+    *
+    * @param mineral_field --> The mineral field unit to pivot around.
+    *
+    * @returns A list of possible Point2 objects.
+    """
+
     def get_mining_positions(self, mineral_field: Unit = None) -> typing.List[Point2]:
         # Variables:
         position: Point2 = Point2(mineral_field.position)
@@ -60,66 +69,119 @@ class SCVManagerUtil:
             Point2((position.x + (1 + SCV_RADIUS), position.y + (0.5 + SCV_RADIUS))),
         ]
 
+    """
+    * A method to have the specified SCV speed mine their specified mineral field.
+    *
+    * @param SCV --> The specified SCV unit object.
+    *
+    * @param target_mineral_field_tag --> The mineral field's tag.
+    *
+    * @param mineral_collector_dict --> A dictionary containing a mapping of the SCVs' mineral field.
+    """
+
     def speed_mine_minerals_single(
-            self,
-            SCV: Unit,
-            target_mineral_field_tag: int,
-            mineral_collector_dict: typing.Dict[int, int],
+        self,
+        SCV: Unit,
+        target_mineral_field_tag: int,
+        mineral_collector_dict: typing.Dict[int, int],
     ) -> None:
-        if SCV.is_carrying_resource:
-            if len(SCV.orders) < 2:
-                target = self.AI.townhalls.ready.closest_to(SCV)
-                if (
-                        SCV.distance_to(target)
-                        < TRANSITION_DISTANCE + target.radius + SCV.radius
-                ):
-                    if (
-                            SCV.distance_to(target)
-                            < MINIMUM_DISTANCE + target.radius + SCV.radius
-                    ):
-                        SCV(AbilityId.SMART, target, queue=False)
-                        return
-
-                    waypoint = target.position.towards(SCV, target.radius + SCV.radius)
-                    SCV.move(waypoint)
-                    SCV(AbilityId.SMART, target, queue=True)
-            return
-        else:
-            target: Unit = self.AI.mineral_field.find_by_tag(
-                tag=target_mineral_field_tag
-            )
-            if SCV.is_idle and target:
-                SCV.gather(target)
-                return
-
-            if len(SCV.orders) < 2:
-                if target:
-                    if len(SCV.orders) == 1 and SCV.orders[0].target != target.tag:
-                        if SCV.orders[0].target not in self.AI.mineral_field.tags:
-                            # TODO: Loguru print("scv_manager: scv has invalid target ID")
-                            SCV.gather(target)
-                        else:
-                            mineral_collector_dict[SCV.tag] = SCV.orders[0].target
-                        return
-                    if (
-                            MINIMUM_DISTANCE + target.radius + SCV.radius
-                            < SCV.distance_to(target)
-                            < TRANSITION_DISTANCE + target.radius + SCV.radius
-                    ):
-                        mining_positions = self.get_mining_positions(
-                            mineral_field=target
+        match SCV.is_carrying_resource:
+            case True:
+                if len(SCV.orders) < 2:
+                    townhall: typing.Optional[
+                        Unit
+                    ] = self.AI.townhalls.ready.closest_to(SCV)
+                    if townhall is None:
+                        loguru.logger.info(
+                            "Cannot locate a townhall for SCV of tag {} to return minerals to.".format(
+                                SCV.tag
+                            )
                         )
-                        closest = Point2((0, 0))
-                        min_dist = math.inf
-                        for pos in mining_positions:
-                            if not self.AI.in_pathing_grid(pos):
-                                continue
-                            dist = pos.distance_to(SCV)
-                            if dist < min_dist:
-                                min_dist = dist
-                                closest = pos
+
+                        return None
+
+                    if (
+                        SCV.distance_to(townhall)
+                        < TRANSITION_DISTANCE + townhall.radius + SCV_RADIUS
+                    ):
+                        if (
+                            SCV.distance_to(townhall)
+                            < MINERAL_DISTANCE + townhall.radius + SCV_RADIUS
+                        ):
+                            SCV(AbilityId.SMART, townhall, queue=False)
+
+                            return None
+
+                        waypoint: Point2 = townhall.position.towards(
+                            SCV, townhall.radius + SCV_RADIUS
+                        )
+
+                        SCV.move(waypoint)
+                        SCV(AbilityId.SMART, townhall, queue=True)
+
+                    return None
+
+            case False:
+                specified_mineral_field: typing.Optional[
+                    Unit
+                ] = self.AI.mineral_field.find_by_tag(tag=target_mineral_field_tag)
+
+                if specified_mineral_field is None:
+                    loguru.logger.info(
+                        "Cannot locate the mineral field with tag {}".format(
+                            str(target_mineral_field_tag)
+                        )
+                    )
+
+                    return None
+
+                if SCV.is_idle:
+                    SCV.gather(target=specified_mineral_field)
+
+                    return None
+
+                if len(SCV.orders) < 2:
+                    if (
+                        len(SCV.orders) == 1
+                        and SCV.orders[0].target != target_mineral_field_tag
+                    ):
+                        loguru.logger.info(
+                            "SCV with tag {} was mining the wrong mineral field with tag {}".format(
+                                str(SCV.tag), str(target_mineral_field_tag)
+                            )
+                        )
+
+                        SCV.gather(specified_mineral_field)
+                    else:
+                        mineral_collector_dict[SCV.tag] = SCV.orders[0].target
+
+                    return None
+
+                if (
+                    MINERAL_DISTANCE + specified_mineral_field.radius + SCV_RADIUS
+                    < SCV.distance_to(specified_mineral_field)
+                    < TRANSITION_DISTANCE + specified_mineral_field.radius + SCV_RADIUS
+                ):
+                    mining_positions: typing.List[Point2] = self.get_mining_positions(
+                        mineral_field=specified_mineral_field
+                    )
+
+                    minimum_distance: float = math.inf
+                    closest: Point2 = Point2((0, 0))
+
+                    for position in mining_positions:
+                        if self.AI.in_pathing_grid(position) is False:
+                            continue
+
+                        distance: float = position.distance_to(SCV)
+                        if distance < minimum_distance:
+                            minimum_distance = distance
+                            closest = position
+
                         if closest != Point2((0, 0)):
-                            waypoint = closest
-                            SCV.move(waypoint)
-                            SCV(AbilityId.SMART, target, queue=True)
-                return
+                            SCV.move(closest)
+                            SCV(
+                                AbilityId.SMART,
+                                target=specified_mineral_field,
+                                queue=True,
+                            )
