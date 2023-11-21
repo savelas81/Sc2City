@@ -19,6 +19,13 @@ import json
 # Enum:
 import enum
 
+"""
+* Building placements is used to extract building placement from maps made specifically
+* for that purpose. Use placement_extractor.py for this.
+* 
+* get_placement_for method is used by the bot to get building placements
+* beginning of the game. map_type is used as parameter to select directory from where maps are loaded.
+"""
 
 # Classes:
 class MapType(enum.Enum):
