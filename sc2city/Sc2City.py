@@ -13,7 +13,7 @@ from sc2city.interfaces import MapAnalyzerInterface
 # Miscellaneous:
 from cache_first_frame import EnemyExpansions
 
-from requests import BuildRequest, UnitRequest, RequestBehaviors
+# from requests import BuildRequest, UnitRequest, RequestBehaviors
 
 # Managers:
 from managers import (
@@ -38,7 +38,7 @@ class Sc2City(BotAI):
         self.StrategyManager: StrategyManager = StrategyManager(self)
 
         self.CalculationManager: CalculationManager = CalculationManager(AI=self)
-        self.MemoryManager: MemoryManager = MemoryManager(AI=self, debug=True)
+        self.MemoryManager: MemoryManager = MemoryManager(AI=self, debug=False)
 
         # Executors:
         self.UnitRequestExecutor: UnitRequestExecutor = UnitRequestExecutor(AI=self, debug=True)
@@ -56,7 +56,7 @@ class Sc2City(BotAI):
     # Methods:
     async def on_start(self) -> None:
         # Configuration:
-        self.client.game_step = 8
+        self.client.game_step = 2
 
         # Miscellaneous:
         self.BuildingPlacementSolver: BuildingPlacementSolver = BuildingPlacementSolver(self)
@@ -67,26 +67,6 @@ class Sc2City(BotAI):
         # Startup functions:
         await self.SCVManager.worker_split_frame_zero()
         await self.enemy_expansions.cache_enemy_expansions()
-
-        self.UnitRequestExecutor.queue_request(
-            UnitRequest(
-                conditional=None,
-                AI=self,
-                ID=UnitTypeId.SCV,
-                target_value_or_quantity_value_behavior=RequestBehaviors.TARGET_BEHAVIOR,
-                target_value_or_quantity_value=19
-            ),
-        )
-
-        self.x: BuildRequest = BuildRequest(
-            ID=UnitTypeId.SUPPLYDEPOT,
-            AI=self,
-        )
-
-        self.y: BuildRequest = BuildRequest(
-            ID=UnitTypeId.BARRACKS,
-            AI=self,
-        )
 
     async def on_step(self, iteration) -> None:
         self.iteration = iteration
@@ -100,11 +80,6 @@ class Sc2City(BotAI):
         await self.scout_manager.update_points_need_scouting()
         await self.scout_manager.move_scout()
         await self.SCVManager.move_scvs()
-
-        if not self.x.is_request_done:
-            await self.x.execute()
-        if self.x.is_request_done:
-            await self.y.execute()
 
         # TODO: Refactor this... make it its own module.
         """
