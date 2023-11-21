@@ -9,9 +9,6 @@ class FourRaxAllInSequence:
 
     def sequence(self) -> typing.List[typing.Any]:
         return [
-            """
-            # This strategy is in preparation to having a strategy dependent on custom maps.
-            """
             UnitRequest(
                 conditional=None,
                 AI=self.AI,
