@@ -9,9 +9,6 @@ class FourRaxAllInSequence:
 
     def sequence(self) -> typing.List[typing.Any]:
         return [
-            """
-            # This strategy is in preparation to having a strategy dependent on custom maps.
-            """
             UnitRequest(
                 conditional=None,
                 AI=self.AI,
@@ -25,6 +22,10 @@ class FourRaxAllInSequence:
                 target_value_or_quantity_value=RequestBehaviors.QUANTITY_BEHAVIOR,
                 target_value_or_quantity_value=1,
             ),
+            """
+            # Be able to put the maximum build SCVs to 3
+            # Be able to stay at the spot until a total of 5 barracks are either build or in progress
+            """
             BuildRequest(
                 ID=UnitTypeId.BARRACKS,
                 AI=self.AI,
