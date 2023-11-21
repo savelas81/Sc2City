@@ -28,7 +28,7 @@ class BuildingPlacementExtractor(BotAI):
 
 
 def main():
-    mapname = "GoldenauraAIE-A-Player 2"
+    mapname = "DragonScalesAIE-A-Player 2"
     opponents = [Race.Protoss, Race.Zerg, Race.Terran]
     opponent = random.choice(opponents)
     # opponent = Race.Terran

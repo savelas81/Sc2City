@@ -21,7 +21,7 @@ class BuildingPlacementDebugger(BotAI):
 
 
 def main():
-    mapname = "GoldenauraAIE"
+    mapname = "DragonScalesAIE"
     opponents = [Race.Protoss, Race.Zerg, Race.Terran]
     opponent = random.choice(opponents)
     # opponent = Race.Terran
