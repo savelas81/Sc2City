@@ -184,4 +184,7 @@ class FourRaxAllInSequence:
                 # Set the prioritisation of the marauders above the hellions now.
                 """
             ),
+        """
+        # Queue up a high priority supply depot every time supply gets 8 supply before the limit
+        """
         ]
