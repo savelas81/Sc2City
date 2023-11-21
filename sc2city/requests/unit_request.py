@@ -101,6 +101,57 @@ class UnitRequest(Request):
         return True
 
     # Methods:
+    def sort_and_filter_production_facilities(
+        self, faclilities: Units
+    ) -> typing.Optional[Units]:
+        # Unit Objects:
+        sorted_and_filtered_facilities: Units = Units([], self.AI)
+        facilities_without_add_on: Units = Units([], self.AI)
+        facilities_with_reactor: Units = Units([], self.AI)
+        facilities_with_techlab: Units = Units([], self.AI)
+
+        # Constants:
+        townhall_types: typing.Set[UnitTypeId] = {
+            UnitTypeId.COMMANDCENTER,
+            UnitTypeId.PLANETARYFORTRESS,
+            UnitTypeId.ORBITALCOMMAND,
+        }
+
+        need_techlab: typing.Set[UnitTypeId] = {
+            UnitTypeId.MARAUDER,
+            UnitTypeId.GHOST,
+            UnitTypeId.SIEGETANK,
+            UnitTypeId.CYCLONE,
+            UnitTypeId.THOR,
+            UnitTypeId.MARAUDER,
+            UnitTypeId.RAVEN,
+            UnitTypeId.BANSHEE,
+            UnitTypeId.BATTLECRUISER,
+        }
+
+        # Main:
+        for facility in faclilities.ready.idle:
+            if facility.type_id in townhall_types:
+                sorted_and_filtered_facilities.append(facility)
+            return sorted_and_filtered_facilities
+
+        for facility in faclilities.ready:
+            if (
+                facility.has_reactor
+                and len(facility.orders) < 2
+                and self.ID not in need_techlab
+            ):
+                facilities_with_reactor.append(facility)
+            elif facility.has_techlab and facility.is_idle:
+                facilities_with_techlab.append(facility)
+            elif facility.is_idle and self.ID not in need_techlab:
+                facilities_without_add_on.append(facility)
+
+        sorted_and_filtered_facilities.append(facilities_with_reactor)
+        sorted_and_filtered_facilities.append(facilities_with_techlab)
+        sorted_and_filtered_facilities.append(facilities_without_add_on)
+        return sorted_and_filtered_facilities
+
     def execute(self) -> bool:
         if self.is_request_done:
             return True
@@ -123,6 +174,10 @@ class UnitRequest(Request):
         available_production_facilities: Units = self.AI.structures.of_type(
             production_facilities
         ).ready.idle
+
+        available_production_facilities: Units = (
+            self.sort_and_filter_production_facilities(available_production_facilities)
+        )
         if not any(available_production_facilities):
             return False
 
@@ -140,49 +195,3 @@ class UnitRequest(Request):
                     self.successions += 1
             else:
                 return False
-
-
-    def sort_and_filter_production_facilitie(self, faclilities: Units) -> typing.Optional[Units]:
-        # Unit Objects:
-        sorted_and_filtered_facilities: Units = Units([], self.AI)
-        facilities_without_add_on: Units = Units([], self.AI)
-        facilities_with_reactor: Units = Units([], self.AI)
-        facilities_with_techlab: Units = Units([], self.AI)
-
-        # Constants:
-        townhall_types: typing.Set[UnitTypeId] = {
-            UnitTypeId.COMMANDCENTER,
-            UnitTypeId.PLANETARYFORTRESS,
-            UnitTypeId.ORBITALCOMMAND
-        }
-
-        need_techlab: typing.Set[UnitTypeId] = {
-            UnitTypeId.MARAUDER,
-            UnitTypeId.GHOST,
-            UnitTypeId.SIEGETANK,
-            UnitTypeId.CYCLONE,
-            UnitTypeId.THOR,
-            UnitTypeId.MARAUDER,
-            UnitTypeId.RAVEN,
-            UnitTypeId.BANSHEE,
-            UnitTypeId.BATTLECRUISER,
-        }
-
-        # Main:
-        for facility in faclilities.ready.idle:
-            if facility.type_id in townhall_types:
-                sorted_and_filtered_facilities.append(facility)
-            return sorted_and_filtered_facilities
-
-        for facility in faclilities.ready:
-            if facility.has_reactor and len(facility.orders) < 2 and self.ID not in need_techlab:
-                facilities_with_reactor.append(facility)
-            elif facility.has_techlab and facility.is_idle:
-                facilities_with_techlab.append(facility)
-            elif facility.is_idle and self.ID not in need_techlab:
-                facilities_without_add_on.append(facility)
-
-        sorted_and_filtered_facilities.append(facilities_with_reactor)
-        sorted_and_filtered_facilities.append(facilities_with_techlab)
-        sorted_and_filtered_facilities.append(facilities_without_add_on)
-        return sorted_and_filtered_facilities

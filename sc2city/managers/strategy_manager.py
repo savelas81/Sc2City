@@ -10,6 +10,7 @@ from sc2.bot_ai import BotAI
 TODO: Documentation here..
 """
 
+
 class StrategyManager:
     def __init__(self, AI: BotAI = None):
         # Miscellaneous:

@@ -4,6 +4,7 @@
 # > Bot AI:
 from sc2.bot_ai import BotAI
 
+# > IDs:
 from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.ability_id import AbilityId
 
@@ -594,9 +595,7 @@ class OpenerManager:
             if (
                 self.AI.minerals > 60
                 and self.AI.vespene > 60
-                and self.AI.structures(
-                    [UnitTypeId.FACTORY]
-                ).ready
+                and self.AI.structures([UnitTypeId.FACTORY]).ready
             ):
                 await self.AI.SCVManager.queue_building(
                     structure_type_id=next_to_be_build
@@ -606,9 +605,7 @@ class OpenerManager:
         if next_to_be_build in [UnitTypeId.SENSORTOWER, UnitTypeId.MISSILETURRET]:
             if (
                 self.AI.minerals > 50
-                and self.AI.structures(
-                    [UnitTypeId.ENGINEERINGBAY]
-                ).ready
+                and self.AI.structures([UnitTypeId.ENGINEERINGBAY]).ready
             ):
                 await self.AI.SCVManager.queue_building(
                     structure_type_id=next_to_be_build
@@ -630,12 +627,9 @@ class OpenerManager:
                 self.build_order.pop(0)
             return
         if next_to_be_build == UnitTypeId.GHOSTACADEMY:
-            if (
-                self.AI.minerals > 60
-                and (
-                    self.AI.structures(UnitTypeId.BARRACKS).ready
-                    or self.AI.structures(UnitTypeId.BARRACKSFLYING)
-                )
+            if self.AI.minerals > 60 and (
+                self.AI.structures(UnitTypeId.BARRACKS).ready
+                or self.AI.structures(UnitTypeId.BARRACKSFLYING)
             ):
                 await self.AI.SCVManager.queue_building(
                     structure_type_id=next_to_be_build
@@ -657,12 +651,9 @@ class OpenerManager:
                 self.build_order.pop(0)
             return
         if next_to_be_build == UnitTypeId.BUNKER:
-            if (
-                self.AI.minerals > 50
-                and (
-                    self.AI.structures(UnitTypeId.BARRACKS).ready
-                    or self.AI.structures(UnitTypeId.BARRACKSFLYING)
-                )
+            if self.AI.minerals > 50 and (
+                self.AI.structures(UnitTypeId.BARRACKS).ready
+                or self.AI.structures(UnitTypeId.BARRACKSFLYING)
             ):
                 await self.AI.SCVManager.queue_building(
                     structure_type_id=next_to_be_build

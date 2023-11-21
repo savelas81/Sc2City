@@ -35,7 +35,9 @@ class ScoutManager:
 
     async def create_scouting_grid_for_enemy_main(self):
         """gets all grid points from enemy main base"""
-        self.points_need_scouting = self.AI.MapAnalyzerInterface.MapData.where_all(self.AI.enemy_start_locations[0])[0].array
+        self.points_need_scouting = self.AI.MapAnalyzerInterface.MapData.where_all(
+            self.AI.enemy_start_locations[0]
+        )[0].array
 
     async def move_scout(self):
         scout: Unit = self.AI.units.find_by_tag(self.scout_tag)
@@ -55,28 +57,35 @@ class ScoutManager:
                     grid = copy.copy(self.AI.MapAnalyzerInterface.enemy_air_grid)
                 else:
                     grid = copy.copy(self.AI.MapAnalyzerInterface.enemy_ground_grid)
-                condition_list = [self.points_need_scouting == 1, self.points_need_scouting != 1]
+                condition_list = [
+                    self.points_need_scouting == 1,
+                    self.points_need_scouting != 1,
+                ]
                 choice_list = [grid, math.inf]
                 scouting_grid = np.select(condition_list, choice_list)
-                lowest_cost_points = self.AI.MapAnalyzerInterface.MapData.lowest_cost_points_array(
-                    from_pos=scout.position,
-                    radius=500,
-                    grid=scouting_grid)
+                lowest_cost_points = (
+                    self.AI.MapAnalyzerInterface.MapData.lowest_cost_points_array(
+                        from_pos=scout.position, radius=500, grid=scouting_grid
+                    )
+                )
 
                 if self.AI.iteration % 4 == 0:
-                    self.next_point = self.AI.MapAnalyzerInterface.MapData.closest_towards_point(points=lowest_cost_points,
-                                                                                target=scout.position)
+                    self.next_point = (
+                        self.AI.MapAnalyzerInterface.MapData.closest_towards_point(
+                            points=lowest_cost_points, target=scout.position
+                        )
+                    )
                 if self.next_point is not None and self.next_point.any():
-                    path = self.AI.MapAnalyzerInterface.MapData.pathfind(start=scout.position.rounded,
-                                                        goal=self.next_point,
-                                                        grid=grid,
-                                                        sensitivity=3)
+                    path = self.AI.MapAnalyzerInterface.MapData.pathfind(
+                        start=scout.position.rounded,
+                        goal=self.next_point,
+                        grid=grid,
+                        sensitivity=3,
+                    )
                     if path is not None and len(path) > 0:
                         scout.move(path[0])
                 else:
-                    loguru.logger.info(
-                        f"No self.next_point {str(self.next_point)}"
-                    )
+                    loguru.logger.info(f"No self.next_point {str(self.next_point)}")
                     return
 
     async def update_points_need_scouting(self):
@@ -97,7 +106,7 @@ class ScoutManager:
             for x in range(0, self.points_need_scouting.shape[0]):
                 for y in range(0, self.points_need_scouting.shape[1]):
                     if self.points_need_scouting[x, y] == 1:
-                        p= Point2((x, y))
+                        p = Point2((x, y))
                         h2 = self.AI.get_terrain_z_height(p)
                         pos = Point3((p.x, p.y, h2))
                         size = 0.45

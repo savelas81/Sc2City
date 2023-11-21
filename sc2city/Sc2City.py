@@ -17,7 +17,7 @@ from cache_first_frame import EnemyExpansions
 
 # Managers:
 from managers import (
-    ScvManager,
+    SCVManager,
     ScoutManager,
     StrategyManager,
     OpenerManager,
@@ -27,6 +27,7 @@ from managers import (
     CalculationManager,
     UnitRequestExecutor,
 )
+
 
 class Sc2City(BotAI):
     # Initialization:
@@ -41,12 +42,14 @@ class Sc2City(BotAI):
         self.MemoryManager: MemoryManager = MemoryManager(AI=self, debug=False)
 
         # Executors:
-        self.UnitRequestExecutor: UnitRequestExecutor = UnitRequestExecutor(AI=self, debug=True)
+        self.UnitRequestExecutor: UnitRequestExecutor = UnitRequestExecutor(
+            AI=self, debug=True
+        )
 
         # TODO: Refactor!!!
         self.OpenerManager: OpenerManager = OpenerManager(AI=self)
         self.MidGameManager: MidGameManager = MidGameManager(self)
-        self.SCVManager: ScvManager = ScvManager(self)
+        self.SCVManager: SCVManager = SCVManager(AI=self)
         self.scout_manager = ScoutManager(self)
         self.enemy_expansions = EnemyExpansions(self)
 
@@ -59,8 +62,12 @@ class Sc2City(BotAI):
         self.client.game_step = 2
 
         # Miscellaneous:
-        self.BuildingPlacementSolver: BuildingPlacementSolver = BuildingPlacementSolver(self)
-        self.MapAnalyzerInterface: MapAnalyzerInterface = MapAnalyzerInterface(AI=self)
+        self.BuildingPlacementSolver: BuildingPlacementSolver = BuildingPlacementSolver(
+            self
+        )
+        self.MapAnalyzerInterface: MapAnalyzerInterface = MapAnalyzerInterface(
+            AI=self, debug=True
+        )
 
         self.BuildingPlacementSolver.load_data()
 

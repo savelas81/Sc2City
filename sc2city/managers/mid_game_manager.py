@@ -1,7 +1,4 @@
-
-
 class MidGameManager:
-
     def __init__(self, ai=None):
         self.ai = ai
 
