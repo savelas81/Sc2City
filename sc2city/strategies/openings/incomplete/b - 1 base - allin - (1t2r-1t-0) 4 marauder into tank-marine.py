@@ -36,7 +36,7 @@ class FourRaxAllInSequence:
             ),
             """
             # 1:03 Set amount of gas miners worldwide to 3     
-            # 1:12 Set amount of gas miners worldwide to 4
+            # 1:12 Set amount of gas miners worldwide to 6
             """
             """BuildRequest(
                 ID=UnitTypeId.ORBITALCOMMAND,
