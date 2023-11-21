@@ -31,22 +31,22 @@
   ],
   "auxiliary_buildings_1": [
     [
-      172.5,
-      48.5
-    ],
-    [
-      169.5,
-      47.5
-    ]
-  ],
-  "auxiliary_buildings_2": [
-    [
       175.5,
       48.5
     ],
     [
       183.5,
       56.5
+    ]
+  ],
+  "auxiliary_buildings_2": [
+    [
+      172.5,
+      48.5
+    ],
+    [
+      169.5,
+      47.5
     ]
   ],
   "auxiliary_buildings_3": [
