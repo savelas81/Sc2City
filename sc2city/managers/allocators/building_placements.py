@@ -27,6 +27,7 @@ import enum
 * beginning of the game. map_type is used as parameter to select directory from where maps are loaded.
 """
 
+
 # Classes:
 class MapType(enum.Enum):
     ONEBASE = enum.auto()
@@ -387,105 +388,170 @@ class BuildingPlacementSolver:
         green = Point3((0, 255, 0))
         blue = Point3((0, 0, 255))
         white = Point3((255, 255, 255))
-        draw_addon = False
+
         """barrack placement debugs below"""
         """demo comment"""
+        size = 1.45
+        draw_addon = True
         for p in self.building_positions_priority_1:
             pos = Point2(p)
-            size = 1.45
             color = red
-            draw_addon = True
             self.draw_debug_single(
                 pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon
             )
         for p in self.building_positions_priority_2:
             pos = Point2(p)
-            size = 1.45
             color = yellow
-            draw_addon = True
+            self.draw_debug_single(
+                pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon
+            )
+        for p in self.building_positions_priority_3:
+            pos = Point2(p)
+            color = green
+            self.draw_debug_single(
+                pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon
+            )
+        for p in self.building_positions_priority_4:
+            pos = Point2(p)
+            color = blue
+            self.draw_debug_single(
+                pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon
+            )
+        for p in self.building_positions_priority_5:
+            pos = Point2(p)
+            color = white
             self.draw_debug_single(
                 pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon
             )
 
         """engineeringbay etc placement debug """
+        size = 1.45
+        draw_addon = False
         for p in self.auxiliary_buildings_1:
             pos = Point2(p)
-            size = 1.45
             color = red
-            draw_addon = False
             self.draw_debug_single(
                 pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon
             )
+        for p in self.auxiliary_buildings_2:
+            pos = Point2(p)
+            color = yellow
             self.draw_debug_single(
-                pos2=pos,
-                size=(size - 0.05),
-                height=0.3,
-                color=color,
-                draw_addon=draw_addon,
+                pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon
+            )
+        for p in self.auxiliary_buildings_3:
+            pos = Point2(p)
+            color = green
+            self.draw_debug_single(
+                pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon
             )
 
         """depot placement debug """
+        size = 0.95
+        draw_addon = False
         for p in self.supplydepot_positions_priority_1:
             pos = Point2(p)
-            size = 0.95
             color = red
-            draw_addon = False
             self.draw_debug_single(
                 pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon
             )
         for p in self.supplydepot_positions_priority_2:
             pos = Point2(p)
-            size = 0.95
             color = yellow
-            draw_addon = False
+            self.draw_debug_single(
+                pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon
+            )
+        for p in self.supplydepot_positions_priority_3:
+            pos = Point2(p)
+            color = green
+            self.draw_debug_single(
+                pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon
+            )
+        for p in self.supplydepot_positions_priority_4:
+            pos = Point2(p)
+            color = blue
+            self.draw_debug_single(
+                pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon
+            )
+        for p in self.supplydepot_positions_priority_5:
+            pos = Point2(p)
+            color = white
             self.draw_debug_single(
                 pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon
             )
 
         """turret placement debug"""
+        size = 0.95
+        draw_addon = False
         for p in self.turret_positions_priority_1:
             pos = Point2(p)
-            size = 0.95
             color = red
-            draw_addon = False
+            self.draw_debug_single(
+                pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon
+            )
+        for p in self.turret_positions_priority_1:
+            pos = Point2(p)
+            color = yellow
+            self.draw_debug_single(
+                pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon
+            )
+        for p in self.turret_positions_priority_1:
+            pos = Point2(p)
+            color = green
             self.draw_debug_single(
                 pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon
             )
 
         """macaro orbital placement debug"""
+        size = 2.49
+        draw_addon = False
         for p in self.macro_orbitals:
             pos = Point2(p)
-            size = 2.49
             color = white
-            draw_addon = False
             self.draw_debug_single(
                 pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon
             )
 
         """expansion placement debug"""
+        size = 2.45
+        draw_addon = False
         for p in self.expansion_priority_1:
             pos = Point2(p)
-            size = 2.45
             color = red
-            draw_addon = False
             self.draw_debug_single(
                 pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon
             )
         for p in self.expansion_priority_2:
             pos = Point2(p)
-            size = 2.45
             color = yellow
-            draw_addon = False
             self.draw_debug_single(
                 pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon
             )
         for p in self.expansion_priority_3:
             pos = Point2(p)
-            size = 2.45
             color = green
-            draw_addon = False
             self.draw_debug_single(
                 pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon
+            )
+
+        """bunker placement debug"""
+        size = 1.45
+        draw_addon = False
+        for p in self.bunkers:
+            pos = Point2(p)
+            color = red
+            self.draw_debug_single(
+                pos2=pos, size=size, height=0.3, color=color, draw_addon=draw_addon
+            )
+
+        """sensor tower placement debug"""
+        size = 0.45
+        draw_addon = False
+        for p in self.sensor_towers:
+            pos = Point2(p)
+            color = red
+            self.draw_debug_single(
+                pos2=pos, size=size, height=1, color=color, draw_addon=draw_addon
             )
 
     def draw_debug_single(
