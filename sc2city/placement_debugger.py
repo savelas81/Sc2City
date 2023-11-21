@@ -11,7 +11,7 @@ from sc2city.managers.allocators import MapType
 class BuildingPlacementDebugger(BotAI):
     def __init__(self):
         self.placement_solver = BuildingPlacementSolver(self)
-        self.map_type = MapType.STANDARD
+        self.map_type = MapType.ONEBASE
 
     async def on_start(self):
         self.placement_solver.load_data(map_type=self.map_type)

@@ -12,7 +12,7 @@ from sc2city.managers.allocators import MapType
 class BuildingPlacementExtractor(BotAI):
     def __init__(self):
         self.placement_solver = BuildingPlacementSolver(self)
-        self.map_type = MapType.STANDARD
+        self.map_type = MapType.ONEBASE
 
     async def on_start(self):
         pass
@@ -28,7 +28,7 @@ class BuildingPlacementExtractor(BotAI):
 
 
 def main():
-    mapname = "TESTV12"
+    mapname = "DragonScalesAIE-A-Player 2"
     opponents = [Race.Protoss, Race.Zerg, Race.Terran]
     opponent = random.choice(opponents)
     # opponent = Race.Terran
