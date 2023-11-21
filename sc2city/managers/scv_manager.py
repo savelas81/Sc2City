@@ -142,10 +142,15 @@ class SCVManager:
     
     TODO: Please shorten this code... maybe add some stuff to other methods to condense it and make it cleaner
     """
-    async def queue_building(self, structure_type_id: UnitTypeId = UnitTypeId.BARRACKS) -> None:
+
+    async def queue_building(
+        self, structure_type_id: UnitTypeId = UnitTypeId.BARRACKS
+    ) -> None:
         # Debugging:
         if self.debug:
-            loguru.logger.info("SCVManager: Queuing building: {}".format(str(structure_type_id)))
+            loguru.logger.info(
+                "SCVManager: Queuing building: {}".format(str(structure_type_id))
+            )
 
         # Refinery Handling...
         if structure_type_id == UnitTypeId.REFINERY:
@@ -154,7 +159,9 @@ class SCVManager:
             return None
 
         # Main:
-        position: typing.Optional[Point2] = await self.AI.BuildingPlacementSolver.get_placement_for(
+        position: typing.Optional[
+            Point2
+        ] = await self.AI.BuildingPlacementSolver.get_placement_for(
             structure_type_id=structure_type_id
         )
 
@@ -167,7 +174,9 @@ class SCVManager:
             if self.expand_to_natural and structure_type_id == UnitTypeId.COMMANDCENTER:
                 position: typing.Union[Point2, bool] = self.expand_to_natural
                 if isinstance(position, bool):
-                    loguru.logger.info("Position is a boolean but we wanted a Point2...")
+                    loguru.logger.info(
+                        "Position is a boolean but we wanted a Point2..."
+                    )
 
                     return None
 
@@ -450,8 +459,9 @@ class SCVManager:
             if scv.tag in self.mineral_collector_dict:
                 target_mineralfield_tag = self.mineral_collector_dict[scv.tag]
                 self.SCVManagerUtil.speed_mine_minerals_single(
-                    SCV=scv, target_mineral_field_tag=target_mineralfield_tag,
-                    mineral_collector_dict=self.mineral_collector_dict
+                    SCV=scv,
+                    target_mineral_field_tag=target_mineralfield_tag,
+                    mineral_collector_dict=self.mineral_collector_dict,
                 )
             elif scv.tag in self.vespene_collector_dict:
                 target_refinery_tag = self.vespene_collector_dict[scv.tag]

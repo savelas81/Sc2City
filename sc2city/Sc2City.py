@@ -79,8 +79,7 @@ class Sc2City(BotAI):
         await self.SCVManager.worker_split_frame_zero()
         await self.enemy_expansions.cache_enemy_expansions()
 
-    async def on_step(self, iteration) -> None:
-        self.iteration = iteration
+    async def on_step(self, iteration: int = 0) -> None:
         # Create Influence Maps:
         self.MapAnalyzerInterface.create_influence_maps()
 
@@ -91,6 +90,9 @@ class Sc2City(BotAI):
         await self.scout_manager.update_points_need_scouting()
         await self.scout_manager.move_scout()
         await self.SCVManager.move_scvs()
+
+        # Miscellaneous:
+        self.iteration: int = iteration
 
         # TODO: Refactor this... make it its own module.
         """
