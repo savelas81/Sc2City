@@ -294,11 +294,11 @@ class BuildingPlacementSolver:
         cc_position = self.ai.structures(UnitTypeId.COMMANDCENTER).first.position
         match map_type:
             case MapType.STANDARD:
-                map_id = "data/standard/" + str(map_name) + str(cc_position) + ".json"
+                map_id = "buildings/locations/standard/" + str(map_name) + str(cc_position) + ".json"
             case MapType.ONEBASE:
-                map_id = "data/onebase/" + str(map_name) + str(cc_position) + ".json"
+                map_id = "buildings/locations/onebase/" + str(map_name) + str(cc_position) + ".json"
             case MapType.PROXY:
-                map_id = "data/proxy/" + str(map_name) + str(cc_position) + ".json"
+                map_id = "buildings/locations/proxy/" + str(map_name) + str(cc_position) + ".json"
         # map_id = "data/" + str(map_name) + str(cc_position) + ".json"
         # map_id = 'data/test.json'
         try:
@@ -313,11 +313,11 @@ class BuildingPlacementSolver:
         cc_position = self.ai.structures(UnitTypeId.COMMANDCENTER).first.position
         match map_type:
             case MapType.STANDARD:
-                map_id = "data/standard/" + str(map_name) + str(cc_position) + ".json"
+                map_id = "buildings/locations/standard/" + str(map_name) + str(cc_position) + ".json"
             case MapType.ONEBASE:
-                map_id = "data/onebase/" + str(map_name) + str(cc_position) + ".json"
+                map_id = "buildings/locations/onebase/" + str(map_name) + str(cc_position) + ".json"
             case MapType.PROXY:
-                map_id = "data/proxy/" + str(map_name) + str(cc_position) + ".json"
+                map_id = "buildings/locations/proxy/" + str(map_name) + str(cc_position) + ".json"
         # map_id = "data/" + str(map_name) + str(cc_position) + ".json"
         # map_id = 'data/test.json'
         try:
