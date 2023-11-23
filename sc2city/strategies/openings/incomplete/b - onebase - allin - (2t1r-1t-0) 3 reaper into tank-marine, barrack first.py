@@ -143,6 +143,16 @@ class FourRaxAllInSequence:
                 target_value_or_quantity_value=RequestBehaviors.QUANTITY_BEHAVIOR,
                 target_value_or_quantity_value=1,
             ),"""
+            UnitRequest(
+                conditional=None,
+                AI=self.AI,
+                ID=UnitTypeId.MARAUDER,
+                target_value_or_quantity_value_behavior=RequestBehaviors.TARGET_BEHAVIOR,
+                target_value_or_quantity_value=1500
+            ),
+            """
+            # Replace a marine queue make a marauder if there's more then 300 minerals and 125 vesperine
+            """
         """
         # Queue up a high priority supply depot every time supply gets 8 supply before the limit
         """
