@@ -23,22 +23,18 @@ import typing
 # Loguru:
 import loguru
 
-# Math:
-import math
-
 # Utils:
 from sc2city.util import SCVManagerUtil
-
-# Constants:
-
-SCV_RADIUS: float = 0.375
 
 # Classes:
 
 """
-DOCUMENTATION HERE SAVELAS OR MARLON!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+* A manager to manage SCVs and queue buildings.
+*
+* @param AI --> The SC2City AI object.
+*
+* @param debug --> A setting to enable debugging features for functions.
 """
-
 
 class SCVManager:
     # Constants:
@@ -52,8 +48,8 @@ class SCVManager:
 
         self.SCVManagerUtil: SCVManagerUtil = SCVManagerUtil(AI=AI)
 
-        self.next_building_position = Point2((0, 0))
-        self.next_building_type = None
+        self.next_building_position: Point2 = Point2((0, 0))
+        self.next_building_type: typing.Optional[UnitTypeId] = None
 
         # Dictionaries:
         self.mineral_collector_dict: typing.Dict[int, int] = {}
@@ -66,7 +62,7 @@ class SCVManager:
         self.queue_delay: int = 3
 
         # Booleans:
-        self.remember_first_builder = True
+        self.remember_first_builder: bool = True
         self.expand_to_natural: typing.Union[Point2, bool] = True
 
         self.debug: bool = debug
@@ -84,7 +80,8 @@ class SCVManager:
 
     # Properties:
     """
-    implementation is kind of obvious but still MARLONNNNN SAVELASS ADD DOC HERE!!!! u fucking monsters
+    * A property indicating whether the building queue is currently empty.
+    *
     """
 
     @property
@@ -107,22 +104,20 @@ class SCVManager:
     """
 
     # TODO: Have chronicles fix this function and make it better...
+    # TODO: Make rogue SCVs move to CC then get added....
 
     async def worker_split_frame_zero(self) -> None:
         # Miscellaneous:
-        self.expand_to_natural: typing.Optional[
-            Point2
-        ] = await self.AI.get_next_expansion()
+        self.expand_to_natural: typing.Optional[Point2] = await self.AI.get_next_expansion()
 
         # Variables:
         mineral_fields: Units = self.AI.mineral_field.closer_than(
-            distance=10, position=self.AI.townhalls.first.position
+            distance=10, position=self.AI.townhalls.first
+        ).sorted_by_distance_to(
+            position=self.AI.townhalls.first
         )
-        workers: Units = self.AI.units.of_type(UnitTypeId.SCV)
 
-        if not any(workers):
-            loguru.logger.info("SAVELASSSSSSSSS MARLONNNNNNNNNNNNNNNN")
-
+        """
         # Main:
         for mineral_field in mineral_fields:
             worker: Unit = workers.closest_to(mineral_field)
@@ -136,6 +131,7 @@ class SCVManager:
             worker.gather(mineral_field)
 
             self.mineral_collector_dict[worker.tag] = mineral_field.tag
+        """
 
     """
     Doc here...
@@ -469,7 +465,7 @@ class SCVManager:
                     scv=scv, target_refinery_tag=target_refinery_tag
                 )
 
-    async def remove_unit_tag_from_lists(self, unit_tag: int) -> None:
+    def remove_unit_tag_from_lists(self, unit_tag: int) -> None:
         if unit_tag in self.mineral_collector_dict:
             del self.mineral_collector_dict[unit_tag]
         if unit_tag in self.repairer_tag_list:

@@ -126,7 +126,7 @@ class SCVManagerUtil:
                 ] = self.AI.mineral_field.find_by_tag(tag=target_mineral_field_tag)
 
                 if specified_mineral_field is None:
-                    # await self.AI.SCVManager.remove_unit_tag_from_lists(SCV.tag)
+                    self.AI.SCVManager.remove_unit_tag_from_lists(SCV.tag)
                     loguru.logger.info(
                         "Cannot locate the mineral field with tag {}".format(
                             str(target_mineral_field_tag)
