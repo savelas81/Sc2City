@@ -193,7 +193,7 @@ class SCVManager:
                 loguru.logger.info("No contractor was selected!")
                 return None
 
-            await self.remove_unit_tag_from_lists(contractor.tag)
+            self.remove_unit_tag_from_lists(contractor.tag)
             self.builder_tag = contractor.tag
             self.next_building_type = structure_type_id
             self.next_building_position = Point2(position)
@@ -248,7 +248,7 @@ class SCVManager:
             self.placeholders.remove(holder_to_be_deleted)
 
     async def add_unit_tag_scout_list(self, unit_tag: int):
-        await self.remove_unit_tag_from_lists(unit_tag=unit_tag)
+        self.remove_unit_tag_from_lists(unit_tag=unit_tag)
         self.scout_tag_list.append(unit_tag)
 
     async def build_queued_building(self):
@@ -380,7 +380,7 @@ class SCVManager:
                 continue
             elif scv.is_idle:
                 # print("scv_manager: Idle SCV.")
-                await self.remove_unit_tag_from_lists(scv.tag)
+                self.remove_unit_tag_from_lists(scv.tag)
                 cc = self.AI.townhalls.ready.not_flying.sorted(
                     lambda x: x.distance_to(scv)
                 ).first
@@ -409,7 +409,7 @@ class SCVManager:
             ):
                 scv = await self.select_contractor(position=refinery.position)
                 if scv:
-                    await self.remove_unit_tag_from_lists(unit_tag=scv.tag)
+                    self.remove_unit_tag_from_lists(unit_tag=scv.tag)
                     self.vespene_collector_dict[scv.tag] = refinery.tag
                     scv.gather(refinery)
                     break
@@ -426,7 +426,7 @@ class SCVManager:
                             break
                 if scv_to_stop:
                     scv_to_stop.move(scv_to_stop.position)
-                    await self.remove_unit_tag_from_lists(scv_to_stop.tag)
+                    self.remove_unit_tag_from_lists(scv_to_stop.tag)
                     break
 
             cc_with_excess_workers = None
