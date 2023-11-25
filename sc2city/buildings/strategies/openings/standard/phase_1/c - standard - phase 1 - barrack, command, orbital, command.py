@@ -42,6 +42,9 @@ class FourRaxAllInSequence:
             ),"""
             """
             # If the scouting information allows a followup, choose a followup from the folder: barrack, command, orbital, command
-            # if the scouting information is 1 base play, cancel the second build command center and choose a followup from the folder: twobase
+            # if the scouting information is 1 base play, cancel the second build command center and choose a followup from the folder: phase_3
+            """
+            """
+            https://burnysc2.github.io/sc2-planner/?&race=terran&settings=tLuDriterisSritnjUrisEritm2KsLuFsExSGtZWxRGsKIGOuFtN&optimizeSettings=tLuDriterisSritTrisEritmxIEtRccPUfnePdlcVrjsKUVIMSINriuFsExoGtdnsKxqGsIuFtN&bo=002eJyLrlbKTFGyMjHVUSqpLEhVslIqzy/KTi1SqtUhJGNoCZcpLikqTS4pLUolQpuRIVnayHKhBVlWGRob4dGH11BzuFxicklmfh4+22IBiy549g==
             """
         ]
