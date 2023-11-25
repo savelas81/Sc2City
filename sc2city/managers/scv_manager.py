@@ -34,6 +34,7 @@ from sc2city.util import SCVManagerUtil
 * @param AI --> The SC2City AI object.
 *
 * @param debug --> A setting to enable debugging features for functions.
+*
 """
 
 class SCVManager:

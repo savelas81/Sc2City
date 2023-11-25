@@ -24,6 +24,8 @@ from sc2city.requests import UnitRequest
 *
 * @param AI --> The SC2City AI object.
 *
+* @param debug --> A setting to enable debugging features for functions.
+*
 * NOTE: The executor's sole purpose is to execute the request and put the unit into production..
     * It does not verify that the request's unit's training is fully completed.
 """
