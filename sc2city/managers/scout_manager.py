@@ -22,12 +22,12 @@ class ScoutManager:
     async def assign_unit_tag_scout(self, unit_tag: int):
         self.scout_tag = unit_tag
         if unit_tag in self.AI.units(UnitTypeId.SCV).tags:
-            await self.AI.SCVManager.remove_unit_tag_from_lists(unit_tag=unit_tag)
+            self.AI.SCVManager.remove_unit_tag_from_lists(unit_tag=unit_tag)
             await self.AI.SCVManager.add_unit_tag_scout_list(unit_tag=unit_tag)
 
     async def remove_scout(self):
         if self.scout_tag:
-            await self.AI.SCVManager.remove_unit_tag_from_lists(unit_tag=self.scout_tag)
+            self.AI.SCVManager.remove_unit_tag_from_lists(unit_tag=self.scout_tag)
         self.scout_tag = None
         self.points_need_scouting = None
         self.next_point = None
