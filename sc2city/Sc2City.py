@@ -13,9 +13,11 @@ from sc2city.interfaces import MapAnalyzerInterface
 # Miscellaneous:
 from cache_first_frame import EnemyExpansions
 
-# from requests import BuildRequest, UnitRequest, RequestBehaviors
+from sc2city.requests import UnitRequestFromJson
+
 
 # Managers:
+from build_order_manager import BuildOrderManager
 from managers import (
     SCVManager,
     ScoutManager,
@@ -37,8 +39,8 @@ class Sc2City(BotAI):
         self.raw_affects_selection = False
 
         # Managers:
+        self.BuildOrderManager: BuildOrderManager = BuildOrderManager(self)
         self.StrategyManager: StrategyManager = StrategyManager(self)
-
         self.CalculationManager: CalculationManager = CalculationManager(AI=self)
         self.MemoryManager: MemoryManager = MemoryManager(AI=self, debug=False)
 
@@ -46,6 +48,8 @@ class Sc2City(BotAI):
         self.UnitRequestExecutor: UnitRequestExecutor = UnitRequestExecutor(
             AI=self, debug=True
         )
+        self.UnitRequestFromJson: UnitRequestFromJson = UnitRequestFromJson(AI=self)
+
 
         # TODO: Refactor!!!
         self.OpenerManager: OpenerManager = OpenerManager(AI=self)
@@ -73,6 +77,8 @@ class Sc2City(BotAI):
             AI=self, debug=True
         )
 
+        await self.StrategyManager.on_the_start()
+        self.map_type = self.BuildOrderManager.get_map_type()
         self.BuildingPlacementSolver.load_data(self.map_type)
 
         # Startup functions:

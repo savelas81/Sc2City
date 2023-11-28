@@ -1,0 +1,29 @@
+{
+  "build_type": "ONEBASE",
+  "build_order": [
+    {
+      "request_type": "unit",
+      "conditional": "None",
+      "id": "SCV",
+      "target_value_behaviour": "False",
+      "target_value_or_quantity_value": 1,
+      "comment": "write comment here"
+    },
+    {
+      "request_type": "unit",
+      "conditional": "None",
+      "id": "SCV",
+      "target_value_behaviour": "False",
+      "target_value_or_quantity_value": 1,
+      "comment": "write comment here"
+    },
+    {
+      "request_type": "structure",
+      "conditional": "None",
+      "id": "SUPPLYDEPOT",
+      "target_value_behaviour": "False",
+      "target_value_or_quantity_value": 1,
+      "comment": "write comment here"
+    }
+  ]
+}
