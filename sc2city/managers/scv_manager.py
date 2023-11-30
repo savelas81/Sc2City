@@ -118,8 +118,8 @@ class SCVManager:
             position=self.AI.townhalls.first
         )
 
-        """
         # Main:
+        workers = self.AI.workers
         for mineral_field in mineral_fields:
             worker: Unit = workers.closest_to(mineral_field)
             worker.gather(mineral_field)
@@ -132,7 +132,6 @@ class SCVManager:
             worker.gather(mineral_field)
 
             self.mineral_collector_dict[worker.tag] = mineral_field.tag
-        """
 
     """
     Doc here...
