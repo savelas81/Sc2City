@@ -45,7 +45,8 @@ class BuildOrderManager:
         """
         if len(self.build_order) <= 0:
             return
-        if await self.AI.UnitRequestFromJson.unit_queue_empty():
+        if (await self.AI.UnitRequestFromJson.unit_queue_empty()
+                and await self.AI.StructureQueueManager.structure_queue_empty()):
             if self.next_build_order is None and len(self.build_order) > 0:
                 self.next_build_order = self.build_order.pop(0)
                 print("build order list " + str(self.build_order))
@@ -67,8 +68,6 @@ class BuildOrderManager:
                            )
                     self.next_build_order = None
                 case "structure":
-                    if not self.AI.StructureQueueManager.structure_queue_empty:
-                        return
                     conditional = self.next_build_order.get("conditional")
                     ID = UnitTypeId[self.next_build_order.get("id")]
                     if self.next_build_order.get("target_value_behaviour") == "True":
