@@ -255,7 +255,6 @@ class SCVManager:
     async def build_queued_building(self):
         if self.building_queue_empty or self.next_building_type is None:
             return
-
         if self.next_building_type == UnitTypeId.REFINERY:
             if self.AI.can_afford(self.next_building_type):
                 for cc in self.AI.townhalls.sorted(

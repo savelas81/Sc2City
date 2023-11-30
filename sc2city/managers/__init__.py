@@ -8,3 +8,4 @@ from .calculation_manager import CalculationManager
 from .allocators import BuildingPlacementSolver
 from .allocators import MapType
 from .executors import UnitRequestExecutor
+from .structure_queue_manager import StructureQueueManager

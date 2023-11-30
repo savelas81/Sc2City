@@ -29,6 +29,7 @@ from managers import (
     CalculationManager,
     UnitRequestExecutor,
     MapType,
+    StructureQueueManager
 )
 
 
@@ -43,6 +44,7 @@ class Sc2City(BotAI):
         self.StrategyManager: StrategyManager = StrategyManager(self)
         self.CalculationManager: CalculationManager = CalculationManager(AI=self)
         self.MemoryManager: MemoryManager = MemoryManager(AI=self, debug=False)
+        self.StructureQueueManager: StructureQueueManager = StructureQueueManager(AI=self)
 
         # Executors:
         self.UnitRequestExecutor: UnitRequestExecutor = UnitRequestExecutor(
@@ -95,6 +97,8 @@ class Sc2City(BotAI):
         await self.StrategyManager.run_strategy()
         await self.scout_manager.update_points_need_scouting()
         await self.scout_manager.move_scout()
+        await self.UnitRequestFromJson.execute_build_units()
+        await self.StructureQueueManager.execute_build_structures()
         await self.SCVManager.move_scvs()
 
         # Miscellaneous:

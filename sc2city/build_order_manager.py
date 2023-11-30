@@ -40,21 +40,53 @@ class BuildOrderManager:
         pp.pprint(self.build_order)
 
     async def on_the_step(self):
-        if self.next_build_order is None and len(self.build_order) > 0:
-            self.next_build_order = self.build_order.pop(0)
-            print("build order list " + str(self.build_order))
-            print("next build order" + str(self.next_build_order))
-        match self.next_build_order.get("request_type"):
-            case "unit":
-                conditional = self.next_build_order.get("conditional")
-                ID = UnitTypeId[self.next_build_order.get("id")]
-                target_value_behaviour = self.next_build_order.get("target_value_behaviour")
-                target_value_or_quantity_value = self.next_build_order.get("target_value_or_quantity_value")
-                await (self.AI.UnitRequestFromJson
-                       .queue_unit(conditional=conditional,
-                                   ID=ID,
-                                   target_value_behaviour=target_value_behaviour,
-                                   target_value_or_quantity_value=target_value_or_quantity_value))
+        """
+        gets next item from self.build_order and give that item to next part of code.
+        """
+        if len(self.build_order) <= 0:
+            return
+        if await self.AI.UnitRequestFromJson.unit_queue_empty():
+            if self.next_build_order is None and len(self.build_order) > 0:
+                self.next_build_order = self.build_order.pop(0)
+                print("build order list " + str(self.build_order))
+                print("next build order" + str(self.next_build_order))
+            match self.next_build_order.get("request_type"):
+                case "unit":
+                    conditional = self.next_build_order.get("conditional")
+                    ID = UnitTypeId[self.next_build_order.get("id")]
+                    if self.next_build_order.get("target_value_behaviour") == "True":
+                        target_value_behaviour = True
+                    else:
+                        target_value_behaviour = False
+                    target_value_or_quantity_value = self.next_build_order.get("target_value_or_quantity_value")
+                    await (self.AI.UnitRequestFromJson
+                           .queue_unit(conditional=conditional,
+                                       ID=ID,
+                                       target_value_behaviour=target_value_behaviour,
+                                       target_value_or_quantity_value=target_value_or_quantity_value)
+                           )
+                    self.next_build_order = None
+                case "structure":
+                    if not self.AI.StructureQueueManager.structure_queue_empty:
+                        return
+                    conditional = self.next_build_order.get("conditional")
+                    ID = UnitTypeId[self.next_build_order.get("id")]
+                    if self.next_build_order.get("target_value_behaviour") == "True":
+                        target_value_behaviour = True
+                    else:
+                        target_value_behaviour = False
+                    target_value_or_quantity_value = self.next_build_order.get("target_value_or_quantity_value")
+                    await (self.AI.StructureQueueManager
+                           .queue_building(conditional=conditional,
+                                           ID=ID,
+                                           target_value_behaviour=target_value_behaviour,
+                                           target_value_or_quantity_value=target_value_or_quantity_value))
+                    self.next_build_order = None
+
+        """
+        Execute build order for units.
+        This is run every frame even if there is nothing to train
+        """
 
     def save_data(self):
         try:
