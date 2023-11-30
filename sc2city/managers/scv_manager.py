@@ -40,7 +40,7 @@ from sc2city.util import SCVManagerUtil
 class SCVManager:
     # Constants:
     SCVs_PER_REFINERY: int = 3
-    GAS_MINERS_TOTAL: int = 50
+    MAX_GAS_MINERS: int = 50
 
     # Initialization:
     def __init__(self, AI: BotAI = None, debug: bool = False):
@@ -404,7 +404,7 @@ class SCVManager:
         for refinery in self.AI.gas_buildings.ready:
             if (
                 refinery.custom_assigned_harvesters < self.SCVs_PER_REFINERY
-                and self.GAS_MINERS_TOTAL < len(self.vespene_collector_dict)
+                and len(self.vespene_collector_dict) < self.MAX_GAS_MINERS
             ):
                 scv = await self.select_contractor(position=refinery.position)
                 if scv:
@@ -414,7 +414,7 @@ class SCVManager:
                     break
             if (
                 refinery.custom_assigned_harvesters > self.SCVs_PER_REFINERY
-                or self.GAS_MINERS_TOTAL > len(self.vespene_collector_dict)
+                or len(self.vespene_collector_dict) > self.MAX_GAS_MINERS
             ):
                 scv_to_stop = None
                 for scv in self.AI.units(UnitTypeId.SCV):
