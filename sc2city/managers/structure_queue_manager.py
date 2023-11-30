@@ -36,7 +36,7 @@ class StructureQueueManager:
         else:
             self.amount_to_be_build = target_value_or_quantity_value
 
-    def structure_queue_empty(self) -> bool:
+    async def structure_queue_empty(self) -> bool:
         """
         checks if the structure production queue is empty.
         If queue is empty return true.
