@@ -48,7 +48,7 @@
     },
     {
       "request_type": "structure",
-      "conditional": "None",
+      "conditional": "True",
       "conditional_behaviour": "skip",
       "id": "REFINERY",
       "target_value_behaviour": "False",
@@ -57,9 +57,36 @@
     },
     {
       "request_type": "structure",
-      "conditional": "None",
+      "conditional": "True",
       "conditional_behaviour": "skip",
       "id": "FACTORY",
+      "target_value_behaviour": "False",
+      "target_value_or_quantity_value": 1,
+      "comment": "write comment here"
+    },
+    {
+      "request_type": "structure",
+      "conditional": "True",
+      "conditional_behaviour": "skip",
+      "id": "SUPPLYDEPOT",
+      "target_value_behaviour": "False",
+      "target_value_or_quantity_value": 1,
+      "comment": "write comment here"
+    },
+    {
+      "request_type": "unit",
+      "conditional": "True",
+      "conditional_behaviour": "skip",
+      "id": "MARINE",
+      "target_value_behaviour": "False",
+      "target_value_or_quantity_value": 3,
+      "comment": "conditional_behaviour accepts skip and wait"
+    },
+    {
+      "request_type": "structure",
+      "conditional": "True",
+      "conditional_behaviour": "skip",
+      "id": "SUPPLYDEPOT",
       "target_value_behaviour": "False",
       "target_value_or_quantity_value": 1,
       "comment": "write comment here"
