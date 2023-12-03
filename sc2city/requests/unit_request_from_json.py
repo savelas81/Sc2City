@@ -82,6 +82,25 @@ class UnitRequestFromJson:
                 self.amount_to_be_trained -= 1
                 return
 
+    async def execute_target_value_dict(self):
+        for unit_id in self.target_value_dict:
+            target_amount = self.target_value_dict[unit_id]
+            if self.AI.units(unit_id).amount + self.AI.already_pending(unit_id) < target_amount:
+                facility_type_ids: typing.Set[UnitTypeId] = UNIT_TRAINED_FROM[unit_id]
+                facilities = self.AI.structures(facility_type_ids)
+                if not facilities:
+                    return
+                facilities: Units = (
+                    self.sort_and_filter_production_facilities(facilities=facilities)
+                )
+                if not facilities:
+                    return
+                for facility in facilities:
+                    facility.train(self.unit_to_be_trained)
+                    self.amount_to_be_trained -= 1
+                    return
+
+
     # Methods:
     def sort_and_filter_production_facilities(
         self, facilities: Units

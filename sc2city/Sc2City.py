@@ -99,8 +99,7 @@ class Sc2City(BotAI):
         await self.scout_manager.move_scout()
         await self.UnitRequestFromJson.execute_build_units()
         await self.StructureQueueManager.execute_build_structures()
-        await self.SCVManager.move_scvs()
-
+        await self.SCVManager.move_scvs() #  used for all scv movement
         # Miscellaneous:
         self.iteration: int = iteration
 

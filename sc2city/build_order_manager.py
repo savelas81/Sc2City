@@ -15,6 +15,9 @@ import pprint
 # Loguru:
 import loguru
 
+# Import operating system
+import os
+
 
 class BuildOrderManager:
 
@@ -49,11 +52,12 @@ class BuildOrderManager:
                 and await self.AI.StructureQueueManager.structure_queue_empty()):
             if self.next_build_order is None and len(self.build_order) > 0:
                 self.next_build_order = self.build_order.pop(0)
-                print("build order list " + str(self.build_order))
-                print("next build order" + str(self.next_build_order))
+                # print("build order list " + str(self.build_order))
+                # print("next build order" + str(self.next_build_order))
             if not eval(self.next_build_order.get("conditional")):
                 if self.next_build_order.get("conditional_behaviour") == "skip":
                     self.next_build_order = None
+                    return
                 elif self.next_build_order.get("conditional_behaviour") == "wait":
                     return
                 else:
@@ -105,6 +109,8 @@ class BuildOrderManager:
             print(str(e))
 
     def load_data(self):
+        # for filename in os.listdir('data'):
+        #     print(filename)
         try:
             with open('data/test.json', 'r') as file:
                 self.build_orders_file = json.load(file)

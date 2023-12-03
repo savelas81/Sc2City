@@ -59,7 +59,6 @@ class StructureQueueManager:
             await self.AI.SCVManager.queue_building(self.structure_to_be_build)
             self.amount_to_be_build -= 1
 
-
     def we_can_build_next_building(self) -> bool:
         next_to_be_build = self.structure_to_be_build
         if next_to_be_build == UnitTypeId.SUPPLYDEPOT:
