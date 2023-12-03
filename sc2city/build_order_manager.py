@@ -51,6 +51,16 @@ class BuildOrderManager:
                 self.next_build_order = self.build_order.pop(0)
                 print("build order list " + str(self.build_order))
                 print("next build order" + str(self.next_build_order))
+            if not eval(self.next_build_order.get("conditional")):
+                if self.next_build_order.get("conditional_behaviour") == "skip":
+                    self.next_build_order = None
+                elif self.next_build_order.get("conditional_behaviour") == "wait":
+                    return
+                else:
+                    behaviour = self.next_build_order.get("conditional_behaviour")
+                    loguru.logger.info(
+                        f"Build order had illegal conditional_behaviour: {str(behaviour)}"
+                    )
             match self.next_build_order.get("request_type"):
                 case "unit":
                     conditional = self.next_build_order.get("conditional")
