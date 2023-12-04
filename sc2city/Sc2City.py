@@ -22,9 +22,7 @@ from managers import (
     SCVManager,
     ScoutManager,
     StrategyManager,
-    OpenerManager,
     MemoryManager,
-    MidGameManager,
     BuildingPlacementSolver,
     CalculationManager,
     UnitRequestExecutor,
@@ -55,8 +53,6 @@ class Sc2City(BotAI):
         self.UnitRequestFromJson: UnitRequestFromJson = UnitRequestFromJson(AI=self)
 
         # TODO: Refactor!!!
-        self.OpenerManager: OpenerManager = OpenerManager(AI=self)
-        self.MidGameManager: MidGameManager = MidGameManager(self)
         self.SCVManager: SCVManager = SCVManager(AI=self)
         self.scout_manager = ScoutManager(self)
         self.enemy_expansions = EnemyExpansions(self)

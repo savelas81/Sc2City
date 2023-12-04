@@ -27,6 +27,10 @@ class StructureQueueManager:
         target_value_behaviour: bool = False,
         target_value_or_quantity_value: int = 1,
     ) -> None:
+        """
+        queue_building is used to queue next building.
+
+        """
         self.conditional = conditional
         self.structure_to_be_build = ID
         if target_value_behaviour:
