@@ -1,3 +1,10 @@
+# Python
 __pycache__/
 *.SC2Replay
 *.pyc
+
+# Virtual Environments
+.venv
+
+# Visual Studio Code
+.vscode/
