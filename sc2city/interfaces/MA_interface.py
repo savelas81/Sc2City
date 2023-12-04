@@ -28,6 +28,7 @@ import numpy
 *
 """
 
+
 class MapAnalyzerInterface:
     # Constants:
     EXTRA_GROUND_DISTANCE: int = 3
@@ -60,11 +61,19 @@ class MapAnalyzerInterface:
 
     def create_influence_maps(self) -> None:
         # Constructing Grids:
-        self.enemy_ground_to_air_grid: numpy.ndarray = self.MapData.get_clean_air_grid(default_weight=1)
-        self.enemy_ground_grid: numpy.ndarray = self.MapData.get_pyastar_grid(default_weight=1)
-        self.enemy_air_grid: numpy.ndarray = self.MapData.get_pyastar_grid(default_weight=1)
+        self.enemy_ground_to_air_grid: numpy.ndarray = self.MapData.get_clean_air_grid(
+            default_weight=1
+        )
+        self.enemy_ground_grid: numpy.ndarray = self.MapData.get_pyastar_grid(
+            default_weight=1
+        )
+        self.enemy_air_grid: numpy.ndarray = self.MapData.get_pyastar_grid(
+            default_weight=1
+        )
 
-        self.reaper_grid: numpy.ndarray = self.MapData.get_climber_grid(default_weight=1)
+        self.reaper_grid: numpy.ndarray = self.MapData.get_climber_grid(
+            default_weight=1
+        )
 
         for enemy_unit in self.AI.MemoryManager.enemy_unit_tag_to_unit_object.values():
             # Debugging:
@@ -75,14 +84,19 @@ class MapAnalyzerInterface:
 
             if enemy_unit.can_attack_ground:
                 enemy_total_range: float = (
-                    enemy_unit.radius + enemy_unit.ground_range + self.EXTRA_GROUND_DISTANCE
+                    enemy_unit.radius
+                    + enemy_unit.ground_range
+                    + self.EXTRA_GROUND_DISTANCE
                 )
 
-                (self.enemy_ground_grid, self.reaper_grid) = self.MapData.add_cost_to_multiple_grids(
+                (
+                    self.enemy_ground_grid,
+                    self.reaper_grid,
+                ) = self.MapData.add_cost_to_multiple_grids(
                     position=enemy_unit.position,
                     radius=enemy_total_range,
                     grids=[self.enemy_ground_grid, self.reaper_grid],
-                    weight=enemy_unit.ground_dps
+                    weight=enemy_unit.ground_dps,
                 )
             elif enemy_unit.can_attack_air:
                 enemy_total_range: float = (
@@ -94,16 +108,17 @@ class MapAnalyzerInterface:
                         position=enemy_unit.position,
                         radius=enemy_total_range,
                         grid=self.enemy_air_grid,
-                        weight=enemy_unit.air_dps
+                        weight=enemy_unit.air_dps,
                     )
                 else:
-                    (self.enemy_ground_to_air_grid, self.enemy_air_grid) = (
-                        self.MapData.add_cost_to_multiple_grids(
-                            position=enemy_unit.position,
-                            radius=enemy_total_range,
-                            grids=[self.enemy_ground_to_air_grid, self.enemy_air_grid],
-                            weight=enemy_unit.air_dps
-                        )
+                    (
+                        self.enemy_ground_to_air_grid,
+                        self.enemy_air_grid,
+                    ) = self.MapData.add_cost_to_multiple_grids(
+                        position=enemy_unit.position,
+                        radius=enemy_total_range,
+                        grids=[self.enemy_ground_to_air_grid, self.enemy_air_grid],
+                        weight=enemy_unit.air_dps,
                     )
 
                 if self.debug:
@@ -112,7 +127,9 @@ class MapAnalyzerInterface:
                     size: int = 14
 
                     for x, y in zip(*numpy.where(self.enemy_ground_grid > 1)):
-                        height: float = self.AI.get_terrain_z_height(self.AI.start_location)
+                        height: float = self.AI.get_terrain_z_height(
+                            self.AI.start_location
+                        )
 
                         position: Point3 = Point3((x, y, height))
 
@@ -120,4 +137,6 @@ class MapAnalyzerInterface:
                             continue
 
                         value: int = int(self.enemy_ground_grid[x, y])
-                        self.AI.client.debug_text_world(text=str(value), pos=position, color=color, size=size)
+                        self.AI.client.debug_text_world(
+                            text=str(value), pos=position, color=color, size=size
+                        )

@@ -1,7 +1,7 @@
 import math
 
-class EnemyExpansions:
 
+class EnemyExpansions:
     def __init__(self, ai=None):
         self.ai = ai
         self.expansions: list = []

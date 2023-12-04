@@ -25,6 +25,7 @@ from sc2city.requests import BuildRequest
 *
 """
 
+
 class BuildRequestExecutor:
     # Initialization:
     def __init__(self, AI: BotAI, debug: bool = False) -> None:

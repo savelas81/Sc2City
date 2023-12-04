@@ -12,7 +12,6 @@ from sc2.ids.unit_typeid import UnitTypeId
 
 
 class StructureQueueManager:
-
     def __init__(self, AI: BotAI = None, debug: bool = False):
         # Miscellaneous:
         self.AI: BotAI = AI
@@ -22,16 +21,19 @@ class StructureQueueManager:
         self.target_value_dict: dict = {}
 
     async def queue_building(
-            self,
-            conditional=None,
-            ID: UnitTypeId = None,
-            target_value_behaviour: bool = False,
-            target_value_or_quantity_value: int = 1) -> None:
+        self,
+        conditional=None,
+        ID: UnitTypeId = None,
+        target_value_behaviour: bool = False,
+        target_value_or_quantity_value: int = 1,
+    ) -> None:
         self.conditional = conditional
         self.structure_to_be_build = ID
         if target_value_behaviour:
             if self.structure_to_be_build not in self.target_value_dict:
-                self.target_value_dict[self.structure_to_be_build] = target_value_or_quantity_value
+                self.target_value_dict[
+                    self.structure_to_be_build
+                ] = target_value_or_quantity_value
                 print(self.target_value_dict)
         else:
             self.amount_to_be_build = target_value_or_quantity_value

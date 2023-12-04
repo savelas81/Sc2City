@@ -29,7 +29,7 @@ from managers import (
     CalculationManager,
     UnitRequestExecutor,
     MapType,
-    StructureQueueManager
+    StructureQueueManager,
 )
 
 
@@ -44,14 +44,15 @@ class Sc2City(BotAI):
         self.StrategyManager: StrategyManager = StrategyManager(self)
         self.CalculationManager: CalculationManager = CalculationManager(AI=self)
         self.MemoryManager: MemoryManager = MemoryManager(AI=self, debug=False)
-        self.StructureQueueManager: StructureQueueManager = StructureQueueManager(AI=self)
+        self.StructureQueueManager: StructureQueueManager = StructureQueueManager(
+            AI=self
+        )
 
         # Executors:
         self.UnitRequestExecutor: UnitRequestExecutor = UnitRequestExecutor(
             AI=self, debug=True
         )
         self.UnitRequestFromJson: UnitRequestFromJson = UnitRequestFromJson(AI=self)
-
 
         # TODO: Refactor!!!
         self.OpenerManager: OpenerManager = OpenerManager(AI=self)
@@ -99,7 +100,7 @@ class Sc2City(BotAI):
         await self.scout_manager.move_scout()
         await self.UnitRequestFromJson.execute_build_units()
         await self.StructureQueueManager.execute_build_structures()
-        await self.SCVManager.move_scvs() #  used for all scv movement
+        await self.SCVManager.move_scvs()  #  used for all scv movement
         # Miscellaneous:
         self.iteration: int = iteration
 

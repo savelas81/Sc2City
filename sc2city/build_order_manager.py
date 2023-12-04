@@ -20,7 +20,6 @@ import os
 
 
 class BuildOrderManager:
-
     def __init__(self, AI: BotAI = None) -> None:
         # Miscellaneous:
         self.AI: BotAI = AI
@@ -48,8 +47,10 @@ class BuildOrderManager:
         """
         if len(self.build_order) <= 0:
             return
-        if (await self.AI.UnitRequestFromJson.unit_queue_empty()
-                and await self.AI.StructureQueueManager.structure_queue_empty()):
+        if (
+            await self.AI.UnitRequestFromJson.unit_queue_empty()
+            and await self.AI.StructureQueueManager.structure_queue_empty()
+        ):
             if self.next_build_order is None and len(self.build_order) > 0:
                 self.next_build_order = self.build_order.pop(0)
                 # print("build order list " + str(self.build_order))
@@ -73,13 +74,15 @@ class BuildOrderManager:
                         target_value_behaviour = True
                     else:
                         target_value_behaviour = False
-                    target_value_or_quantity_value = self.next_build_order.get("target_value_or_quantity_value")
-                    await (self.AI.UnitRequestFromJson
-                           .queue_unit(conditional=conditional,
-                                       ID=ID,
-                                       target_value_behaviour=target_value_behaviour,
-                                       target_value_or_quantity_value=target_value_or_quantity_value)
-                           )
+                    target_value_or_quantity_value = self.next_build_order.get(
+                        "target_value_or_quantity_value"
+                    )
+                    await self.AI.UnitRequestFromJson.queue_unit(
+                        conditional=conditional,
+                        ID=ID,
+                        target_value_behaviour=target_value_behaviour,
+                        target_value_or_quantity_value=target_value_or_quantity_value,
+                    )
                     self.next_build_order = None
                 case "structure":
                     conditional = self.next_build_order.get("conditional")
@@ -88,12 +91,15 @@ class BuildOrderManager:
                         target_value_behaviour = True
                     else:
                         target_value_behaviour = False
-                    target_value_or_quantity_value = self.next_build_order.get("target_value_or_quantity_value")
-                    await (self.AI.StructureQueueManager
-                           .queue_building(conditional=conditional,
-                                           ID=ID,
-                                           target_value_behaviour=target_value_behaviour,
-                                           target_value_or_quantity_value=target_value_or_quantity_value))
+                    target_value_or_quantity_value = self.next_build_order.get(
+                        "target_value_or_quantity_value"
+                    )
+                    await self.AI.StructureQueueManager.queue_building(
+                        conditional=conditional,
+                        ID=ID,
+                        target_value_behaviour=target_value_behaviour,
+                        target_value_or_quantity_value=target_value_or_quantity_value,
+                    )
                     self.next_build_order = None
 
         """
@@ -103,7 +109,7 @@ class BuildOrderManager:
 
     def save_data(self):
         try:
-            with open('data/test.json', 'w') as file:
+            with open("data/test.json", "w") as file:
                 json.dump(self.build_orders_file, file, indent=2)
         except (OSError, IOError) as e:
             print(str(e))
@@ -112,7 +118,7 @@ class BuildOrderManager:
         # for filename in os.listdir('data'):
         #     print(filename)
         try:
-            with open('data/test.json', 'r') as file:
+            with open("data/test.json", "r") as file:
                 self.build_orders_file = json.load(file)
         except (OSError, IOError) as e:
             print("No build order data found.")
@@ -121,9 +127,7 @@ class BuildOrderManager:
     def get_map_type(self) -> typing.Optional[MapType]:
         map_type: MapType = None
         if not self.build_orders_file.get("build_type"):
-            loguru.logger.info(
-                f"Not able to find build_type"
-            )
+            loguru.logger.info(f"Not able to find build_type")
             return None
         match self.build_orders_file.get("build_type"):
             case "ONEBASE":
@@ -132,15 +136,10 @@ class BuildOrderManager:
                 return MapType.PROXY
             case "STANDARD":
                 return MapType.STANDARD
-        loguru.logger.info(
-            f"Wrong build_type in .json file"
-        )
+        loguru.logger.info(f"Wrong build_type in .json file")
 
     def get_build_order(self) -> typing.Optional[list]:
         if not self.build_orders_file.get("build_order"):
-            loguru.logger.info(
-                f"Not able to find build_order"
-            )
+            loguru.logger.info(f"Not able to find build_order")
             return None
         return self.build_orders_file.get("build_order")
-

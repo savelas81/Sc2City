@@ -3,6 +3,7 @@ from sc2.bot_ai import BotAI
 from sc2.ids.unit_typeid import UnitTypeId
 import typing
 
+
 class FourRaxAllInSequence:
     def __init__(self, AI: BotAI):
         self.AI: BotAI = AI
@@ -14,7 +15,7 @@ class FourRaxAllInSequence:
                 AI=self.AI,
                 ID=UnitTypeId.SCV,
                 target_value_or_quantity_value_behavior=RequestBehaviors.TARGET_BEHAVIOR,
-                target_value_or_quantity_value=8
+                target_value_or_quantity_value=8,
             ),
             BuildRequest(
                 ID=UnitTypeId.SUPPLYDEPOT,
@@ -46,5 +47,5 @@ class FourRaxAllInSequence:
             """
             """
             https://burnysc2.github.io/sc2-planner/?&race=terran&settings=tLuDriterisSritnjUrisEritm2KsLuFsExSGtZWxRGsKIGOuFtN&optimizeSettings=tLuDriterisSritTrisEritmxIEtRccPUfnePdlcVrjsKUVIMSINriuFsExoGtdnsKxqGsIuFtN&bo=002eJyLrlbKTFGyMjHVUSqpLEhVslIqzy/KTi1SqtUhJGNoCZcpLikqTS4pLUolQpuRIVnayHKhBVlWGRob4dGH11BzuFxicklmfh4+22IBiy549g==
-            """
+            """,
         ]

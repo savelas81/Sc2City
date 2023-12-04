@@ -24,7 +24,9 @@ class BuildingPlacementExtractor(BotAI):
         if rax.distance_to(cc) > 30:
             pass
         elif iteration == 30:
-            self.placement_solver.save_placements(buildings=self.structures, map_type=self.map_type)
+            self.placement_solver.save_placements(
+                buildings=self.structures, map_type=self.map_type
+            )
 
 
 def main():

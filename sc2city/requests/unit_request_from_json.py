@@ -20,8 +20,8 @@ import typing
 # Enum:
 import enum
 
-class UnitRequestFromJson:
 
+class UnitRequestFromJson:
     def __init__(self, AI: BotAI = None):
         # Miscellaneous:
         self.AI: BotAI = AI
@@ -30,18 +30,20 @@ class UnitRequestFromJson:
         self.conditional = None
         self.target_value_dict: dict = {}
 
-
     async def queue_unit(
-            self,
-            conditional=None,
-            ID: UnitTypeId = None,
-            target_value_behaviour: bool = False,
-            target_value_or_quantity_value: int = 1) -> None:
+        self,
+        conditional=None,
+        ID: UnitTypeId = None,
+        target_value_behaviour: bool = False,
+        target_value_or_quantity_value: int = 1,
+    ) -> None:
         self.conditional = conditional
         self.unit_to_be_trained = ID
         if target_value_behaviour:
             if self.unit_to_be_trained not in self.target_value_dict:
-                self.target_value_dict[self.unit_to_be_trained] = target_value_or_quantity_value
+                self.target_value_dict[
+                    self.unit_to_be_trained
+                ] = target_value_or_quantity_value
                 print(self.target_value_dict)
                 self.unit_to_be_trained = None
         else:
@@ -69,12 +71,14 @@ class UnitRequestFromJson:
         if self.unit_to_be_trained:
             if not self.AI.can_afford(self.unit_to_be_trained):
                 return
-            facility_type_ids: typing.Set[UnitTypeId] = UNIT_TRAINED_FROM[self.unit_to_be_trained]
+            facility_type_ids: typing.Set[UnitTypeId] = UNIT_TRAINED_FROM[
+                self.unit_to_be_trained
+            ]
             facilities = self.AI.structures(facility_type_ids)
             if not facilities:
                 return
-            facilities: Units = (
-                self.sort_and_filter_production_facilities(facilities=facilities, unit_type_id=self.unit_to_be_trained)
+            facilities: Units = self.sort_and_filter_production_facilities(
+                facilities=facilities, unit_type_id=self.unit_to_be_trained
             )
             if not facilities:
                 return
@@ -90,21 +94,21 @@ class UnitRequestFromJson:
     async def execute_target_value_dict(self):
         for unit_id in self.target_value_dict:
             target_amount = self.target_value_dict[unit_id]
-            if (self.AI.units(unit_id).amount + self.AI.already_pending(unit_id) < target_amount
-                    and self.AI.can_afford(unit_id)):
+            if self.AI.units(unit_id).amount + self.AI.already_pending(
+                unit_id
+            ) < target_amount and self.AI.can_afford(unit_id):
                 facility_type_ids: typing.Set[UnitTypeId] = UNIT_TRAINED_FROM[unit_id]
                 facilities = self.AI.structures(facility_type_ids)
                 if not facilities:
                     return
-                facilities: Units = (
-                    self.sort_and_filter_production_facilities(facilities=facilities, unit_type_id=unit_id)
+                facilities: Units = self.sort_and_filter_production_facilities(
+                    facilities=facilities, unit_type_id=unit_id
                 )
                 if not facilities:
                     return
                 for facility in facilities:
                     facility.train(unit_id)
                     return
-
 
     # Methods:
     def sort_and_filter_production_facilities(
@@ -162,5 +166,9 @@ class UnitRequestFromJson:
             elif facility.is_idle and unit_type_id not in need_techlab:
                 facilities_without_add_on.append(facility)
 
-        sorted_and_filtered_facilities = (facilities_with_reactor | facilities_with_techlab | facilities_without_add_on)
+        sorted_and_filtered_facilities = (
+            facilities_with_reactor
+            | facilities_with_techlab
+            | facilities_without_add_on
+        )
         return sorted_and_filtered_facilities

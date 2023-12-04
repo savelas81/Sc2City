@@ -139,9 +139,16 @@ class SCVManagerUtil:
                     return None
 
                 if len(SCV.orders) < 2:
-                    if len(SCV.orders) == 1 and SCV.orders[0].target != target_mineral_field_tag:
+                    if (
+                        len(SCV.orders) == 1
+                        and SCV.orders[0].target != target_mineral_field_tag
+                    ):
                         if SCV.orders[0].target not in self.AI.mineral_field.tags:
-                            loguru.logger.info("SCV with tag {} was targeting non mineral field.".format(str(SCV.tag)))
+                            loguru.logger.info(
+                                "SCV with tag {} was targeting non mineral field.".format(
+                                    str(SCV.tag)
+                                )
+                            )
                             SCV.gather(specified_mineral_field)
                         else:
                             mineral_collector_dict[SCV.tag] = SCV.orders[0].target
@@ -150,9 +157,13 @@ class SCVManagerUtil:
                     if (
                         MINIMUM_DISTANCE + specified_mineral_field.radius + SCV_RADIUS
                         < SCV.distance_to(specified_mineral_field)
-                        < TRANSITION_DISTANCE + specified_mineral_field.radius + SCV_RADIUS
+                        < TRANSITION_DISTANCE
+                        + specified_mineral_field.radius
+                        + SCV_RADIUS
                     ):
-                        mining_positions: typing.List[Point2] = self.get_mining_positions(
+                        mining_positions: typing.List[
+                            Point2
+                        ] = self.get_mining_positions(
                             mineral_field=specified_mineral_field
                         )
 
