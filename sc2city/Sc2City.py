@@ -3,6 +3,7 @@
 # StarCraft II:
 # > Bot AI:
 from sc2.bot_ai import BotAI
+from sc2.ids.ability_id import AbilityId
 
 # > IDs:
 from sc2.ids.unit_typeid import UnitTypeId
@@ -96,12 +97,11 @@ class Sc2City(BotAI):
         await self.scout_manager.move_scout()
         await self.UnitRequestFromJson.execute_build_units()
         await self.StructureQueueManager.execute_build_structures()
-        await self.SCVManager.move_scvs()  #  used for all scv movement
+        await self.SCVManager.move_scvs()  # used for all scv movement
         # Miscellaneous:
         self.iteration: int = iteration
 
         # TODO: Refactor this... make it its own module.
-        """
         for orbital in self.townhalls(UnitTypeId.ORBITALCOMMAND):
             if orbital.energy >= 50:
                 mfs = self.mineral_field.closer_than(10, orbital)
@@ -109,7 +109,6 @@ class Sc2City(BotAI):
                 orbital(AbilityId.CALLDOWNMULE_CALLDOWNMULE, mf)
         for depot in self.structures(UnitTypeId.SUPPLYDEPOT):
             depot(AbilityId.MORPH_SUPPLYDEPOT_LOWER)
-        """
 
     async def on_unit_destroyed(self, unit_tag: int):
         self.MemoryManager.forget_unit(unit_tag)
