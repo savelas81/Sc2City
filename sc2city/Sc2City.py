@@ -11,14 +11,19 @@ from units_manager import UnitsManager
 
 class Sc2City(BotAI):
     race = Race.Terran
+    current_strategy = None
 
     def __init__(self):
         self.history_analyzer = HistoryAnalyzer()
         self.map_analyzer = MapAnalyzer()
-        self.macro_manager = MacroManager()
+        self.macro_manager = MacroManager(self)
         self.micro_manager = MicroManager()
         self.build_order_manager = BuildOrderManager()
         self.units_manager = UnitsManager()
 
     async def on_start(self):
         self.client.game_step = 2
+        self.macro_manager.choose_first_strategy()
+
+    async def on_step(self, iteration):
+        pass

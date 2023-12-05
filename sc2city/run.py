@@ -4,7 +4,7 @@ from sc2.data import Difficulty, Race
 from sc2.player import Bot, Computer
 
 # Load game client and bot
-from util.game import Game
+from utils.game import Game
 from Sc2City import Sc2City
 
 # Start game
@@ -15,13 +15,13 @@ if __name__ == "__main__":
     map = "DragonScalesAIE"
 
     if "--LadderServer" in sys.argv:
-        game = Game(map, bot)
+        game = Game(map, player)
         # Ladder game started by LadderManager
         print("Starting ladder game...")
         result, opponent_id = game.run_ladder_game()
         print(result, " against opponent ", opponent_id)
     else:
-        game = Game(map, bot, opponent)
+        game = Game(map, player, opponent)
         # Local game
         print("Starting local game...")
         game.start()
