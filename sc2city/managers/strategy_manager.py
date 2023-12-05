@@ -27,4 +27,7 @@ class StrategyManager:
             await self.AI.scout_manager.create_scouting_grid_for_enemy_main()
             self.send_first_scv_scout = False
             return
-        await self.AI.BuildOrderManager.on_the_step()
+        if await self.AI.BuildOrderManager.build_order_list_empty():
+            print("build order completed")
+        else:
+            await self.AI.BuildOrderManager.on_the_step()

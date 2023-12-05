@@ -107,6 +107,12 @@ class BuildOrderManager:
         This is run every frame even if there is nothing to train
         """
 
+    async def build_order_list_empty(self) -> bool:
+        if len(self.build_order) > 0:
+            return False
+        else:
+            return True
+
     def save_data(self):
         try:
             with open("data/test.json", "w") as file:
