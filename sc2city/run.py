@@ -4,7 +4,7 @@ from sc2.data import Difficulty, Race
 from sc2.player import Bot, Computer
 
 # Load game client and bot
-from utils.game import Game
+from utils import Game
 from Sc2City import Sc2City
 
 # Start game

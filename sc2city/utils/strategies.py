@@ -1,12 +1,6 @@
 import enum
 import os
-
-
-class Paths(enum.Enum):
-    OPENINGS = "data/strategies/openings/"
-    MID_GAMES = "data/strategies/mid_games/"
-    LATE_GAMES = "data/strategies/late_games/"
-    REACTIONARY = "data/strategies/reactionary/"
+from .config import Paths
 
 
 class Strategy(enum.Enum):

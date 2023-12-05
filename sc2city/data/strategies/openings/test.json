@@ -1,5 +1,5 @@
 {
-  "build_type": "ONEBASE",
+  "build_type": "ONE_BASE",
   "build_order": [
     {
       "request_type": "unit",
