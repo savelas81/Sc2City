@@ -9,7 +9,8 @@ from Sc2City import Sc2City
 
 # Start game
 if __name__ == "__main__":
-    bot = Bot(Race.Terran, Sc2City())
+    bot = Sc2City()
+    player = Bot(bot.race, bot)
     opponent = Computer(Race.Protoss, Difficulty.VeryHard)
     map = "DragonScalesAIE"
 
