@@ -37,6 +37,7 @@ from sc2city.util import SCVManagerUtil
 *
 """
 
+
 class SCVManager:
     # Constants:
     SCVs_PER_REFINERY: int = 3
@@ -109,17 +110,17 @@ class SCVManager:
 
     async def worker_split_frame_zero(self) -> None:
         # Miscellaneous:
-        self.expand_to_natural: typing.Optional[Point2] = await self.AI.get_next_expansion()
+        self.expand_to_natural: typing.Optional[
+            Point2
+        ] = await self.AI.get_next_expansion()
 
         # Variables:
         mineral_fields: Units = self.AI.mineral_field.closer_than(
             distance=10, position=self.AI.townhalls.first
-        ).sorted_by_distance_to(
-            position=self.AI.townhalls.first
-        )
+        ).sorted_by_distance_to(position=self.AI.townhalls.first)
 
         # Main:
-        workers = self.AI.workers
+        workers = Units(self.AI.workers, self.AI)
         for mineral_field in mineral_fields:
             worker: Unit = workers.closest_to(mineral_field)
             worker.gather(mineral_field)
