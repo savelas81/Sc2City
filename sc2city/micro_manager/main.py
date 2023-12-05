@@ -1,0 +1,2 @@
+class MicroManager:
+    pass

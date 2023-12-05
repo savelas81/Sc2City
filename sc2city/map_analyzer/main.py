@@ -1,0 +1,2 @@
+class MapAnalyzer:
+    pass
