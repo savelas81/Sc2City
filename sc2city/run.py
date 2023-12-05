@@ -17,8 +17,8 @@ if __name__ == "__main__":
         game = Game(map, bot)
         # Ladder game started by LadderManager
         print("Starting ladder game...")
-        result, opponentid = game.run_ladder_game()
-        print(result, " against opponent ", opponentid)
+        result, opponent_id = game.run_ladder_game()
+        print(result, " against opponent ", opponent_id)
     else:
         game = Game(map, bot, opponent)
         # Local game
