@@ -12,7 +12,7 @@ from sc2.game_state import GameState
 from sc2.position import Point2
 from sc2.unit import Unit
 
-from .constructs import MDRamp, VisionBlockerArea
+from MapAnalyzer.constructs import MDRamp, VisionBlockerArea
 
 from .cext import CMapChoke
 from .destructibles import (
@@ -31,7 +31,7 @@ from .destructibles import (
 from .settings import ROOT_DIR
 
 if TYPE_CHECKING:
-    from .map_data import MapData
+    from MapAnalyzer.MapData import MapData
 
 
 def change_destructable_status_in_grid(grid: np.ndarray, unit: Unit, status: int):
@@ -192,7 +192,7 @@ def get_sets_with_mutual_elements(
 
 
 def mock_map_data(map_file: str) -> "MapData":
-    from .map_data import MapData
+    from MapAnalyzer.MapData import MapData
 
     with lzma.open(f"{map_file}", "rb") as f:
         raw_game_data, raw_game_info, raw_observation = pickle.load(f)

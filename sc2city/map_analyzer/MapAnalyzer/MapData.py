@@ -13,11 +13,12 @@ from scipy.ndimage import binary_fill_holes, center_of_mass, generate_binary_str
 from scipy.ndimage import label as ndlabel
 from scipy.spatial import distance
 
-from .constructs import ChokeArea, MDRamp, RawChoke, VisionBlockerArea
-from .debugger import MapAnalyzerDebugger
-from .pather import MapAnalyzerPather
-from .region import Region
-from .utils import fix_map_ramps, get_sets_with_mutual_elements
+from MapAnalyzer.constructs import ChokeArea, MDRamp, RawChoke, VisionBlockerArea
+from MapAnalyzer.Debugger import MapAnalyzerDebugger
+from MapAnalyzer.Pather import MapAnalyzerPather
+from MapAnalyzer.Region import Region
+from MapAnalyzer.utils import fix_map_ramps, get_sets_with_mutual_elements
+
 from .cext import CMapChoke, CMapInfo
 from .constants import (
     BINARY_STRUCTURE,

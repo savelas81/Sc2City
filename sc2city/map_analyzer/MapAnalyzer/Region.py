@@ -4,11 +4,11 @@ from typing import TYPE_CHECKING, List
 import numpy as np
 from sc2.position import Point2
 
-from .constructs import ChokeArea, MDRamp
-from .polygon import Polygon
+from MapAnalyzer.constructs import ChokeArea, MDRamp
+from MapAnalyzer.Polygon import Polygon
 
 if TYPE_CHECKING:
-    from map_data import MapData
+    from MapAnalyzer import MapData
 
 
 class Region(Polygon):

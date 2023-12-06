@@ -7,10 +7,10 @@ from sc2.game_info import Ramp as sc2Ramp
 from sc2.position import Point2
 
 from .cext import CMapChoke
-from .polygon import Polygon
+from .Polygon import Polygon
 
 if TYPE_CHECKING:  # pragma: no cover
-    from .map_data import MapData
+    from .MapData import MapData
 
 
 class ChokeArea(Polygon):
@@ -159,7 +159,7 @@ class MDRamp(ChokeArea):
              Make this a private method
 
         """
-        from .region import Region
+        from MapAnalyzer.Region import Region
 
         for p in self.outer_perimeter_points:
             areas = self.map_data.where_all(p)

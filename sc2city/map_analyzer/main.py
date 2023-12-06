@@ -3,7 +3,7 @@ from typing import TYPE_CHECKING, Optional
 
 from sc2.position import Point2, Point3
 
-from .map_data import MapData
+from .MapAnalyzer import MapData
 from .memory_manager import MemoryManager
 
 if TYPE_CHECKING:

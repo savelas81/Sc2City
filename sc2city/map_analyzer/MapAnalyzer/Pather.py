@@ -6,15 +6,15 @@ from numpy import ndarray
 from sc2.ids.unit_typeid import UnitTypeId
 from sc2.position import Point2
 
-from .exceptions import PatherNoPointsException
-from .region import Region
-from .utils import change_destructable_status_in_grid
+from MapAnalyzer.exceptions import PatherNoPointsException
+from MapAnalyzer.Region import Region
+from MapAnalyzer.utils import change_destructable_status_in_grid
 
 from .cext import astar_path, astar_path_with_nyduses
 from .destructibles import buildings_2x2, buildings_3x3, buildings_5x5
 
 if TYPE_CHECKING:
-    from .map_data import MapData
+    from MapAnalyzer.MapData import MapData
 
 
 def _bounded_circle(center, radius, shape):

@@ -13,7 +13,7 @@ from sc2.position import Point2, Point3
 from .constants import COLORS, LOG_FORMAT, LOG_MODULE
 
 if TYPE_CHECKING:
-    from .map_data import MapData
+    from MapAnalyzer.MapData import MapData
 
 
 class LocalLogFilter:

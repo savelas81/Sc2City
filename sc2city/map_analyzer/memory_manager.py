@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING
 from loguru import logger
 
-from sc2.bot_ai import BotAI
 from sc2.units import Units
 from sc2.unit import Unit
 
