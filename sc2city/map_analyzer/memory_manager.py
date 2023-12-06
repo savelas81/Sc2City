@@ -21,9 +21,8 @@ if TYPE_CHECKING:
 
 
 class MemoryManager:
-    def __init__(self, bot: "Sc2City", debug: bool = False) -> None:
-        self.bot: BotAI = bot
-        self.debug = debug
+    def __init__(self, bot: "Sc2City") -> None:
+        self.bot = bot
 
         self.friendly_unit_tag_to_unit_object: dict[int, Unit] = dict()
         self.enemy_unit_tag_to_unit_object: dict[int, Unit] = dict()
@@ -48,7 +47,7 @@ class MemoryManager:
                 self.enemy_unit_tag_to_unit_object[enemy_unit.tag] = enemy_unit
 
                 # Debugging:
-                if self.debug is True:
+                if self.bot.debug is True:
                     logger.info(
                         f"Unit with tag {enemy_unit.tag} and type {enemy_unit.type_id} was added into enemy unit memory.",
                     )
@@ -63,7 +62,7 @@ class MemoryManager:
                 self.friendly_unit_tag_to_unit_object[friendly_unit.tag] = friendly_unit
 
                 # Debugging:
-                if self.debug is True:
+                if self.bot.debug is True:
                     logger.info(
                         f"Unit with tag {friendly_unit.tag} and type {friendly_unit.type_id} was added into friendly unit memory.",
                     )
@@ -88,7 +87,7 @@ class MemoryManager:
             )
 
             # Debugging:
-            if self.debug is True:
+            if self.bot.debug is True:
                 logger.info(
                     f"Unit with tag {unit_tag} was added into dead enemy unit memory.",
                 )
@@ -104,7 +103,7 @@ class MemoryManager:
             )
 
             # Debugging:
-            if self.debug is True:
+            if self.bot.debug is True:
                 logger.info(
                     f"Unit with tag {unit_tag} was added into friendly enemy unit memory.",
                 )

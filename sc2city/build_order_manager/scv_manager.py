@@ -10,8 +10,6 @@ if TYPE_CHECKING:
 class SCVManager:
     def __init__(self, bot: "Sc2City"):
         self.bot = bot
-        self.mineral_collector_dict: dict[int, int] = {}
-        self.vespene_collector_dict: dict[int, int] = {}
 
     def worker_split_frame_zero(self) -> None:
         mineral_fields = self.bot.mineral_field.closer_than(
@@ -31,4 +29,4 @@ class SCVManager:
         self, worker: Unit, mineral_field: Unit
     ) -> None:
         worker.gather(mineral_field)
-        self.mineral_collector_dict[worker.tag] = mineral_field.tag
+        self.bot.mineral_collector_dict[worker.tag] = mineral_field.tag

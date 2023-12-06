@@ -1,8 +1,7 @@
 import numpy
 from typing import TYPE_CHECKING, Optional
 
-from sc2.position import Point2
-from sc2.position import Point3
+from sc2.position import Point2, Point3
 
 from .map_data import MapData
 from .memory_manager import MemoryManager
@@ -17,12 +16,11 @@ class MapAnalyzer:
 
     def __init__(self, bot: "Sc2City"):
         self.bot = bot
-        self.debug: bool = self.bot.settings["debug"]
 
         self.expansions = []
         self.enemy_expansions = []
         self.map_data = MapData(bot=bot, loglevel="INFO")
-        self.memory_manager = MemoryManager(bot, self.debug)
+        self.memory_manager = MemoryManager(bot)
 
         # Grids
         self.enemy_ground_to_air_grid: Optional[numpy.ndarray] = None
@@ -30,7 +28,28 @@ class MapAnalyzer:
         self.enemy_air_grid: Optional[numpy.ndarray] = None
         self.reaper_grid: Optional[numpy.ndarray] = None
 
-    async def get_expansions(self) -> None:
+    async def get_initial_map_info(self) -> None:
+        await self.__get_expansions()
+        self.__set_scouting_grid_for_enemy_main()
+
+    def remember_units(self) -> None:
+        self.memory_manager.remember_units()
+
+    def forget_unit(self, unit_tag: int) -> None:
+        self.memory_manager.forget_unit(unit_tag)
+
+    def update_map_info(self) -> None:
+        # TODO: Add logic to update all relevant map information
+        self.__update_influence_maps()
+
+    def __set_scouting_grid_for_enemy_main(self) -> None:
+        """gets all grid points from enemy main base"""
+        # TODO: Improve typing for this method
+        self.bot.pending_scouting_points = self.map_data.where_all(
+            self.bot.enemy_start_locations[0]
+        )[0].array
+
+    async def __get_expansions(self) -> None:
         expansions = self.bot.expansion_locations_list
         starting_location = self.bot.start_location
         enemy_start_location = self.bot.enemy_start_locations[0]
@@ -43,7 +62,7 @@ class MapAnalyzer:
         self.expansions = [expansion for _, expansion in distances]
         self.enemy_expansions = [expansion for _, expansion in enemy_distances]
 
-    def update_influence_maps(self) -> None:
+    def __update_influence_maps(self) -> None:
         # Constructing Grids:
         self.enemy_ground_to_air_grid: numpy.ndarray = self.map_data.get_clean_air_grid(
             default_weight=1
@@ -59,9 +78,10 @@ class MapAnalyzer:
             default_weight=1
         )
 
+        self.memory_manager.remember_units()
         for enemy_unit in self.memory_manager.enemy_unit_tag_to_unit_object.values():
             # Debugging:
-            if self.debug:
+            if self.bot.debug:
                 self.bot.client.debug_sphere_out(
                     p=enemy_unit, r=enemy_unit.radius, color=(255, 0, 0)
                 )
@@ -105,7 +125,7 @@ class MapAnalyzer:
                         weight=enemy_unit.air_dps,
                     )
 
-                if self.debug:
+                if self.bot.debug:
                     # Variables:
                     color: Point3 = Point3((201, 168, 79))
                     size: int = 14

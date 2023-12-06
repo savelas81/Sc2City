@@ -22,6 +22,9 @@ class BuildOrderManager:
         self.__update_building_placements()
         self.scv_manager.worker_split_frame_zero()
 
+    def execute_strategy(self):
+        pass
+
     def __update_building_placements(self) -> None:
         if not self.bot.current_strategy.get("build_type"):
             # TODO: Add a default building placements file to fallback on
