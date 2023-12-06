@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sc2.bot_ai import BotAI
 from sc2.data import Race
 
@@ -14,8 +16,8 @@ class Sc2City(BotAI):
 
     def __init__(self):
         self.current_strategy = None
+        self.map_analyzer: Optional[MapAnalyzer] = None
         self.history_analyzer = HistoryAnalyzer()
-        self.map_analyzer = MapAnalyzer(self)
         self.macro_manager = MacroManager(self)
         self.micro_manager = MicroManager()
         self.build_order_manager = BuildOrderManager(self)
@@ -25,7 +27,10 @@ class Sc2City(BotAI):
         self.client.game_step = 2
         self.macro_manager.choose_first_strategy()
         self.build_order_manager.execute_frame_zero()
+
+        self.map_analyzer = MapAnalyzer(self)
         await self.map_analyzer.get_expansions()
 
-    async def on_step(self, iteration) -> None:
-        pass
+    async def on_step(self, iteration: int) -> None:
+        self.map_analyzer.update_influence_maps()
+        print("Iteration: ", iteration)

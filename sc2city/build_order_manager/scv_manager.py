@@ -1,15 +1,17 @@
-import typing
+from typing import TYPE_CHECKING
 
-from sc2.bot_ai import BotAI
 from sc2.unit import Unit
 from sc2.units import Units
 
+if TYPE_CHECKING:
+    from Sc2City import Sc2City
+
 
 class SCVManager:
-    def __init__(self, bot: BotAI):
+    def __init__(self, bot: "Sc2City"):
         self.bot = bot
-        self.mineral_collector_dict: typing.Dict[int, int] = {}
-        self.vespene_collector_dict: typing.Dict[int, int] = {}
+        self.mineral_collector_dict: dict[int, int] = {}
+        self.vespene_collector_dict: dict[int, int] = {}
 
     def worker_split_frame_zero(self) -> None:
         mineral_fields = self.bot.mineral_field.closer_than(

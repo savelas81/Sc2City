@@ -1,13 +1,17 @@
 import json
-import loguru
+from loguru import logger
+from typing import TYPE_CHECKING
 
-from sc2.bot_ai import BotAI
 from utils import MapTypes
 from .scv_manager import SCVManager
 
 
+if TYPE_CHECKING:
+    from Sc2City import Sc2City
+
+
 class BuildOrderManager:
-    def __init__(self, bot: BotAI):
+    def __init__(self, bot: "Sc2City"):
         self.bot = bot
         self.map_file = None
         self.building_placements = None
@@ -21,7 +25,7 @@ class BuildOrderManager:
     def __update_building_placements(self) -> None:
         if not self.bot.current_strategy.get("build_type"):
             # TODO: Add a default building placements file to fallback on
-            loguru.logger.info(f"Not able to find build_type")
+            logger.info(f"Not able to find build_type")
             return
         build_type = self.bot.current_strategy.get("build_type")
         map_path = getattr(MapTypes, build_type).value

@@ -1,7 +1,10 @@
 import json
+from typing import TYPE_CHECKING
 
-from sc2.bot_ai import BotAI
 from utils import strategies
+
+if TYPE_CHECKING:
+    from Sc2City import Sc2City
 
 
 class MacroManager:
@@ -10,7 +13,7 @@ class MacroManager:
     late_games = strategies.LateGames
     reactionary = strategies.Reactionary
 
-    def __init__(self, bot: BotAI):
+    def __init__(self, bot: "Sc2City"):
         self.bot = bot
 
     def choose_first_strategy(self) -> None:
