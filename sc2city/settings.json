@@ -1,4 +1,5 @@
 {
   "tournaments": false,
+  "debug": false,
   "vs_bots": true
 }

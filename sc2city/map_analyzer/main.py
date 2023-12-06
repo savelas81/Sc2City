@@ -2,8 +2,10 @@ import numpy
 from typing import TYPE_CHECKING, Optional
 
 from sc2.position import Point2
+from sc2.position import Point3
 
 from .map_data import MapData
+from .memory_manager import MemoryManager
 
 if TYPE_CHECKING:
     from Sc2City import Sc2City
@@ -15,9 +17,12 @@ class MapAnalyzer:
 
     def __init__(self, bot: "Sc2City"):
         self.bot = bot
+        self.debug: bool = self.bot.settings["debug"]
+
         self.expansions = []
         self.enemy_expansions = []
         self.map_data = MapData(bot=bot, loglevel="INFO")
+        self.memory_manager = MemoryManager(bot, self.debug)
 
         # Grids
         self.enemy_ground_to_air_grid: Optional[numpy.ndarray] = None
@@ -53,6 +58,72 @@ class MapAnalyzer:
         self.reaper_grid: numpy.ndarray = self.map_data.get_climber_grid(
             default_weight=1
         )
+
+        for enemy_unit in self.memory_manager.enemy_unit_tag_to_unit_object.values():
+            # Debugging:
+            if self.debug:
+                self.bot.client.debug_sphere_out(
+                    p=enemy_unit, r=enemy_unit.radius, color=(255, 0, 0)
+                )
+
+            if enemy_unit.can_attack_ground:
+                enemy_total_range: float = (
+                    enemy_unit.radius
+                    + enemy_unit.ground_range
+                    + self.EXTRA_GROUND_DISTANCE
+                )
+
+                (
+                    self.enemy_ground_grid,
+                    self.reaper_grid,
+                ) = self.map_data.add_cost_to_multiple_grids(
+                    position=enemy_unit.position,
+                    radius=enemy_total_range,
+                    grids=[self.enemy_ground_grid, self.reaper_grid],
+                    weight=enemy_unit.ground_dps,
+                )
+            elif enemy_unit.can_attack_air:
+                enemy_total_range: float = (
+                    enemy_unit.radius + enemy_unit.air_range + self.EXTRA_AIR_DISTANCE
+                )
+
+                if enemy_unit.is_flying:
+                    self.enemy_air_grid = self.map_data.add_cost(
+                        position=enemy_unit.position,
+                        radius=enemy_total_range,
+                        grid=self.enemy_air_grid,
+                        weight=enemy_unit.air_dps,
+                    )
+                else:
+                    (
+                        self.enemy_ground_to_air_grid,
+                        self.enemy_air_grid,
+                    ) = self.map_data.add_cost_to_multiple_grids(
+                        position=enemy_unit.position,
+                        radius=enemy_total_range,
+                        grids=[self.enemy_ground_to_air_grid, self.enemy_air_grid],
+                        weight=enemy_unit.air_dps,
+                    )
+
+                if self.debug:
+                    # Variables:
+                    color: Point3 = Point3((201, 168, 79))
+                    size: int = 14
+
+                    for x, y in zip(*numpy.where(self.enemy_ground_grid > 1)):
+                        height: float = self.bot.get_terrain_z_height(
+                            self.bot.start_location
+                        )
+
+                        position: Point3 = Point3((x, y, height))
+
+                        if self.enemy_ground_grid[x, y] == numpy.inf:
+                            continue
+
+                        value: int = int(self.enemy_ground_grid[x, y])
+                        self.bot.client.debug_text_world(
+                            text=str(value), pos=position, color=color, size=size
+                        )
 
     async def __calculate_path_distances(
         self, starting_position: Point2, goals: list[Point2]
