@@ -159,7 +159,7 @@ class MDRamp(ChokeArea):
              Make this a private method
 
         """
-        from MapAnalyzer.Region import Region
+        from .Region import Region
 
         for p in self.outer_perimeter_points:
             areas = self.map_data.where_all(p)

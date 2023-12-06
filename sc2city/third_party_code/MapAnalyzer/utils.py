@@ -12,7 +12,7 @@ from sc2.game_state import GameState
 from sc2.position import Point2
 from sc2.unit import Unit
 
-from MapAnalyzer.constructs import MDRamp, VisionBlockerArea
+from .constructs import MDRamp, VisionBlockerArea
 
 from .cext import CMapChoke
 from .destructibles import (

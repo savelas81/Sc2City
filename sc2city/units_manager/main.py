@@ -32,6 +32,8 @@ class UnitsManager:
             return
         if self.bot.micro_manager.pending_scouting_locations:
             scout.move(self.bot.micro_manager.pending_scouting_locations[0])
+            print("Moving to pending location")
+            return
 
         if self.bot.pending_scouting_points is not None:
             if self.bot.pending_scouting_points.any():

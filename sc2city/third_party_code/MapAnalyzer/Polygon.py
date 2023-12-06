@@ -8,7 +8,8 @@ from sc2.position import Point2
 from scipy.ndimage import center_of_mass
 
 if TYPE_CHECKING:
-    from MapAnalyzer import MapData, Region
+    from .MapData import MapData
+    from .Region import Region
 
 
 class Buildables:
@@ -138,7 +139,7 @@ class Polygon:
         and is inside / bordering with ``self``
 
         """
-        from MapAnalyzer.Region import Region
+        from .Region import Region
 
         if len(self.areas) > 0:
             return [r for r in self.areas if isinstance(r, Region)]
