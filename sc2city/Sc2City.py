@@ -21,11 +21,11 @@ class Sc2City(BotAI):
         self.build_order_manager = BuildOrderManager(self)
         self.units_manager = UnitsManager()
 
-    async def on_start(self):
+    async def on_start(self) -> None:
         self.client.game_step = 2
         self.macro_manager.choose_first_strategy()
         self.build_order_manager.execute_frame_zero()
-        await self.map_analyzer.cache_enemy_expansions()
+        await self.map_analyzer.get_expansions()
 
-    async def on_step(self, iteration):
+    async def on_step(self, iteration) -> None:
         pass

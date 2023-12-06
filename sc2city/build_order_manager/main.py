@@ -13,31 +13,32 @@ class BuildOrderManager:
         self.building_placements = None
         self.scv_manager = SCVManager(bot)
 
-    def execute_frame_zero(self):
+    def execute_frame_zero(self) -> None:
         self.__set_map_filename()
         self.__update_building_placements()
         self.scv_manager.worker_split_frame_zero()
 
-    def __update_building_placements(self):
+    def __update_building_placements(self) -> None:
         if not self.bot.current_strategy.get("build_type"):
+            # TODO: Add a default building placements file to fallback on
             loguru.logger.info(f"Not able to find build_type")
-            return None
-
+            return
         build_type = self.bot.current_strategy.get("build_type")
         map_path = getattr(MapTypes, build_type).value
         full_path = map_path + self.map_file
         self.building_placements = self.__load_building_placements(full_path)
 
-    def __load_building_placements(self, buildings_file: str):
+    def __load_building_placements(self, buildings_file: str) -> dict:
         try:
             with open(buildings_file, "r") as f:
                 building_placements = json.load(f)
             return building_placements
         except (OSError, IOError) as e:
+            # TODO: Add a default building placements file to fallback on
             print("Building placement file not found.")
             print(e)
 
-    def __set_map_filename(self):
+    def __set_map_filename(self) -> None:
         # This function should only run at the start of the game to discover the correct set of map files
         map_name = self.bot.game_info.map_name
         starting_location = self.bot.start_location

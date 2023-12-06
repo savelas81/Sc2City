@@ -20,7 +20,7 @@ class Game:
         self.opponent = opponent
         self.realtime = realtime
 
-    def start(self):
+    def start(self) -> None:
         if self.opponent is None:
             raise Exception("No opponent set")
         run_game(
@@ -29,7 +29,7 @@ class Game:
             realtime=self.realtime,
         )
 
-    async def synchronous_start(self):
+    async def synchronous_start(self) -> None:
         if self.opponent is None:
             raise Exception("No opponent set")
         await run_game(
