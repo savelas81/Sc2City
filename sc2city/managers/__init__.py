@@ -5,5 +5,5 @@ from .memory_manager import MemoryManager
 from .calculation_manager import CalculationManager
 from .allocators import BuildingPlacementSolver
 from .allocators import MapType
-from .executors import UnitRequestExecutor
+from .unit_queue_manager import UnitQueueManager
 from .structure_queue_manager import StructureQueueManager

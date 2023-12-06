@@ -48,7 +48,7 @@ class BuildOrderManager:
         if len(self.build_order) <= 0:
             return
         if (
-            await self.AI.UnitRequestFromJson.unit_queue_empty()
+            await self.AI.UnitQueueManager.unit_queue_empty()
             and await self.AI.StructureQueueManager.structure_queue_empty()
         ):
             if self.next_build_order is None and len(self.build_order) > 0:
@@ -77,7 +77,7 @@ class BuildOrderManager:
                     target_value_or_quantity_value = self.next_build_order.get(
                         "target_value_or_quantity_value"
                     )
-                    await self.AI.UnitRequestFromJson.queue_unit(
+                    await self.AI.UnitQueueManager.queue_unit(
                         conditional=conditional,
                         ID=ID,
                         target_value_behaviour=target_value_behaviour,

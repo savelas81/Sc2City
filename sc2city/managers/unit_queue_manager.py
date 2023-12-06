@@ -21,7 +21,7 @@ import typing
 import enum
 
 
-class UnitRequestFromJson:
+class UnitQueueManager:
     def __init__(self, AI: BotAI = None):
         # Miscellaneous:
         self.AI: BotAI = AI

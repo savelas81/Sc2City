@@ -14,9 +14,6 @@ from sc2city.interfaces import MapAnalyzerInterface
 # Miscellaneous:
 from cache_first_frame import EnemyExpansions
 
-from sc2city.requests import UnitRequestFromJson
-
-
 # Managers:
 from build_order_manager import BuildOrderManager
 from managers import (
@@ -26,7 +23,7 @@ from managers import (
     MemoryManager,
     BuildingPlacementSolver,
     CalculationManager,
-    UnitRequestExecutor,
+    UnitQueueManager,
     MapType,
     StructureQueueManager,
 )
@@ -46,12 +43,7 @@ class Sc2City(BotAI):
         self.StructureQueueManager: StructureQueueManager = StructureQueueManager(
             AI=self
         )
-
-        # Executors:
-        self.UnitRequestExecutor: UnitRequestExecutor = UnitRequestExecutor(
-            AI=self, debug=True
-        )
-        self.UnitRequestFromJson: UnitRequestFromJson = UnitRequestFromJson(AI=self)
+        self.UnitQueueManager: UnitQueueManager = UnitQueueManager(AI=self)
 
         # TODO: Refactor!!!
         self.SCVManager: SCVManager = SCVManager(AI=self)
@@ -95,7 +87,7 @@ class Sc2City(BotAI):
         await self.StrategyManager.run_strategy()
         await self.scout_manager.update_points_need_scouting()
         await self.scout_manager.move_scout()
-        await self.UnitRequestFromJson.execute_build_units()
+        await self.UnitQueueManager.execute_build_units()
         await self.StructureQueueManager.execute_build_structures()
         await self.SCVManager.move_scvs()  # used for all scv movement
         # Miscellaneous:
