@@ -1,26 +1,27 @@
-import json
 from typing import Optional
 
 from sc2.bot_ai import BotAI
 from sc2.data import Race
 from sc2.unit import Unit
 
-from history_analyzer import HistoryAnalyzer
-from map_analyzer import MapAnalyzer
-from macro_manager import MacroManager
-from micro_manager import MicroManager
-from build_order_manager import BuildOrderManager
-from units_manager import UnitsManager
+from utils import Settings
+from managers import (
+    HistoryAnalyzer,
+    MapAnalyzer,
+    MacroManager,
+    MicroManager,
+    BuildOrderManager,
+    UnitsManager,
+)
 
 
 class Sc2City(BotAI):
     race = Race.Terran
-    settings_file = "settings.json"
 
-    def __init__(self):
+    def __init__(self, settings: Settings) -> None:
         # Settings
-        self.settings: dict = self.__load_settings()
-        self.debug = self.settings.get("debug", False)
+        self.settings = settings
+        self.debug = self.settings.debug
 
         # Managers
         self.map_analyzer: Optional[MapAnalyzer] = None
@@ -30,6 +31,7 @@ class Sc2City(BotAI):
         self.build_order_manager = BuildOrderManager(self)
         self.units_manager = UnitsManager(self)
 
+        # TODO: Create objects for the state variables
         # State
         self.iteration: int = 0
         self.current_strategy: Optional[dict] = None
@@ -39,11 +41,6 @@ class Sc2City(BotAI):
         self.scouts: list[Unit] = []
         # TODO: Merge this with scouting logic in micro manager
         self.pending_scouting_points = None
-
-    def __load_settings(self):
-        with open(self.settings_file) as f:
-            settings = json.load(f)
-        return settings
 
     async def on_start(self) -> None:
         self.client.game_step = 2

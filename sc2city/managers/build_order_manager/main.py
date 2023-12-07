@@ -4,7 +4,7 @@ from typing import TYPE_CHECKING
 
 from utils import MapTypes
 from .scv_manager import SCVManager
-from .unit_queue import UnitQueue
+from .structure_manager import StructureManager
 
 if TYPE_CHECKING:
     from Sc2City import Sc2City
@@ -16,7 +16,7 @@ class BuildOrderManager:
         self.map_file = None
         self.building_placements = None
         self.scv_manager = SCVManager(bot)
-        self.units_queue = UnitQueue(bot)
+        self.structure_manager = StructureManager(bot)
 
     def execute_frame_zero(self) -> None:
         self.__set_map_filename()
@@ -24,6 +24,7 @@ class BuildOrderManager:
         self.scv_manager.worker_split_frame_zero()
 
     def execute_strategy(self):
+        self.structure_manager.execute_builds()
         self.scv_manager.move_scvs()
 
     def __update_building_placements(self) -> None:

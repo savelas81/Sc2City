@@ -1,0 +1,2 @@
+class BuildingPlacements:
+    pass

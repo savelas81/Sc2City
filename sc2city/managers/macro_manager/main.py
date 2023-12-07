@@ -5,8 +5,7 @@ from sc2.unit import Unit
 from sc2.position import Point2
 
 from utils import strategies
-from .structure_queue_manager import StructureQueueManager
-from .unit_queue_manager import UnitQueueManager
+from .queue_manager import QueueManager
 
 if TYPE_CHECKING:
     from Sc2City import Sc2City
@@ -21,8 +20,7 @@ class MacroManager:
     def __init__(self, bot: "Sc2City"):
         self.bot = bot
         self.pending_scv_scouts: list[dict] = []
-        self.structure_queue_manager = StructureQueueManager(bot)
-        self.unit_queue_manager = UnitQueueManager(bot)
+        self.queue_manager = QueueManager(bot)
 
     def choose_first_strategy(self) -> None:
         opening = self.__choose_opening()
@@ -34,7 +32,7 @@ class MacroManager:
     def update_strategy(self) -> None:
         # TODO: Add logic to update strategy based on game state
         # TODO: Add logic to make decisions outside of imported strategies
-
+        self.queue_manager.update_queues()
         if self.pending_scv_scouts:
             self.__update_scv_scouts()
 
