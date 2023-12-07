@@ -1,4 +1,5 @@
 import numpy
+import copy
 from typing import TYPE_CHECKING, Optional
 
 from sc2.position import Point2, Point3
@@ -31,6 +32,7 @@ class MapAnalyzer:
     async def get_initial_map_info(self) -> None:
         await self.__get_expansions()
         self.__set_scouting_grid_for_enemy_main()
+        self.add_to_pending_scouting_points(position=self.enemy_expansions[0], radius=2)
 
     def remember_units(self) -> None:
         self.memory_manager.remember_units()
@@ -41,6 +43,13 @@ class MapAnalyzer:
     def update_map_info(self) -> None:
         # TODO: Add logic to update all relevant map information
         self.__update_influence_maps()
+
+    def add_to_pending_scouting_points(self, position: Point2, radius: int = 1):
+        grid = copy.copy(self.bot.pending_scouting_points)
+        grid = self.map_data.add_cost(position=position, radius=radius, grid=grid, weight=1)
+        condition_list = [grid >= 1, grid < 1]
+        choice_list = [1, 0]
+        self.bot.pending_scouting_points = numpy.select(condition_list, choice_list)
 
     def __set_scouting_grid_for_enemy_main(self) -> None:
         """gets all grid points from enemy main base"""

@@ -21,7 +21,7 @@ class Sc2City(BotAI):
     def __init__(self, settings: Settings) -> None:
         # Settings
         self.settings = settings
-        self.debug = self.settings.debug
+        self.debug = self.settings['debug']
 
         # Managers
         self.map_analyzer: Optional[MapAnalyzer] = None
