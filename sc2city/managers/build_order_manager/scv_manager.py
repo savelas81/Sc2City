@@ -25,12 +25,6 @@ class SCVManager:
             mineral_field = mineral_fields.closest_to(worker)
             self.__assign_worker_to_mineral_field(worker, mineral_field)
 
-    async def move_scvs(self):
-        self.queue_delay -= 1
-        await self.placeholder_tracker()
-        await self.distribute_workers()
-        await self.build_queued_building()
-
     def __assign_worker_to_mineral_field(
         self, worker: Unit, mineral_field: Unit
     ) -> None:
