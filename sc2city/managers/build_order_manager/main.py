@@ -17,4 +17,5 @@ class BuildOrderManager:
         self.scv_manager.worker_split_frame_zero()
 
     def execute_strategy(self):
+        self.scv_manager.move_scvs()
         self.structure_manager.execute_builds()

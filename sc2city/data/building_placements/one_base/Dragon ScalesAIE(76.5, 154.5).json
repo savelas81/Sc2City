@@ -1,35 +1,27 @@
 {
-  "building_positions_priority_1": [
+  "MAIN": [
     [
       93.5,
       149.5
-    ]
-  ],
-  "building_positions_priority_2": [
+    ],
     [
       79.5,
       133.5
-    ]
-  ],
-  "building_positions_priority_3": [
+    ],
     [
       86.5,
       160.5
-    ]
-  ],
-  "building_positions_priority_4": [
+    ],
     [
       72.5,
       149.5
-    ]
-  ],
-  "building_positions_priority_5": [
+    ],
     [
       64.5,
       150.5
     ]
   ],
-  "auxiliary_buildings_1": [
+  "AUXILIARY": [
     [
       79.5,
       164.5
@@ -37,9 +29,7 @@
     [
       65.5,
       153.5
-    ]
-  ],
-  "auxiliary_buildings_2": [
+    ],
     [
       65.5,
       156.5
@@ -47,9 +37,7 @@
     [
       67.5,
       159.5
-    ]
-  ],
-  "auxiliary_buildings_3": [
+    ],
     [
       83.5,
       162.5
@@ -59,25 +47,19 @@
       163.5
     ]
   ],
-  "supply_depot_positions_priority_1": [
+  "SUPPLY_DEPOT": [
     [
       80.0,
       131.0
-    ]
-  ],
-  "supply_depot_positions_priority_2": [
+    ],
     [
       93.0,
       152.0
-    ]
-  ],
-  "supply_depot_positions_priority_3": [
+    ],
     [
       90.0,
       158.0
-    ]
-  ],
-  "supply_depot_positions_priority_4": [
+    ],
     [
       75.0,
       151.0
@@ -89,9 +71,7 @@
     [
       80.0,
       157.0
-    ]
-  ],
-  "supply_depot_positions_priority_5": [
+    ],
     [
       72.0,
       161.0
@@ -109,7 +89,7 @@
       162.0
     ]
   ],
-  "turret_positions_priority_1": [
+  "TURRET": [
     [
       77.0,
       134.0
@@ -131,19 +111,15 @@
       165.0
     ]
   ],
-  "turret_positions_priority_2": [],
-  "turret_positions_priority_3": [],
-  "macro_orbitals": [],
-  "expansion_priority_1": [],
-  "expansion_priority_2": [],
-  "expansion_priority_3": [],
-  "bunkers": [
+  "MACRO_ORBITAL": [],
+  "EXPANSION": [],
+  "BUNKER": [
     [
       90.5,
       150.5
     ]
   ],
-  "sensor_towers": [
+  "SENSOR_TOWER": [
     [
       94.5,
       142.5

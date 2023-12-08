@@ -46,7 +46,7 @@ class MacroManager:
             (
                 order
                 for order in self.bot.queues[OrderType.UNIT]
-                if order.id == unit.type_id and order.status == Status.PENDING
+                if order.id == unit.type_id and order.status == Status.STARTED
             ),
             None,
         )
