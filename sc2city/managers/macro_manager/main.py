@@ -28,6 +28,8 @@ class MacroManager:
         self.__set_map_filename()
         opening = self.__choose_opening()
         self.bot.current_strategy = Strategy.from_dict(opening, self.map_file)
+        self.queue_manager.set_starting_queues()
+        # TODO: Create method to handle SCV scouts
         self.pending_scv_scouts = [
             s for s in self.bot.current_strategy.scout_times if s.id == "SCV"
         ]
