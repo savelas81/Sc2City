@@ -59,6 +59,8 @@ class QueueManager:
 
     def __clear_finished_orders(self) -> None:
         self.bot.queues = {
-            order_type: (order for order in orders if order.status != Status.FINISHED)
+            order_type: list(
+                filter(lambda order: order.status != Status.FINISHED, orders)
+            )
             for order_type, orders in self.bot.queues.items()
         }
