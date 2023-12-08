@@ -4,7 +4,8 @@ from sc2.bot_ai import BotAI
 from sc2.data import Race
 from sc2.unit import Unit
 
-from utils import Settings
+from utils import Settings, OrderType
+from game_objects import Strategy
 from managers import (
     HistoryAnalyzer,
     MapAnalyzer,
@@ -13,8 +14,6 @@ from managers import (
     BuildOrderManager,
     UnitsManager,
 )
-
-from game_objects import Strategy
 
 
 class Sc2City(BotAI):
@@ -33,10 +32,14 @@ class Sc2City(BotAI):
         self.build_order_manager = BuildOrderManager(self)
         self.units_manager = UnitsManager(self)
 
-        # TODO: Create objects for the state variables
         # State
         self.iteration: int = 0
         self.current_strategy: Optional[Strategy] = None
+        self.queues: dict[OrderType, list] = {
+            OrderType.STRUCTURE: [],
+            OrderType.UNIT: [],
+            OrderType.TECH: [],
+        }
         self.mineral_collector_dict: dict[int, int] = {}
         self.vespene_collector_dict: dict[int, int] = {}
         # TODO: Implement army logic with scripts. Eg: army = {soldiers: [(Unit, Script)], squads: [(Squad, Script)], scouts: [(Scout, Script)]}

@@ -8,11 +8,12 @@ from utils import Status, OrderType
 @dataclass
 class Order:
     type: OrderType
-    conditional: bool
-    conditional_behavior: str  # TODO: Enumerate the possible values
     id: UnitTypeId
+    priority: int = 0
+    target_value: int = 1
+    conditional: bool = True
+    conditional_behavior: str = "skip"  # TODO: Enumerate the possible values
     target_value_behavior: bool = False
-    target_value_or_quantity_value: int = 1
     status: Status = Status.PENDING
     comment: str = ""
 

@@ -1,6 +1,5 @@
+import copy
 from typing import TYPE_CHECKING
-
-from utils import OrderType
 
 if TYPE_CHECKING:
     from Sc2City import Sc2City
@@ -11,21 +10,19 @@ class QueueManager:
         self.bot = bot
 
     def set_starting_queues(self) -> None:
-        structure_queue = [
-            order
-            for order in self.bot.current_strategy.build_order
-            if order.type == OrderType.STRUCTURE
-        ]
-        unit_queue = [
-            order
-            for order in self.bot.current_strategy.build_order
-            if order.type == OrderType.UNIT
-        ]
-        tech_queue = [
-            order
-            for order in self.bot.current_strategy.build_order
-            if order.type == OrderType.TECH
-        ]
+        self.bot.current_strategy.build_order.sort(
+            key=lambda x: x.priority, reverse=True
+        )
+        for order in self.bot.current_strategy.build_order:
+            if order.target_value > 1:
+                for _ in range(order.target_value):
+                    copy_order = copy.deepcopy(order)
+                    copy_order.target_value = 1
+                    self.bot.queues[order.type].append(copy_order)
+            else:
+                self.bot.queues[order.type].append(order)
+
+        print(self.bot.queues)
 
     def update_queues(self) -> None:
         pass
