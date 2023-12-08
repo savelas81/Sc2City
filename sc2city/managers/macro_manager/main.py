@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING
 
 from sc2.unit import Unit
 from sc2.position import Point2
+from sc2.ids.unit_typeid import UnitTypeId
 
 from utils import strategies, Status, OrderType
 from game_objects import Strategy, ScoutTime
@@ -31,7 +32,7 @@ class MacroManager:
         self.queue_manager.set_starting_queues()
         # TODO: Create method to handle SCV scouts
         self.pending_scv_scouts = [
-            s for s in self.bot.current_strategy.scout_times if s.id == "SCV"
+            s for s in self.bot.current_strategy.scout_times if s.id == UnitTypeId.SCV
         ]
 
     def update_strategy(self) -> None:
@@ -41,20 +42,21 @@ class MacroManager:
         if self.pending_scv_scouts:
             self.__update_scv_scouts()
 
-    def unit_created(self, unit: Unit) -> None:
+    def production_complete(self, unit: Unit, order_type: OrderType) -> None:
         order = next(
             (
                 order
-                for order in self.bot.queues[OrderType.UNIT]
+                for order in self.bot.queues[order_type]
                 if order.id == unit.type_id and order.status == Status.STARTED
             ),
             None,
         )
         if order is not None:
             order.status = Status.FINISHED
+            print(f"{order.id} finished")
         else:
-            # TODO: Add logic to handle units that are not in the queue
-            print(f"Unit {unit.type_id} not found in queue")
+            # TODO: Add logic to handle errors
+            print(f"{unit.type_id} not found in queue")
 
     def __update_scv_scouts(self) -> None:
         # TODO: Add logic to select the best scv scout position

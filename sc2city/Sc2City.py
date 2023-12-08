@@ -67,8 +67,11 @@ class Sc2City(BotAI):
         self.build_order_manager.execute_strategy()
         self.units_manager.give_orders()
 
+    async def on_building_construction_complete(self, unit: Unit):
+        self.macro_manager.production_complete(unit, OrderType.STRUCTURE)
+
     async def on_unit_created(self, unit: Unit) -> None:
-        self.macro_manager.unit_created(unit)
+        self.macro_manager.production_complete(unit, OrderType.UNIT)
 
     async def on_unit_destroyed(self, unit_tag: int) -> None:
         self.map_analyzer.forget_unit(unit_tag)

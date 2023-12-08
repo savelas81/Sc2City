@@ -46,7 +46,9 @@ class MapAnalyzer:
 
     def add_to_pending_scouting_points(self, position: Point2, radius: int = 1):
         grid = copy.copy(self.bot.pending_scouting_points)
-        grid = self.map_data.add_cost(position=position, radius=radius, grid=grid, weight=1)
+        grid = self.map_data.add_cost(
+            position=position, radius=radius, grid=grid, weight=1
+        )
         condition_list = [grid >= 1, grid < 1]
         choice_list = [1, 0]
         self.bot.pending_scouting_points = numpy.select(condition_list, choice_list)

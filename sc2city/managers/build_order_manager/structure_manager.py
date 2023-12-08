@@ -21,20 +21,20 @@ class StructureManager:
 
     # TODO: Improve logic and refactor
     def __train_units(self) -> None:
-        for order in self.bot.queues[OrderType.UNIT]:
-            if order.status == Status.PENDING and self.bot.can_afford(order.id):
-                facility = UNIT_TRAINED_FROM[order.id]
-                facilities = self.bot.structures(facility)
-                if facilities:
-                    facilities = self.__sort_and_filter_production_facilities(
-                        facilities, order.id
-                    )
-                if not facilities:
-                    continue
-                for facility in facilities:
-                    print(facility)
-                    facility.train(order.id)
-                    order.status = Status.STARTED
+        order = self.bot.queues[OrderType.UNIT][0]
+        if order.status == Status.PENDING and self.bot.can_afford(order.id):
+            facility = UNIT_TRAINED_FROM[order.id]
+            facilities = self.bot.structures(facility)
+            if facilities:
+                facilities = self.__sort_and_filter_production_facilities(
+                    facilities, order.id
+                )
+            if not facilities:
+                return
+            for facility in facilities:
+                facility.train(order.id)
+                order.status = Status.STARTED
+                print(f"Training {order.id} at {facility}")
 
     #  TODO: Improve this logic and the parameters used
     def __sort_and_filter_production_facilities(
