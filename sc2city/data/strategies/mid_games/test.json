@@ -1,93 +1,100 @@
 {
   "build_type": "ONE_BASE",
+  "scout_times": [
+	{
+	  "id": "SCV",
+	  "time": 37,
+	  "comment": "write comment here"
+	}
+  ],
   "build_order": [
     {
       "request_type": "unit",
       "conditional": "True",
-      "conditional_behaviour": "skip",
+      "conditional_behavior": "skip",
       "id": "SCV",
-      "target_value_behaviour": "False",
+      "target_value_behavior": "False",
       "target_value_or_quantity_value": 1,
-      "comment": "conditional_behaviour accepts skip and wait"
+      "comment": "conditional_behavior accepts skip and wait"
     },
     {
       "request_type": "unit",
       "conditional": "self.AI.minerals > 400",
-      "conditional_behaviour": "skip",
+      "conditional_behavior": "skip",
       "id": "SCV",
-      "target_value_behaviour": "False",
+      "target_value_behavior": "False",
       "target_value_or_quantity_value": 1,
       "comment": "write comment here"
     },
     {
       "request_type": "structure",
       "conditional": "True",
-      "conditional_behaviour": "skip",
+      "conditional_behavior": "skip",
       "id": "SUPPLYDEPOT",
-      "target_value_behaviour": "False",
+      "target_value_behavior": "False",
       "target_value_or_quantity_value": 1,
       "comment": "write comment here"
     },
     {
       "request_type": "structure",
       "conditional": "True",
-      "conditional_behaviour": "skip",
+      "conditional_behavior": "skip",
       "id": "BARRACKS",
-      "target_value_behaviour": "False",
+      "target_value_behavior": "False",
       "target_value_or_quantity_value": 1,
       "comment": "write comment here"
     },
     {
       "request_type": "unit",
       "conditional": "True",
-      "conditional_behaviour": "skip",
+      "conditional_behavior": "skip",
       "id": "SCV",
-      "target_value_behaviour": "True",
+      "target_value_behavior": "True",
       "target_value_or_quantity_value": 50,
       "comment": "write comment here"
     },
     {
       "request_type": "structure",
       "conditional": "True",
-      "conditional_behaviour": "skip",
+      "conditional_behavior": "skip",
       "id": "REFINERY",
-      "target_value_behaviour": "False",
+      "target_value_behavior": "False",
       "target_value_or_quantity_value": 2,
       "comment": "write comment here"
     },
     {
       "request_type": "structure",
       "conditional": "True",
-      "conditional_behaviour": "skip",
+      "conditional_behavior": "skip",
       "id": "FACTORY",
-      "target_value_behaviour": "False",
+      "target_value_behavior": "False",
       "target_value_or_quantity_value": 1,
       "comment": "write comment here"
     },
     {
       "request_type": "structure",
       "conditional": "True",
-      "conditional_behaviour": "skip",
+      "conditional_behavior": "skip",
       "id": "SUPPLYDEPOT",
-      "target_value_behaviour": "False",
+      "target_value_behavior": "False",
       "target_value_or_quantity_value": 1,
       "comment": "write comment here"
     },
     {
       "request_type": "unit",
       "conditional": "True",
-      "conditional_behaviour": "skip",
+      "conditional_behavior": "skip",
       "id": "MARINE",
-      "target_value_behaviour": "False",
+      "target_value_behavior": "False",
       "target_value_or_quantity_value": 3,
-      "comment": "conditional_behaviour accepts skip and wait"
+      "comment": "conditional_behavior accepts skip and wait"
     },
     {
       "request_type": "structure",
       "conditional": "True",
-      "conditional_behaviour": "skip",
+      "conditional_behavior": "skip",
       "id": "SUPPLYDEPOT",
-      "target_value_behaviour": "False",
+      "target_value_behavior": "False",
       "target_value_or_quantity_value": 1,
       "comment": "write comment here"
     }

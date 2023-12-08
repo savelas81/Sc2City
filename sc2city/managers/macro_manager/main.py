@@ -5,6 +5,7 @@ from sc2.unit import Unit
 from sc2.position import Point2
 
 from utils import strategies
+from game_objects import Strategy, ScoutTime
 from .queue_manager import QueueManager
 
 if TYPE_CHECKING:
@@ -19,14 +20,16 @@ class MacroManager:
 
     def __init__(self, bot: "Sc2City"):
         self.bot = bot
-        self.pending_scv_scouts: list[dict] = []
+        self.pending_scv_scouts: list[ScoutTime] = []
         self.queue_manager = QueueManager(bot)
+        self.map_file = None
 
     def choose_first_strategy(self) -> None:
+        self.__set_map_filename()
         opening = self.__choose_opening()
-        self.bot.current_strategy = opening
+        self.bot.current_strategy = Strategy.from_dict(opening, self.map_file)
         self.pending_scv_scouts = [
-            s for s in self.bot.current_strategy.get("scouts") if s.get("id") == "SCV"
+            s for s in self.bot.current_strategy.scout_times if s.id == "SCV"
         ]
 
     def update_strategy(self) -> None:
@@ -40,7 +43,7 @@ class MacroManager:
         # TODO: Add logic to select the best scv scout position
         position = self.bot.start_location
         for scout in self.pending_scv_scouts:
-            if self.bot.time < scout.get("time"):
+            if self.bot.time < scout.time:
                 continue
 
             scv = self.__select_scv_scout(position)
@@ -80,3 +83,9 @@ class MacroManager:
             # TODO: Add a default strategy file to fallback on
             print("Strategy file not found.")
             print(e)
+
+    def __set_map_filename(self) -> None:
+        # This function should only run at the start of the game to discover the correct set of map files
+        map_name = self.bot.game_info.map_name
+        starting_location = self.bot.start_location
+        self.map_file = map_name + str(starting_location) + ".json"

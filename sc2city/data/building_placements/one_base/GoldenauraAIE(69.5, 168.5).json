@@ -59,7 +59,7 @@
       165.5
     ]
   ],
-  "supplydepot_positions_priority_1": [
+  "supply_depot_positions_priority_1": [
     [
       72.0,
       155.0
@@ -69,7 +69,7 @@
       152.0
     ]
   ],
-  "supplydepot_positions_priority_2": [
+  "supply_depot_positions_priority_2": [
     [
       84.0,
       153.0
@@ -79,13 +79,13 @@
       151.0
     ]
   ],
-  "supplydepot_positions_priority_3": [
+  "supply_depot_positions_priority_3": [
     [
       65.0,
       158.0
     ]
   ],
-  "supplydepot_positions_priority_4": [
+  "supply_depot_positions_priority_4": [
     [
       74.0,
       173.0
@@ -99,7 +99,7 @@
       165.0
     ]
   ],
-  "supplydepot_positions_priority_5": [
+  "supply_depot_positions_priority_5": [
     [
       88.0,
       171.0

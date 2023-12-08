@@ -14,6 +14,8 @@ from managers import (
     UnitsManager,
 )
 
+from game_objects import Strategy
+
 
 class Sc2City(BotAI):
     race = Race.Terran
@@ -21,7 +23,7 @@ class Sc2City(BotAI):
     def __init__(self, settings: Settings) -> None:
         # Settings
         self.settings = settings
-        self.debug = self.settings['debug']
+        self.debug = self.settings.debug
 
         # Managers
         self.map_analyzer: Optional[MapAnalyzer] = None
@@ -34,7 +36,7 @@ class Sc2City(BotAI):
         # TODO: Create objects for the state variables
         # State
         self.iteration: int = 0
-        self.current_strategy: Optional[dict] = None
+        self.current_strategy: Optional[Strategy] = None
         self.mineral_collector_dict: dict[int, int] = {}
         self.vespene_collector_dict: dict[int, int] = {}
         # TODO: Implement army logic with scripts. Eg: army = {soldiers: [(Unit, Script)], squads: [(Squad, Script)], scouts: [(Scout, Script)]}
