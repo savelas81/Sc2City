@@ -2,12 +2,12 @@ from dataclasses import dataclass
 
 from sc2.ids.unit_typeid import UnitTypeId
 
-from utils import Status, RequestType
+from utils import Status, OrderType
 
 
 @dataclass
 class Order:
-    request_type: RequestType
+    type: OrderType
     conditional: bool
     conditional_behavior: str  # TODO: Enumerate the possible values
     id: UnitTypeId
@@ -18,6 +18,6 @@ class Order:
 
     @classmethod
     def from_dict(cls, dct):
-        dct["request_type"] = RequestType[dct["request_type"]]
+        dct["type"] = OrderType[dct["type"]]
         dct["id"] = UnitTypeId[dct["id"]]
         return cls(**dct)

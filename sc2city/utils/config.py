@@ -27,7 +27,7 @@ class Status(enum.Enum):
     FINISHED = 3
 
 
-class RequestType(enum.Enum):
+class OrderType(enum.Enum):
     STRUCTURE = 0
     UNIT = 1
     TECH = 2

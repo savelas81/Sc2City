@@ -9,7 +9,7 @@
   ],
   "build_order": [
     {
-      "request_type": "UNIT",
+      "type": "UNIT",
       "conditional": true,
       "conditional_behavior": "skip",
       "id": "SCV",
@@ -18,7 +18,7 @@
       "comment": "conditional_behavior accepts skip and wait"
     },
     {
-      "request_type": "UNIT",
+      "type": "UNIT",
       "conditional": "self.AI.minerals > 400",
       "conditional_behavior": "skip",
       "id": "SCV",
@@ -27,7 +27,7 @@
       "comment": "write comment here"
     },
     {
-      "request_type": "STRUCTURE",
+      "type": "STRUCTURE",
       "conditional": true,
       "conditional_behavior": "skip",
       "id": "SUPPLYDEPOT",
@@ -36,7 +36,7 @@
       "comment": "write comment here"
     },
     {
-      "request_type": "STRUCTURE",
+      "type": "STRUCTURE",
       "conditional": true,
       "conditional_behavior": "skip",
       "id": "BARRACKS",
@@ -45,7 +45,7 @@
       "comment": "write comment here"
     },
     {
-      "request_type": "UNIT",
+      "type": "UNIT",
       "conditional": true,
       "conditional_behavior": "skip",
       "id": "SCV",
@@ -54,7 +54,7 @@
       "comment": "write comment here"
     },
     {
-      "request_type": "STRUCTURE",
+      "type": "STRUCTURE",
       "conditional": true,
       "conditional_behavior": "skip",
       "id": "REFINERY",
@@ -63,7 +63,7 @@
       "comment": "write comment here"
     },
     {
-      "request_type": "STRUCTURE",
+      "type": "STRUCTURE",
       "conditional": true,
       "conditional_behavior": "skip",
       "id": "FACTORY",
@@ -72,7 +72,7 @@
       "comment": "write comment here"
     },
     {
-      "request_type": "STRUCTURE",
+      "type": "STRUCTURE",
       "conditional": true,
       "conditional_behavior": "skip",
       "id": "SUPPLYDEPOT",
@@ -81,7 +81,7 @@
       "comment": "write comment here"
     },
     {
-      "request_type": "UNIT",
+      "type": "UNIT",
       "conditional": true,
       "conditional_behavior": "skip",
       "id": "MARINE",
@@ -90,7 +90,7 @@
       "comment": "conditional_behavior accepts skip and wait"
     },
     {
-      "request_type": "STRUCTURE",
+      "type": "STRUCTURE",
       "conditional": true,
       "conditional_behavior": "skip",
       "id": "SUPPLYDEPOT",
