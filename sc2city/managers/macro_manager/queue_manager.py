@@ -1,7 +1,7 @@
 import copy
 from typing import TYPE_CHECKING
 
-from utils import OrderType
+from utils import OrderType, Status
 from game_objects import Order
 
 if TYPE_CHECKING:
@@ -19,7 +19,7 @@ class QueueManager:
         )
 
     def update_queues(self) -> None:
-        pass
+        self.__clear_finished_orders()
 
     def __sort_build_order(self) -> None:
         self.bot.current_strategy.build_order.sort(
@@ -56,3 +56,9 @@ class QueueManager:
             new_order.target_value = 1
             new_orders.append(new_order)
         return new_orders
+
+    def __clear_finished_orders(self) -> None:
+        self.bot.queues = {
+            order_type: (order for order in orders if order.status != Status.FINISHED)
+            for order_type, orders in self.bot.queues.items()
+        }

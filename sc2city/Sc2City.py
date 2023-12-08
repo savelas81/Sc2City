@@ -5,7 +5,7 @@ from sc2.data import Race
 from sc2.unit import Unit
 
 from utils import Settings, OrderType
-from game_objects import Strategy
+from game_objects import Strategy, Order
 from managers import (
     HistoryAnalyzer,
     MapAnalyzer,
@@ -35,7 +35,7 @@ class Sc2City(BotAI):
         # State
         self.iteration: int = 0
         self.current_strategy: Optional[Strategy] = None
-        self.queues: dict[OrderType, list] = {
+        self.queues: dict[OrderType, list[Order]] = {
             OrderType.STRUCTURE: [],
             OrderType.UNIT: [],
             OrderType.TECH: [],
