@@ -29,7 +29,7 @@ class MicroManager:
             self.__update_pending_scouting_points()
 
         if (
-            self.pending_scouting_locations is None
+            not self.pending_scouting_locations
             and self.bot.pending_scouting_points is None
         ):
             self.__remove_scouts()
