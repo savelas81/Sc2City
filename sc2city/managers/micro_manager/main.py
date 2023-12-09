@@ -39,13 +39,11 @@ class MicroManager:
         for location in self.pending_scouting_locations:
             if self.bot.is_visible(location):
                 self.pending_scouting_locations.remove(location)
-                print("Location scouting completed")
 
     def __update_pending_scouting_points(self) -> None:
         # TODO: Add flexibility for adding any number of scouts and scouting targets
         if self.bot.pending_scouting_points.sum() == 0:
             self.bot.pending_scouting_points = None
-            print("Scouting completed")
             return
         else:
             visibility = np.transpose(self.bot.state.visibility.data_numpy)

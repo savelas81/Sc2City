@@ -18,6 +18,7 @@ class ScoutTime:
         return cls(**dct)
 
 
+# TODO: Add conditional behavior
 @dataclass
 class Order:
     type: OrderType

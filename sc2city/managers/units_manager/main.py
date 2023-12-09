@@ -70,5 +70,5 @@ class UnitsManager:
                     if path is not None and len(path) > 0:
                         scout.move(path[0])
                 else:
-                    logger.info(f"No self.next_point {str(self.next_point)}")
+                    # logger.info(f"No self.next_point {str(self.next_point)}")
                     return

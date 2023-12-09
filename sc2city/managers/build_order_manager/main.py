@@ -16,6 +16,6 @@ class BuildOrderManager:
     def execute_frame_zero(self) -> None:
         self.scv_manager.worker_split_frame_zero()
 
-    def execute_strategy(self):
-        self.scv_manager.move_scvs()
+    async def execute_strategy(self):
+        await self.scv_manager.move_scvs()
         self.structure_manager.execute_builds()

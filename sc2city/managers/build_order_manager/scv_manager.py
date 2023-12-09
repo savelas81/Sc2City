@@ -30,10 +30,10 @@ class SCVManager:
             mineral_field = mineral_fields.closest_to(worker)
             self.__assign_worker_to_mineral_field(worker, mineral_field)
 
-    def move_scvs(self) -> None:
+    async def move_scvs(self) -> None:
         self.__efficient_mining()
         self.__distribute_workers()
-        self.__build_structures()
+        await self.__build_structures()
 
     def __efficient_mining(self) -> None:
         pass
@@ -41,31 +41,49 @@ class SCVManager:
     def __distribute_workers(self) -> None:
         pass
 
-    def __build_structures(self) -> None:
-        order = self.bot.queues[OrderType.STRUCTURE][0]
-        # TODO: Add logic to handle refineries
-        if order.id == UnitTypeId.REFINERY:
-            return
-        if order.status == Status.PENDING and self.bot.can_afford(order.id):
-            position = self.__get_position(order.id)
+    # TODO: Improve logic and refactor
+    # TODO: Implement logic for conditional orders
+    # TODO: Handle for when SCV's have the order, but haven't started building
+    async def __build_structures(self) -> None:
+        for order in self.bot.queues[OrderType.STRUCTURE]:
+            if order.status != Status.PENDING:
+                continue
+            if not self.bot.can_afford(order.id):
+                return
+            if order.id == UnitTypeId.REFINERY:
+                position = self.__build_refinery(order)
+                return
+            position = await self.__get_position(order.id)
             worker = self.__select_contractor(position)
             # TODO: Add logic for when there are no available workers
             if not worker:
                 return
             worker.build(order.id, position)
-            order.status = Status.STARTED
-            print(f"Building {order.id} at {position}")
 
-    def __get_position(self, unit_id: UnitTypeId) -> Point2:
+    async def __get_position(self, unit_id: UnitTypeId) -> Point2:
         position_priority = BUILDING_PRIORITY[unit_id]
         possible_positions = self.bot.current_strategy.building_placements.lists[
             position_priority
         ]
         for position in possible_positions:
-            if self.bot.can_place(unit_id, position):
+            if await self.bot.can_place_single(unit_id, position):
                 return position
         # TODO: Handle for when all pre-defined positions are occupied
         return possible_positions[0]
+
+    # TODO: Improve this logic
+    def __build_refinery(self) -> None:
+        for cc in self.bot.townhalls:
+            geysers = self.bot.vespene_geyser.closer_than(10.0, cc)
+            for geyser in geysers:
+                if self.bot.can_place(UnitTypeId.REFINERY, geyser):
+                    worker = self.__select_contractor(cc.position)
+                    break
+            if worker:
+                break
+        if not worker:
+            return
+        worker.build(UnitTypeId.REFINERY, geyser)
 
     def __assign_worker_to_mineral_field(
         self, worker: Unit, mineral_field: Unit
@@ -73,6 +91,7 @@ class SCVManager:
         worker.gather(mineral_field)
         self.bot.mineral_collector_dict[worker.tag] = mineral_field.tag
 
+    # TODO: Handle scv assigned task so that the same one is not called for more than one task
     def __select_contractor(self, position: Point2) -> Unit | None:
         # TODO: Add error handling for when there are no available workers
         # TODO: Add logic to select other types of SCV contractors aside from mineral collectors

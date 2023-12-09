@@ -20,21 +20,25 @@ class StructureManager:
         self.__train_units()
 
     # TODO: Improve logic and refactor
+    # TODO: Implement logic for conditional orders
+    # TODO: Improve logic for handling multiple orders
     def __train_units(self) -> None:
         for order in self.bot.queues[OrderType.UNIT]:
-            if order.status == Status.PENDING and self.bot.can_afford(order.id):
-                facility = UNIT_TRAINED_FROM[order.id]
-                facilities = self.bot.structures(facility)
-                if facilities:
-                    facilities = self.__sort_and_filter_production_facilities(
-                        facilities, order.id
-                    )
-                if not facilities:
-                    continue
-                for facility in facilities:
-                    facility.train(order.id)
-                    order.status = Status.STARTED
-                    print(f"Training {order.id} at {facility}")
+            if order.status != Status.PENDING:
+                continue
+            if not self.bot.can_afford(order.id):
+                return
+            facility = UNIT_TRAINED_FROM[order.id]
+            facilities = self.bot.structures(facility)
+            if facilities:
+                facilities = self.__sort_and_filter_production_facilities(
+                    facilities, order.id
+                )
+            if not facilities:
+                continue
+            for facility in facilities:
+                facility.train(order.id)
+                order.status = Status.STARTED
 
     #  TODO: Improve this logic and the parameters used
     def __sort_and_filter_production_facilities(

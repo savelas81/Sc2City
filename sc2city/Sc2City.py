@@ -64,11 +64,16 @@ class Sc2City(BotAI):
         self.micro_manager.update_unit_scripts()
 
         # TODO: Implement synchronous execution of managers
-        self.build_order_manager.execute_strategy()
+        await self.build_order_manager.execute_strategy()
         self.units_manager.give_orders()
+
+    async def on_building_construction_started(self, unit: Unit):
+        self.macro_manager.building_construction_started(unit)
+        print(f"Building {unit.type_id} started at {unit.position}")
 
     async def on_building_construction_complete(self, unit: Unit):
         self.macro_manager.production_complete(unit, OrderType.STRUCTURE)
+        print(f"Building {unit.type_id} completed at {unit.position}")
 
     async def on_unit_created(self, unit: Unit) -> None:
         self.macro_manager.production_complete(unit, OrderType.UNIT)
