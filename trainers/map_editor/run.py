@@ -4,7 +4,8 @@ import os
 # Get the absolute path of the directory of the current script
 dir_path = os.path.dirname(os.path.realpath(__file__))
 # Add the relative path for the bot script to sys.path
-sys.path.append(os.path.join(dir_path, "..", "..", "sc2city"))
+main_bot_path = os.path.abspath(os.path.join(dir_path, "..", "..", "sc2city"))
+sys.path.append(main_bot_path)
 
 from sc2.data import Difficulty, Race
 from sc2.player import Bot, Computer
@@ -17,7 +18,7 @@ from placement_extractor import BuildingPlacementExtractor
 def setup_and_start_game(
     map_name: str, map_type: MapType, build_type: BuildTypes
 ) -> bool:
-    bot = BuildingPlacementExtractor(map_type, build_type)
+    bot = BuildingPlacementExtractor(main_bot_path, map_type, build_type)
     player = Bot(bot.race, bot)
     opponent = Computer(Race.Protoss, Difficulty.Easy)
 

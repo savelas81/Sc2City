@@ -13,7 +13,13 @@ from sc2city.game_objects import PositionPriority, MAP_PINS, PositionPriorityLis
 class BuildingPlacementExtractor(BotAI):
     race = Race.Terran
 
-    def __init__(self, map_type=MapType.ONE_SIDE, build_type=BuildTypes.ONE_BASE):
+    def __init__(
+        self,
+        main_bot_path: str,
+        map_type=MapType.ONE_SIDE,
+        build_type=BuildTypes.ONE_BASE,
+    ):
+        self.main_bot_path = main_bot_path
         self.map_type = map_type
         self.build_type = build_type
         self.map_pins_saved = False
@@ -66,7 +72,7 @@ class BuildingPlacementExtractor(BotAI):
     def save_map_pins(self, map_pins: PositionPriorityLists) -> None:
         path = self.build_type.value
         name = self.game_info.map_name + str(self.start_location) + ".json"
-        filename = path + name
+        filename = self.main_bot_path + "/" + path + name
         map_pins_str = {key.name: value for key, value in map_pins.items()}
         with open(filename, "w") as f:
             json.dump(map_pins_str, f, indent=2)
