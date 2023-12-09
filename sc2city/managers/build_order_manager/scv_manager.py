@@ -52,7 +52,7 @@ class SCVManager:
             if not self.bot.can_afford(order.id):
                 return
             if order.id == UnitTypeId.REFINERY:
-                position = self.__build_refinery(order)
+                position = self.__build_refinery()
                 return
             position = await self.__get_position(order.id)
             worker = self.__select_contractor(position)
