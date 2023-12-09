@@ -1,6 +1,7 @@
 import enum
 import json
 import heapq
+from typing import TypeAlias
 from dataclasses import dataclass, field
 from collections import defaultdict
 
@@ -22,10 +23,13 @@ class PositionPriority(enum.Enum):
     SENSOR_TOWER = 7
 
 
+PositionPriorityLists: TypeAlias = dict[PositionPriority, list[Point2]]
+
+
 @dataclass
 class BuildingPlacements:
     # TODO: Add a default building placements to fallback on
-    lists: dict[PositionPriority, list[Point2]] = field(
+    lists: PositionPriorityLists = field(
         default_factory=lambda: defaultdict(list[Point2])
     )
 
@@ -63,7 +67,7 @@ BUILDING_PRIORITY = {
 }
 
 
-MAP_PINS = {
+MAP_PINS: dict[UnitTypeId, tuple[PositionPriority, int]] = {
     UnitTypeId.BARRACKS: (PositionPriority.MAIN, 1),
     UnitTypeId.FACTORY: (PositionPriority.MAIN, 2),
     UnitTypeId.STARPORT: (PositionPriority.MAIN, 3),
@@ -90,7 +94,7 @@ MAP_PINS = {
 
 
 # TODO: Move this to a map editor module
-def save_map_pins(bot: BotAI) -> dict[PositionPriority, list[Point2]]:
+def save_map_pins(bot: BotAI) -> PositionPriorityLists:
     positions_dict = {key: [] for key in PositionPriority}
 
     for structure in bot.structures:

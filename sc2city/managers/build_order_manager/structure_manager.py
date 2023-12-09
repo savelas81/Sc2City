@@ -22,6 +22,7 @@ class StructureManager:
     # TODO: Improve logic and refactor
     # TODO: Implement logic for conditional orders
     # TODO: Improve logic for handling multiple orders
+    # TODO: Add logic to handle for interruptions
     def __train_units(self) -> None:
         for order in self.bot.queues[OrderType.UNIT]:
             if order.status != Status.PENDING:

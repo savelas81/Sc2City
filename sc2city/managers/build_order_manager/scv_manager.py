@@ -44,6 +44,7 @@ class SCVManager:
     # TODO: Improve logic and refactor
     # TODO: Implement logic for conditional orders
     # TODO: Handle for when SCV's have the order, but haven't started building
+    # TODO: Add logic to handle for interruptions
     async def __build_structures(self) -> None:
         for order in self.bot.queues[OrderType.STRUCTURE]:
             if order.status != Status.PENDING:

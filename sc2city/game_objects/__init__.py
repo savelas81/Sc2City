@@ -3,6 +3,7 @@ from .building_placements import (
     PositionPriority,
     BUILDING_PRIORITY,
     MAP_PINS,
+    PositionPriorityLists,
 )
 from .strategy import Strategy, Order, ScoutTime
 from .script import Script
