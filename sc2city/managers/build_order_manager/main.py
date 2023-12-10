@@ -1,7 +1,8 @@
 from typing import TYPE_CHECKING
 
+from sc2.unit import Unit
+
 from utils import Status, OrderType
-from game_objects import Order
 from .scv_manager import SCVManager
 from .structure_manager import StructureManager
 
@@ -19,7 +20,7 @@ class BuildOrderManager:
         self.scv_manager.worker_split_frame_zero()
 
     # TODO: Implement logic for conditional orders
-    async def execute_strategy(self):
+    async def execute_strategy(self) -> None:
         for order in self.bot.queue:
             if order.status != Status.PENDING:
                 continue
@@ -40,3 +41,35 @@ class BuildOrderManager:
                 break
 
         self.scv_manager.move_scvs()
+
+    def production_complete(self, unit: Unit) -> None:
+        order = next(
+            (
+                order
+                for order in self.bot.queue
+                if order.id == unit.type_id and order.status == Status.STARTED
+            ),
+            None,
+        )
+        if order is not None:
+            order.status = Status.FINISHED
+            if order.type == OrderType.STRUCTURE:
+                self.bot.contractors.remove(order.worker_tag)
+        else:
+            # TODO: Add logic to handle errors
+            print(f"{unit.type_id} not found in finished queue")
+
+    def building_construction_started(self, unit: Unit) -> None:
+        order = next(
+            (
+                order
+                for order in self.bot.queue
+                if order.id == unit.type_id and order.status == Status.PENDING
+            ),
+            None,
+        )
+        if order is not None:
+            order.status = Status.STARTED
+        else:
+            # TODO: Add logic to handle errors
+            print(f"{unit.type_id} not found in starting queue")
