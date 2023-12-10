@@ -36,6 +36,7 @@ class Sc2City(BotAI):
         self.iteration: int = 0
         self.current_strategy: Optional[Strategy] = None
         self.queue: list[Order] = []
+        self.unit_tags = set()
         # TODO: Merge worker information
         self.mineral_collector_dict: dict[int, int] = {}
         self.vespene_collector_dict: dict[int, int] = {}
@@ -71,9 +72,10 @@ class Sc2City(BotAI):
     async def on_building_construction_complete(self, unit: Unit):
         self.build_order_manager.production_complete(unit)
 
-    # TODO: Handle weird behavior where SCVs that build refineries are notified as new units
     async def on_unit_created(self, unit: Unit) -> None:
-        self.build_order_manager.production_complete(unit)
+        if unit.tag not in self.unit_tags:  # Workaround for weird SCV/Refinery behavior
+            self.unit_tags.add(unit.tag)
+            self.build_order_manager.production_complete(unit)
 
     async def on_unit_destroyed(self, unit_tag: int) -> None:
         self.map_analyzer.forget_unit(unit_tag)
