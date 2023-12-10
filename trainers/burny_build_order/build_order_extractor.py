@@ -4,6 +4,7 @@ import json
 import uuid
 import pyperclip
 
+import concurrent.futures
 from selenium import webdriver
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver import ActionChains
@@ -20,7 +21,7 @@ from config import BurnyOrder, TYPES, EXCEPTION_IDS, BURNY_ACTIONS
 
 class BuildOrderExtractor:
     download_folder = "build_orders"
-    timeout = 15
+    timeout = 10
 
     def __init__(self, url: str, download_dir: str):
         self.url = url
@@ -73,10 +74,17 @@ class BuildOrderExtractor:
         return new_id, new_type, can_skip
 
     def __copy_build_order(self) -> None:
-        try:
-            driver = self.__get_chrome_driver()
-        except:
-            driver = self.__get_firefox_driver()
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(self.__get_chrome_driver)
+            try:
+                driver = future.result(
+                    timeout=self.timeout
+                )  # Set timeout to 10 seconds
+            except concurrent.futures.TimeoutError:
+                driver = self.__get_firefox_driver()
+            except Exception as e:
+                print(f"An error occurred: {e}")
+
         wait = WebDriverWait(driver, self.timeout)
         driver.get(self.url)
         action = ActionChains(driver)
