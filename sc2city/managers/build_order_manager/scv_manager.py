@@ -7,6 +7,7 @@ from sc2.ids.unit_typeid import UnitTypeId
 
 from utils import Status
 from game_objects import BUILDING_PRIORITY, Order
+from .speed_mining import SpeedMining
 
 if TYPE_CHECKING:
     from Sc2City import Sc2City
@@ -15,6 +16,7 @@ if TYPE_CHECKING:
 class SCVManager:
     def __init__(self, bot: "Sc2City"):
         self.bot = bot
+        self.speed_mining = SpeedMining(bot)
 
     def worker_split_frame_zero(self) -> None:
         mineral_fields = self.bot.mineral_field.closer_than(
@@ -83,7 +85,18 @@ class SCVManager:
         order.update_status(Status.PLACEHOLDER)
 
     def __speed_mining(self) -> None:
-        pass
+        for worker_tag in self.bot.mineral_collector_dict:
+            worker = self.bot.workers.find_by_tag(worker_tag)
+            mineral_tag = self.bot.mineral_collector_dict[worker_tag]
+            self.speed_mining.speed_mine_minerals_single(
+                worker, mineral_tag, self.bot.mineral_collector_dict
+            )
+        for worker_tag in self.bot.vespene_collector_dict:
+            worker = self.bot.workers.find_by_tag(worker_tag)
+            vespene_tag = self.bot.vespene_collector_dict[worker_tag]
+            self.speed_mining.speed_mine_gas_single(
+                worker, vespene_tag, self.bot.vespene_collector_dict
+            )
 
     def __distribute_workers(self) -> None:
         self.__handle_idle_workers()
