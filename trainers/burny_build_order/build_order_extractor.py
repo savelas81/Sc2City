@@ -12,6 +12,10 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 
+from sc2city.utils import OrderType
+from sc2city.game_objects import Order
+from config import BurnyOrder, TYPES, EXCEPTION_IDS
+
 
 class BuildOrderExtractor:
     download_folder = "build_orders"
@@ -33,21 +37,36 @@ class BuildOrderExtractor:
         filepath = os.path.join(self.download_dir, filename)
         with open(filepath, "w") as f:
             build_order_obj = json.loads(build_order)
-            self.__format_build_order(build_order_obj)
-            json.dump(build_order_obj, f, indent=2)
+            formatted_orders = self.__format_build_order(build_order_obj)
+            json.dump(formatted_orders, f, indent=2)
 
-    def __format_build_order(self, build_order: dict) -> None:
-        current_priority = len(build_order) * 5
-        for order in build_order:
-            current_priority -= 5
-            order["id"] = order["name"]
-            order["priority"] = current_priority
-            order["target_value"] = 1
-            order["comment"] = "Write comment here"
-            del order["name"]
-            del order["supply"]
-            del order["time"]
-            del order["frame"]
+    def __format_build_order(self, build_order: list[BurnyOrder]) -> list[Order]:
+        priorities = range(len(build_order) * 5, 0, -5)
+        order_types = map(self.__get_type, build_order)
+
+        formatted_orders = [
+            {
+                "id": order["name"].upper(),
+                "type": order_type,
+                "can_skip": can_skip,
+                "priority": priority,
+                "target_value": 1,
+                "comment": "Write comment here",
+            }
+            for order, priority, (order_type, can_skip) in zip(
+                build_order, priorities, order_types
+            )
+        ]
+        return formatted_orders
+
+    def __get_type(self, order: BurnyOrder) -> tuple[str, bool]:
+        new_type = (
+            EXCEPTION_IDS[order["name"]]
+            if order["name"] in EXCEPTION_IDS
+            else TYPES[order["type"]]
+        )
+        can_skip = False if new_type == OrderType.STRUCTURE.name else True
+        return new_type, can_skip
 
     def __copy_build_order(self) -> None:
         driver = self.__get_driver()
@@ -87,12 +106,3 @@ class BuildOrderExtractor:
         )
         driver = webdriver.Chrome(options=chrome_options)
         return driver
-
-
-import os
-
-dir_path = os.path.dirname(os.path.realpath(__file__))
-
-url = "https://burnysc2.github.io/sc2-planner/?&race=terran&bo=002eJy9UssKwjAQ/Jc992Cy1tT+ingobZAgtCUmiIj/7q0R7I5tkF4zzOw8cnqS66jelwWFx2ippvvgr9bTq/iFqOOE3IKPbYjeLqDpHaBBkCesaYMb+iXHtqEoFAmBOb0DJC0SexfSUqyBB7yjIKkNIBmpQtyFcCqnCUb2IAjbYFhVJbSfXMbx4pvuQ4/nKVwhhwdRT7IgWkN5xBXXXpFSrtXJSlGqeZL0/q9w21S7Np0y33/n/AYyNOO0"
-bo_extractor = BuildOrderExtractor(url, dir_path)
-bo_extractor.get_build_order()

@@ -32,6 +32,7 @@ class OrderType(enum.Enum):
     STRUCTURE = 0
     UNIT = 1
     TECH = 2
+    ACTION = 3
 
 
 @dataclass
