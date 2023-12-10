@@ -4,7 +4,7 @@ from sc2.bot_ai import BotAI
 from sc2.data import Race
 from sc2.unit import Unit
 
-from utils import Settings, OrderType
+from utils import Settings
 from game_objects import Strategy, Order
 from managers import (
     HistoryAnalyzer,
@@ -35,13 +35,11 @@ class Sc2City(BotAI):
         # State
         self.iteration: int = 0
         self.current_strategy: Optional[Strategy] = None
-        self.queues: dict[OrderType, list[Order]] = {
-            OrderType.STRUCTURE: [],
-            OrderType.UNIT: [],
-            OrderType.TECH: [],
-        }
+        self.queue: list[Order] = []
+        # TODO: Merge worker information
         self.mineral_collector_dict: dict[int, int] = {}
         self.vespene_collector_dict: dict[int, int] = {}
+        self.contractors: list[int] = []
         # TODO: Implement army logic with scripts. Eg: army = {soldiers: [(Unit, Script)], squads: [(Squad, Script)], scouts: [(Scout, Script)]}
         self.scouts: list[Unit] = []
         # TODO: Merge this with scouting logic in micro manager
@@ -69,14 +67,12 @@ class Sc2City(BotAI):
 
     async def on_building_construction_started(self, unit: Unit):
         self.macro_manager.building_construction_started(unit)
-        print(f"Building {unit.type_id} started at {unit.position}")
 
     async def on_building_construction_complete(self, unit: Unit):
-        self.macro_manager.production_complete(unit, OrderType.STRUCTURE)
-        print(f"Building {unit.type_id} completed at {unit.position}")
+        self.macro_manager.production_complete(unit)
 
     async def on_unit_created(self, unit: Unit) -> None:
-        self.macro_manager.production_complete(unit, OrderType.UNIT)
+        self.macro_manager.production_complete(unit)
 
     async def on_unit_destroyed(self, unit_tag: int) -> None:
         self.map_analyzer.forget_unit(unit_tag)

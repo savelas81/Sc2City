@@ -25,6 +25,7 @@ class Order:
     id: UnitTypeId
     priority: int = 0
     target_value: int = 1
+    worker_tag: int = None
     conditional: bool = True
     conditional_behavior: str = "skip"  # TODO: Enumerate the possible values
     target_value_behavior: bool = False

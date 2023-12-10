@@ -1,7 +1,7 @@
 import copy
 from typing import TYPE_CHECKING
 
-from utils import OrderType, Status
+from utils import Status
 from game_objects import Order
 
 if TYPE_CHECKING:
@@ -12,42 +12,17 @@ class QueueManager:
     def __init__(self, bot: "Sc2City"):
         self.bot = bot
 
-    def set_starting_queues(self) -> None:
-        self.__sort_build_order()
-        self.bot.queues = self.__distribute_queues(
-            self.bot.current_strategy.build_order
-        )
-
-    def update_queues(self) -> None:
-        self.__clear_finished_orders()
-
-    def __sort_build_order(self) -> None:
-        self.bot.current_strategy.build_order.sort(
-            key=lambda x: x.priority, reverse=True
-        )
-
-    def __distribute_queues(
-        self, merged_queue: list[Order], needs_sort=False
-    ) -> dict[OrderType, list]:
-        if needs_sort:
-            sorted_queue = sorted(merged_queue, key=lambda x: x.priority, reverse=True)
-        elif self.__is_sorted(merged_queue):
-            sorted_queue = merged_queue
-        else:
-            sorted_queue = sorted(merged_queue, key=lambda x: x.priority, reverse=True)
-
-        queues = {OrderType.STRUCTURE: [], OrderType.UNIT: [], OrderType.TECH: []}
-        for order in sorted_queue:
+    def start_new_queue(self, orders: list[Order]) -> None:
+        self.bot.queue.clear()
+        for order in orders:
             if order.target_value > 1:
-                queues[order.type].extend(self.__expand_order(order))
+                self.bot.queue.extend(self.__expand_order(order))
             else:
-                queues[order.type].append(order)
-        return queues
+                self.bot.queue.append(order)
+        self.bot.queue.sort(key=lambda x: x.priority, reverse=True)
 
-    def __is_sorted(self, queue: list[Order]) -> bool:
-        return all(
-            current.priority >= next.priority for current, next in zip(queue, queue[1:])
-        )
+    def update_queue(self) -> None:
+        self.__clear_finished_orders()
 
     def __expand_order(self, order: Order) -> list[Order]:
         new_orders = []
@@ -58,9 +33,6 @@ class QueueManager:
         return new_orders
 
     def __clear_finished_orders(self) -> None:
-        self.bot.queues = {
-            order_type: list(
-                filter(lambda order: order.status != Status.FINISHED, orders)
-            )
-            for order_type, orders in self.bot.queues.items()
-        }
+        self.bot.queue = [
+            order for order in self.bot.queue if order.status != Status.FINISHED
+        ]

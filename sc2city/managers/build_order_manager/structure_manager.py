@@ -4,7 +4,8 @@ from sc2.dicts.unit_trained_from import UNIT_TRAINED_FROM
 from sc2.ids.unit_typeid import UnitTypeId
 from sc2.units import Units
 
-from utils import Status, OrderType
+from utils import Status
+from game_objects import Order
 
 if TYPE_CHECKING:
     from Sc2City import Sc2City
@@ -15,33 +16,33 @@ class StructureManager:
     def __init__(self, bot: "Sc2City"):
         self.bot = bot
 
-    # TODO: Add logic for add-ons, researches and building upgrades (e.g. planetary fortress)
-    def execute_builds(self) -> None:
-        self.__train_units()
-
-    # TODO: Improve logic and refactor
-    # TODO: Implement logic for conditional orders
     # TODO: Improve logic for handling multiple orders
+    # TODO: Add logic to decide if it should wait for buildings, when no facility is available
     # TODO: Add logic to handle for interruptions
-    def __train_units(self) -> None:
-        for order in self.bot.queues[OrderType.UNIT]:
-            if order.status != Status.PENDING:
-                continue
-            if not self.bot.can_afford(order.id):
-                return
-            facility = UNIT_TRAINED_FROM[order.id]
-            facilities = self.bot.structures(facility)
-            if facilities:
-                facilities = self.__sort_and_filter_production_facilities(
-                    facilities, order.id
-                )
-            if not facilities:
-                continue
-            for facility in facilities:
-                facility.train(order.id)
-                order.status = Status.STARTED
+    def train_unit(self, order: Order) -> bool | None:
+        """
+        Returns True when there is no facility available,
+        but next order can be started.
+        """
+        if self.bot.tech_requirement_progress(order.id) != 1:
+            return True
+        facility_id = UNIT_TRAINED_FROM[order.id]
+        # This might be a problem for buildings that can train multiple units at the same time
+        # TODO: Add better logic for choosing facility
+        facilities = self.bot.structures(facility_id).idle.ready
+        if not facilities:
+            return True
+        # TODO: Add better logic for choosing facility
+        facility = facilities.random
+        facility.train(order.id)
+        order.status = Status.STARTED
 
-    #  TODO: Improve this logic and the parameters used
+    # TODO: Add logic for add-ons, researches and building upgrades (e.g. planetary fortress)
+    def upgrade(self) -> None:
+        pass
+
+    # TODO: Improve this logic and the parameters used
+    # TODO: This should return a single facility
     def __sort_and_filter_production_facilities(
         self, facilities: Units, unit_type_id: UnitTypeId = None
     ) -> Optional[Units]:

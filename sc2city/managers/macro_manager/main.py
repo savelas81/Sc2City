@@ -29,7 +29,7 @@ class MacroManager:
         self.__set_map_filename()
         opening = self.__choose_opening()
         self.bot.current_strategy = Strategy.from_dict(opening, self.map_file)
-        self.queue_manager.set_starting_queues()
+        self.queue_manager.start_new_queue(self.bot.current_strategy.build_order)
         # TODO: Create method to handle SCV scouts
         self.pending_scv_scouts = [
             s for s in self.bot.current_strategy.scout_times if s.id == UnitTypeId.SCV
@@ -38,7 +38,7 @@ class MacroManager:
     def update_strategy(self) -> None:
         # TODO: Add logic to update strategy based on game state
         # TODO: Add logic to make decisions outside of imported strategies
-        self.queue_manager.update_queues()
+        self.queue_manager.update_queue()
         if self.pending_scv_scouts:
             self.__update_scv_scouts()
 
@@ -47,7 +47,7 @@ class MacroManager:
         order = next(
             (
                 order
-                for order in self.bot.queues[OrderType.STRUCTURE]
+                for order in self.bot.queue
                 if order.id == unit.type_id and order.status == Status.PENDING
             ),
             None,
@@ -58,17 +58,19 @@ class MacroManager:
             # TODO: Add logic to handle errors
             print(f"{unit.type_id} not found in starting queue")
 
-    def production_complete(self, unit: Unit, order_type: OrderType) -> None:
+    def production_complete(self, unit: Unit) -> None:
         order = next(
             (
                 order
-                for order in self.bot.queues[order_type]
+                for order in self.bot.queue
                 if order.id == unit.type_id and order.status == Status.STARTED
             ),
             None,
         )
         if order is not None:
             order.status = Status.FINISHED
+            if order.type == OrderType.STRUCTURE:
+                self.bot.contractors.remove(order.worker_tag)
         else:
             # TODO: Add logic to handle errors
             print(f"{unit.type_id} not found in finished queue")

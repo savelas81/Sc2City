@@ -13,7 +13,7 @@
       "conditional": true,
       "conditional_behavior": "skip",
       "id": "SCV",
-	  "priority": 10,
+	  "priority": 20,
       "target_value_behavior": false,
       "target_value": 1,
       "comment": "conditional_behavior accepts skip and wait"
@@ -23,7 +23,7 @@
       "conditional": "self.AI.minerals > 400",
       "conditional_behavior": "skip",
       "id": "SCV",
-	  "priority": 9,
+	  "priority": 19,
       "target_value_behavior": false,
       "target_value": 1,
       "comment": "write comment here"
@@ -33,7 +33,7 @@
       "conditional": true,
       "conditional_behavior": "skip",
       "id": "SUPPLYDEPOT",
-	  "priority": 10,
+	  "priority": 15,
       "target_value_behavior": false,
       "target_value": 1,
       "comment": "write comment here"
@@ -43,7 +43,7 @@
       "conditional": true,
       "conditional_behavior": "skip",
       "id": "BARRACKS",
-	  "priority": 9,
+	  "priority": 12,
       "target_value_behavior": false,
       "target_value": 1,
       "comment": "write comment here"
@@ -73,7 +73,7 @@
       "conditional": true,
       "conditional_behavior": "skip",
       "id": "FACTORY",
-	  "priority": 7,
+	  "priority": 6,
       "target_value_behavior": false,
       "target_value": 1,
       "comment": "write comment here"
@@ -83,7 +83,7 @@
       "conditional": true,
       "conditional_behavior": "skip",
       "id": "SUPPLYDEPOT",
-	  "priority": 6,
+	  "priority": 7,
       "target_value_behavior": false,
       "target_value": 1,
       "comment": "write comment here"
@@ -93,7 +93,7 @@
       "conditional": true,
       "conditional_behavior": "skip",
       "id": "MARINE",
-	  "priority": 6,
+	  "priority": 11,
       "target_value_behavior": false,
       "target_value": 3,
       "comment": "conditional_behavior accepts skip and wait"
