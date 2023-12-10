@@ -6,7 +6,6 @@ import pyperclip
 
 import concurrent.futures
 from selenium import webdriver
-from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver import ActionChains
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
@@ -21,7 +20,7 @@ from config import BurnyOrder, TYPES, EXCEPTION_IDS, BURNY_ACTIONS
 
 class BuildOrderExtractor:
     download_folder = "build_orders"
-    timeout = 10
+    timeout = 15
 
     def __init__(self, url: str, download_dir: str):
         self.url = url
