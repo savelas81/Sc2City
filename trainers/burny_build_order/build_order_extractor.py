@@ -7,7 +7,8 @@ import pyperclip
 from selenium import webdriver
 from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver import ActionChains
-from selenium.webdriver.chrome.options import Options
+from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
@@ -72,7 +73,10 @@ class BuildOrderExtractor:
         return new_id, new_type, can_skip
 
     def __copy_build_order(self) -> None:
-        driver = self.__get_driver()
+        try:
+            driver = self.__get_chrome_driver()
+        except:
+            driver = self.__get_firefox_driver()
         wait = WebDriverWait(driver, self.timeout)
         driver.get(self.url)
         action = ActionChains(driver)
@@ -96,8 +100,8 @@ class BuildOrderExtractor:
         )
         copy_button.click()
 
-    def __get_driver(self) -> WebDriver:
-        chrome_options = Options()
+    def __get_chrome_driver(self) -> webdriver.Chrome:
+        chrome_options = ChromeOptions()
         chrome_options.add_experimental_option(
             "prefs",
             {
@@ -107,5 +111,19 @@ class BuildOrderExtractor:
                 "plugins.always_open_pdf_externally": True,
             },
         )
-        driver = webdriver.Chrome(options=chrome_options)
-        return driver
+        return webdriver.Chrome(options=chrome_options)
+
+    def __get_firefox_driver(self) -> webdriver.Firefox:
+        firefox_options = FirefoxOptions()
+        firefox_options.set_preference("browser.download.folderList", 2)
+        firefox_options.set_preference(
+            "browser.download.manager.showWhenStarting", False
+        )
+        firefox_options.set_preference("browser.download.dir", self.download_dir)
+        firefox_options.set_preference(
+            "browser.helperApps.neverAsk.saveToDisk", "application/pdf"
+        )
+        firefox_options.set_preference(
+            "pdfjs.disabled", True
+        )  # disable the built-in PDF viewer
+        return webdriver.Firefox(options=firefox_options)
