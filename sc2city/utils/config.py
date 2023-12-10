@@ -33,6 +33,7 @@ class OrderType(enum.Enum):
     UNIT = 1
     TECH = 2
     ACTION = 3
+    SCV_ACTION = 4
 
 
 @dataclass

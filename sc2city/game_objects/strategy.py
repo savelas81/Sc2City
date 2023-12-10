@@ -1,9 +1,33 @@
+import enum
 from dataclasses import dataclass, field
 
 from sc2.ids.unit_typeid import UnitTypeId
 
+
 from .building_placements import BuildingPlacements
 from utils import BuildTypes, OrderType, Status
+
+
+class CustomAbilities(enum.Enum):
+    WORKER_TO_MINS = 5000
+    WORKER_TO_GAS = 5001
+    WORKER_TO_GAS_3 = 5002
+    WORKER_TO_SCOUT = 5003
+    WORKER_FROM_SCOUT = 5004
+    DO_NOTHING_1_SEC = 5005
+    DO_NOTHING_5_SEC = 5006
+    BARRACKS_DETACH_TECHLAB = 5007
+    BARRACKS_DETACH_REACTOR = 5008
+    BARRACKS_ATTACH_TECHLAB = 5009
+    BARRACKS_ATTACH_REACTOR = 5010
+    FACTORY_DETACH_TECHLAB = 5011
+    FACTORY_DETACH_REACTOR = 5012
+    FACTORY_ATTACH_TECHLAB = 5013
+    FACTORY_ATTACH_REACTOR = 5014
+    STARPORT_DETACH_TECHLAB = 5015
+    STARPORT_DETACH_REACTOR = 5016
+    STARPORT_ATTACH_TECHLAB = 5017
+    STARPORT_ATTACH_REACTOR = 5018
 
 
 @dataclass

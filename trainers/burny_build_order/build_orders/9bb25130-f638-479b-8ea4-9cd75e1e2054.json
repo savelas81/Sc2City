@@ -49,7 +49,7 @@
   },
   {
     "id": "WORKER_TO_SCOUT",
-    "type": "ACTION",
+    "type": "SCV_ACTION",
     "can_skip": true,
     "priority": 265,
     "target_value": 1,
@@ -64,8 +64,8 @@
     "comment": "Write comment here"
   },
   {
-    "id": "3WORKER_TO_GAS",
-    "type": "ACTION",
+    "id": "WORKER_TO_GAS_3",
+    "type": "SCV_ACTION",
     "can_skip": true,
     "priority": 255,
     "target_value": 1,
@@ -80,8 +80,8 @@
     "comment": "Write comment here"
   },
   {
-    "id": "3WORKER_TO_GAS",
-    "type": "ACTION",
+    "id": "WORKER_TO_GAS_3",
+    "type": "SCV_ACTION",
     "can_skip": true,
     "priority": 245,
     "target_value": 1,
@@ -176,7 +176,7 @@
     "comment": "Write comment here"
   },
   {
-    "id": "CALL_DOWN_MULE",
+    "id": "CALLDOWNMULE_CALLDOWNMULE",
     "type": "ACTION",
     "can_skip": true,
     "priority": 185,
@@ -312,7 +312,7 @@
     "comment": "Write comment here"
   },
   {
-    "id": "CALL_DOWN_MULE",
+    "id": "CALLDOWNMULE_CALLDOWNMULE",
     "type": "ACTION",
     "can_skip": true,
     "priority": 100,
@@ -424,7 +424,7 @@
     "comment": "Write comment here"
   },
   {
-    "id": "CALL_DOWN_MULE",
+    "id": "CALLDOWNMULE_CALLDOWNMULE",
     "type": "ACTION",
     "can_skip": true,
     "priority": 30,

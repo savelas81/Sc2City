@@ -5,5 +5,5 @@ from .building_placements import (
     MAP_PINS,
     PositionPriorityLists,
 )
-from .strategy import Strategy, Order, ScoutTime
+from .strategy import Strategy, Order, ScoutTime, CustomAbilities
 from .script import Script

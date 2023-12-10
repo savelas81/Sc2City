@@ -14,7 +14,7 @@ from selenium.webdriver.common.by import By
 
 from sc2city.utils import OrderType
 from sc2city.game_objects import Order
-from config import BurnyOrder, TYPES, EXCEPTION_IDS
+from config import BurnyOrder, TYPES, EXCEPTION_IDS, BURNY_ACTIONS
 
 
 class BuildOrderExtractor:
@@ -46,27 +46,30 @@ class BuildOrderExtractor:
 
         formatted_orders = [
             {
-                "id": order["name"].upper(),
+                "id": new_id,
                 "type": order_type,
                 "can_skip": can_skip,
                 "priority": priority,
                 "target_value": 1,
                 "comment": "Write comment here",
             }
-            for order, priority, (order_type, can_skip) in zip(
-                build_order, priorities, order_types
-            )
+            for priority, (new_id, order_type, can_skip) in zip(priorities, order_types)
         ]
         return formatted_orders
 
-    def __get_type(self, order: BurnyOrder) -> tuple[str, bool]:
+    def __get_type(self, order: BurnyOrder) -> tuple[str, str, bool]:
+        new_id = (
+            BURNY_ACTIONS[order["name"]]
+            if order["name"] in BURNY_ACTIONS
+            else order["name"].upper()
+        )
         new_type = (
             EXCEPTION_IDS[order["name"]]
             if order["name"] in EXCEPTION_IDS
             else TYPES[order["type"]]
         )
         can_skip = False if new_type == OrderType.STRUCTURE.name else True
-        return new_type, can_skip
+        return new_id, new_type, can_skip
 
     def __copy_build_order(self) -> None:
         driver = self.__get_driver()
