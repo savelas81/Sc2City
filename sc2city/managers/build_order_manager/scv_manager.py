@@ -5,6 +5,7 @@ from sc2.units import Units
 from sc2.position import Point2
 from sc2.ids.unit_typeid import UnitTypeId
 
+from utils import Status
 from game_objects import BUILDING_PRIORITY, Order
 
 if TYPE_CHECKING:
@@ -33,26 +34,25 @@ class SCVManager:
         self.__speed_mining()
         self.__distribute_workers()
 
-    # TODO: Handle for when SCV's have the order, but haven't started building
-    # TODO: Add logic to handle for interruptions
-    async def scv_build(self, order: Order) -> bool | None:
+    # TODO: Handle for cases where the build command is not successful, since
+    # the API does't return anything (maybe check if resources are being spent)
+    async def scv_build(self, order: Order) -> bool:
         """
-        Returns True when scv is moving to location and haven't
-        started building, but next order can be started.
+        Returns False When executing orders to avoid double commands.
         """
         if self.bot.tech_requirement_progress(order.id) != 1:
-            return
-        if order.worker_tag:
-            return True
+            return order.can_skip
         if order.id == UnitTypeId.REFINERY:
-            position = self.__build_refinery(order)
-            return
+            await self.__build_refinery(order)
+            return False
         position = await self.__get_position(order.id)
         worker = self.__select_contractor(position, order)
         # TODO: Add logic for when there are no available workers
         if not worker:
-            return
+            return order.can_skip
         worker.build(order.id, position)
+        order.update_status(Status.PLACEHOLDER)
+        return False
 
     async def __get_position(self, unit_id: UnitTypeId) -> Point2:
         position_priority = BUILDING_PRIORITY[unit_id]
@@ -66,11 +66,13 @@ class SCVManager:
         return possible_positions[0]
 
     # TODO: Improve this logic
-    def __build_refinery(self, order: Order) -> None:
+    async def __build_refinery(self, order: Order) -> None:
         for cc in self.bot.townhalls:
             geysers = self.bot.vespene_geyser.closer_than(10.0, cc)
             for geyser in geysers:
-                if self.bot.can_place(UnitTypeId.REFINERY, geyser):
+                if await self.bot.can_place_single(
+                    UnitTypeId.REFINERY, geyser.position
+                ):
                     worker = self.__select_contractor(cc.position, order)
                     break
             if worker:
@@ -78,6 +80,7 @@ class SCVManager:
         if not worker:
             return
         worker.build(UnitTypeId.REFINERY, geyser)
+        order.update_status(Status.PLACEHOLDER)
 
     def __speed_mining(self) -> None:
         pass

@@ -71,6 +71,7 @@ class Sc2City(BotAI):
     async def on_building_construction_complete(self, unit: Unit):
         self.build_order_manager.production_complete(unit)
 
+    # TODO: Handle weird behavior where SCVs that build refineries are notified as new units
     async def on_unit_created(self, unit: Unit) -> None:
         self.build_order_manager.production_complete(unit)
 

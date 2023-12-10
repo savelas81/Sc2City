@@ -21,8 +21,22 @@ class QueueManager:
                 self.bot.queue.append(order)
         self.bot.queue.sort(key=lambda x: x.priority, reverse=True)
 
+    # TODO: Improve this logic
+    # TODO: Add logic for deciding what to do with each order based on it's age
     def update_queue(self) -> None:
-        self.__clear_finished_orders()
+        for order in self.bot.queue:
+            if order.age == 0:
+                break
+            if order.status == Status.PENDING:
+                continue
+            elif order.status == Status.PLACEHOLDER:
+                continue
+            elif order.status == Status.STARTED:
+                continue
+            elif order.status == Status.INTERRUPTED:
+                continue
+            elif order.status == Status.FINISHED:
+                self.bot.queue.remove(order)
 
     def __expand_order(self, order: Order) -> list[Order]:
         new_orders = []
@@ -31,8 +45,3 @@ class QueueManager:
             new_order.target_value = 1
             new_orders.append(new_order)
         return new_orders
-
-    def __clear_finished_orders(self) -> None:
-        self.bot.queue = [
-            order for order in self.bot.queue if order.status != Status.FINISHED
-        ]

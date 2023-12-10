@@ -20,12 +20,12 @@ class BuildTypes(enum.Enum):
     PROXY = Paths.PROXY.value
 
 
-# TODO: Add status for when SCVs have the order, but haven't started building
 class Status(enum.Enum):
     PENDING = 0
-    STARTED = 1
-    INTERRUPTED = 2
-    FINISHED = 3
+    PLACEHOLDER = 1
+    STARTED = 2
+    INTERRUPTED = 3
+    FINISHED = 4
 
 
 class OrderType(enum.Enum):

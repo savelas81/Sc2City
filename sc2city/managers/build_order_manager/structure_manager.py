@@ -16,30 +16,27 @@ class StructureManager:
     def __init__(self, bot: "Sc2City"):
         self.bot = bot
 
-    # TODO: Improve logic for handling multiple orders
-    # TODO: Add logic to decide if it should wait for buildings, when no facility is available
-    # TODO: Add logic to handle for interruptions
-    def train_unit(self, order: Order) -> bool | None:
+    def train_unit(self, order: Order) -> bool:
         """
-        Returns True when there is no facility available,
-        but next order can be started.
+        Returns False When executing orders to avoid double commands.
         """
         if self.bot.tech_requirement_progress(order.id) != 1:
-            return True
+            return order.can_skip
         facility_id = UNIT_TRAINED_FROM[order.id]
         # This might be a problem for buildings that can train multiple units at the same time
         # TODO: Add better logic for choosing facility
         facilities = self.bot.structures(facility_id).idle.ready
         if not facilities:
-            return True
+            return order.can_skip
         # TODO: Add better logic for choosing facility
         facility = facilities.random
         facility.train(order.id)
-        order.status = Status.STARTED
+        order.update_status(Status.STARTED)
+        return False
 
     # TODO: Add logic for add-ons, researches and building upgrades (e.g. planetary fortress)
-    def upgrade(self) -> None:
-        pass
+    def upgrade(self) -> bool:
+        return True
 
     # TODO: Improve this logic and the parameters used
     # TODO: This should return a single facility

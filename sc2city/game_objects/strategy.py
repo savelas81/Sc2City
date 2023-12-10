@@ -24,12 +24,15 @@ class Order:
     type: OrderType
     id: UnitTypeId
     priority: int = 0
-    target_value: int = 1
+    status: Status = Status.PENDING
+    status_age: int = 0  # Measured in frames
+    age: int = 0  # Measured in frames
     worker_tag: int = None
+    can_skip: bool = True
     conditional: bool = True
     conditional_behavior: str = "skip"  # TODO: Enumerate the possible values
     target_value_behavior: bool = False
-    status: Status = Status.PENDING
+    target_value: int = 1
     comment: str = ""
 
     @classmethod
@@ -37,6 +40,19 @@ class Order:
         dct["type"] = OrderType[dct["type"]]
         dct["id"] = UnitTypeId[dct["id"]]
         return cls(**dct)
+
+    def update_status(self, new_status: Status) -> None:
+        if new_status != self.status:
+            self.status = new_status
+            self.status_age = 0  # Reset the status age
+
+    def get_old(self, game_step: int) -> None:
+        self.status_age += game_step
+        self.age += game_step
+
+    def reset_ages(self) -> None:
+        self.status_age = 0
+        self.age = 0
 
 
 @dataclass
