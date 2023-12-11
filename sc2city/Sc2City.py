@@ -4,7 +4,7 @@ from sc2.bot_ai import BotAI
 from sc2.data import Race
 from sc2.unit import Unit
 
-from utils import Settings
+from utils import Settings, SCVAssignment, Workers
 from game_objects import Strategy, Order
 from managers import (
     HistoryAnalyzer,
@@ -36,11 +36,17 @@ class Sc2City(BotAI):
         self.iteration: int = 0
         self.current_strategy: Optional[Strategy] = None
         self.queue: list[Order] = []
-        self.unit_tags = set()
-        # TODO: Merge worker information
-        self.mineral_collector_dict: dict[int, int] = {}
-        self.vespene_collector_dict: dict[int, int] = {}
-        self.contractors: list[int] = []
+        self.unit_tags: set[int] = set()
+        self.scvs: Workers = {
+            SCVAssignment.MINERALS: {},
+            SCVAssignment.VESPENE: {},
+            SCVAssignment.BUILD: set(),
+            SCVAssignment.SCOUT: set(),
+            SCVAssignment.REPAIR: set(),
+            SCVAssignment.ARMY: set(),
+            SCVAssignment.NONE: set(),
+        }
+
         # TODO: Implement army logic with scripts. Eg: army = {soldiers: [(Unit, Script)], squads: [(Squad, Script)], scouts: [(Scout, Script)]}
         self.scouts: list[Unit] = []
         # TODO: Merge this with scouting logic in micro manager

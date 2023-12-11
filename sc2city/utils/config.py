@@ -1,6 +1,7 @@
 import enum
 import json
 from loguru import logger
+from typing import TypeAlias
 from dataclasses import dataclass
 
 
@@ -35,14 +36,17 @@ class OrderType(enum.Enum):
     SCV_ACTION = 4
 
 
-class ScvAssignment(enum.Enum):
+class SCVAssignment(enum.Enum):
     MINERALS = 0
     VESPENE = 2
-    CONTRACTOR = 3
+    BUILD = 3
     SCOUT = 3
     REPAIR = 4
     ARMY = 6
     NONE = 7
+
+
+Workers: TypeAlias = dict[SCVAssignment, dict[int, int] | set[int]]
 
 
 @dataclass

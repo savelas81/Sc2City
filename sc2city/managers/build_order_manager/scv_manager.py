@@ -6,6 +6,7 @@ from sc2.position import Point2
 from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.ability_id import AbilityId
 
+from utils import SCVAssignment
 from game_objects import BUILDING_PRIORITY, Order
 from .speed_mining import SpeedMining
 
@@ -114,13 +115,13 @@ class SCVManager:
         return True
 
     def __speed_mining(self) -> None:
-        for worker_tag in self.bot.mineral_collector_dict:
+        for worker_tag in self.bot.scvs[SCVAssignment.MINERALS]:
             worker = self.bot.workers.find_by_tag(worker_tag)
-            mineral_tag = self.bot.mineral_collector_dict[worker_tag]
+            mineral_tag = self.bot.scvs[SCVAssignment.MINERALS][worker_tag]
             self.speed_mining.speed_mine_minerals_single(
-                worker, mineral_tag, self.bot.mineral_collector_dict
+                worker, mineral_tag, self.bot.scvs[SCVAssignment.MINERALS]
             )
-        for worker_tag in self.bot.vespene_collector_dict:
+        for worker_tag in self.bot.scvs[SCVAssignment.VESPENE]:
             worker = self.bot.workers.find_by_tag(worker_tag)
             if (
                 not worker
@@ -130,7 +131,7 @@ class SCVManager:
                 not worker
             ):  #  If worker is inside refinery it can't be found by find_by_tag
                 continue
-            vespene_tag = self.bot.vespene_collector_dict[worker_tag]
+            vespene_tag = self.bot.scvs[SCVAssignment.VESPENE][worker_tag]
             self.speed_mining.speed_mine_gas_single(worker, vespene_tag)
 
     def __distribute_workers(self) -> None:
@@ -146,11 +147,11 @@ class SCVManager:
             """
             if (
                 refinery.custom_assigned_harvesters < self.scvs_per_refinery
-                and len(self.bot.vespene_collector_dict) < self.max_gas_miners
+                and len(self.bot.scvs[SCVAssignment.VESPENE]) < self.max_gas_miners
             ):
                 worker = self.__select_worker(refinery.position)
                 if worker:
-                    self.bot.vespene_collector_dict[worker.tag] = refinery.tag
+                    self.bot.scvs[SCVAssignment.VESPENE][worker.tag] = refinery.tag
                     worker.gather(refinery)
                     return
 
@@ -160,18 +161,18 @@ class SCVManager:
 			"""
             if (
                 refinery.custom_assigned_harvesters > self.scvs_per_refinery
-                or len(self.bot.vespene_collector_dict) > self.max_gas_miners
+                or len(self.bot.scvs[SCVAssignment.VESPENE]) > self.max_gas_miners
             ):
                 for worker in self.bot.workers.sorted(
                     lambda x: x.distance_to(refinery)
                 ):
-                    if worker.tag in self.bot.vespene_collector_dict:
-                        worker_target_refinery_tag = self.bot.vespene_collector_dict[
-                            worker.tag
-                        ]
+                    if worker.tag in self.bot.scvs[SCVAssignment.VESPENE]:
+                        worker_target_refinery_tag = self.bot.scvs[
+                            SCVAssignment.VESPENE
+                        ][worker.tag]
                         if worker_target_refinery_tag == refinery.tag:
                             worker.move(worker.position)
-                            del self.bot.vespene_collector_dict[worker.tag]
+                            del self.bot.scvs[SCVAssignment.VESPENE][worker.tag]
                             return
 
         """
@@ -204,15 +205,15 @@ class SCVManager:
     def __handle_idle_workers(self) -> None:
         # TODO send scv to closest townhall that is not saturated. If not under saturated available send to closest.
         for worker in self.bot.workers.idle:
-            if worker.tag not in self.bot.contractors:
+            if worker.tag not in self.bot.scvs[SCVAssignment.BUILD]:
                 cc = self.bot.townhalls.ready.not_flying.sorted(
                     lambda x: x.distance_to(worker)
                 ).first
                 mfs = self.bot.mineral_field.closer_than(10, cc)
                 mf = mfs.closest_to(worker)
-                self.bot.mineral_collector_dict[worker.tag] = mf.tag
+                self.bot.scvs[SCVAssignment.MINERALS][worker.tag] = mf.tag
                 worker.gather(mf)
-            elif worker.tag in self.bot.contractors:
+            elif worker.tag in self.bot.scvs[SCVAssignment.BUILD]:
                 # TODO: Handle for different order status
                 position = next(
                     order.target
@@ -234,12 +235,12 @@ class SCVManager:
         ):
             structure.custom_assigned_harvesters = 0
             structure.custom_surplus_harvesters = 0
-        for target_refinery_tag in self.bot.vespene_collector_dict.values():
+        for target_refinery_tag in self.bot.scvs[SCVAssignment.VESPENE].values():
             refinery = self.bot.gas_buildings.ready.find_by_tag(target_refinery_tag)
             if refinery:
                 refinery.custom_assigned_harvesters += 1
                 continue
-        for target_mf_tag in self.bot.mineral_collector_dict:
+        for target_mf_tag in self.bot.scvs[SCVAssignment.MINERALS]:
             mf = self.bot.mineral_field.find_by_tag(target_mf_tag)
             if mf:
                 mf.custom_assigned_harvesters += 1
@@ -261,40 +262,41 @@ class SCVManager:
         self, worker: Unit, mineral_field: Unit
     ) -> None:
         worker.gather(mineral_field)
-        self.bot.mineral_collector_dict[worker.tag] = mineral_field.tag
+        self.bot.scvs[SCVAssignment.MINERALS][worker.tag] = mineral_field.tag
 
     def __select_builder(self, position: Point2) -> Unit:
         # TODO: Add error handling for when there are no available workers
-        # TODO: Add logic to select other types of SCV contractors aside from mineral collectors
+        # TODO: Add logic to select other types of SCV builders aside from mineral collectors
         worker = next(
             (
                 w
                 for w in self.bot.workers.sorted(lambda x: x.distance_to(position))
-                if w.tag in self.bot.mineral_collector_dict
+                if w.tag in self.bot.scvs[SCVAssignment.MINERALS]
                 and not w.is_carrying_resource
             ),
             None,
         )
         if worker:
-            del self.bot.mineral_collector_dict[worker.tag]
-            self.bot.contractors.append(worker.tag)
+            del self.bot.scvs[SCVAssignment.MINERALS][worker.tag]
+            self.bot.scvs[SCVAssignment.BUILD].append(worker.tag)
             worker.stop()  # Used to handle workers in the move method
         return worker
 
+    # TODO: Merge this method with __select_builder
     def __select_worker(self, position: Point2) -> Unit | None:
         """
         Same as __select_contractor, but this is used for distributing workers.
-        Removes scv tag from mineral_collector_dict.
+        Removes scv tag from scvs[SCVAssignment.MINERALS].
         """
         worker = next(
             (
                 w
                 for w in self.bot.workers.sorted(lambda x: x.distance_to(position))
-                if w.tag in self.bot.mineral_collector_dict
+                if w.tag in self.bot.scvs[SCVAssignment.MINERALS]
                 and not w.is_carrying_resource
             ),
             None,
         )
         if worker:
-            del self.bot.mineral_collector_dict[worker.tag]
+            del self.bot.scvs[SCVAssignment.MINERALS][worker.tag]
         return worker

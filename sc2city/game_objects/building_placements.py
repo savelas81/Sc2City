@@ -1,13 +1,11 @@
 import enum
 import json
-import heapq
 from typing import TypeAlias
 from dataclasses import dataclass, field
 from collections import defaultdict
 
 from sc2.position import Point2
 from sc2.ids.unit_typeid import UnitTypeId
-from sc2.bot_ai import BotAI
 
 from utils import BuildTypes
 
@@ -91,19 +89,3 @@ MAP_PINS: dict[UnitTypeId, tuple[PositionPriority, int]] = {
     UnitTypeId.BUNKER: (PositionPriority.BUNKER, 1),
     UnitTypeId.SENSORTOWER: (PositionPriority.SENSOR_TOWER, 1),
 }
-
-
-# TODO: Move this to a map editor module
-def save_map_pins(bot: BotAI) -> PositionPriorityLists:
-    positions_dict = {key: [] for key in PositionPriority}
-
-    for structure in bot.structures:
-        if structure.type_id in MAP_PINS:
-            priority, order = MAP_PINS[structure.type_id]
-            positions_dict[priority].append((order, structure.position))
-
-    for key in positions_dict:
-        positions_dict[key] = [
-            x[1] for x in heapq.nsmallest(len(positions_dict[key]), positions_dict[key])
-        ]
-    return positions_dict

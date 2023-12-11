@@ -1,2 +1,10 @@
 from .game import Game
-from .config import Settings, load_settings, Status, BuildTypes, OrderType
+from .config import (
+    Settings,
+    load_settings,
+    Status,
+    BuildTypes,
+    OrderType,
+    SCVAssignment,
+    Workers,
+)

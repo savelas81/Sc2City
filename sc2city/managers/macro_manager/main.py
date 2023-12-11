@@ -5,7 +5,7 @@ from sc2.unit import Unit
 from sc2.position import Point2
 from sc2.ids.unit_typeid import UnitTypeId
 
-from utils import strategies
+from utils import strategies, SCVAssignment
 from game_objects import Strategy, ScoutTime
 from .queue_manager import QueueManager
 
@@ -55,7 +55,7 @@ class MacroManager:
                 return
 
             self.bot.scouts.append(scv)
-            del self.bot.mineral_collector_dict[scv.tag]
+            del self.bot.scvs[SCVAssignment.MINERALS][scv.tag]
             self.pending_scv_scouts.remove(scout)
 
     def __select_scv_scout(self, position: Point2) -> Unit | None:
@@ -64,7 +64,7 @@ class MacroManager:
             (
                 w
                 for w in self.bot.workers.sorted(lambda x: x.distance_to(position))
-                if w.tag in self.bot.mineral_collector_dict
+                if w.tag in self.bot.scvs[SCVAssignment.MINERALS]
                 and not w.is_carrying_resource
             ),
             None,
