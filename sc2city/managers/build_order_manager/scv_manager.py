@@ -17,6 +17,8 @@ class SCVManager:
     def __init__(self, bot: "Sc2City"):
         self.bot = bot
         self.speed_mining = SpeedMining(bot)
+        self.scvs_per_refinery: int = 3
+        self.max_gas_miners: int = 100
 
     def worker_split_frame_zero(self) -> None:
         mineral_fields = self.bot.mineral_field.closer_than(
@@ -102,13 +104,68 @@ class SCVManager:
         self.__calculate_custom_assigned_workers()
         self.__handle_idle_workers()
 
+        """
+        manages saturation for refineries
+        """
+        for refinery in self.bot.gas_buildings.ready:
+
+            """
+            Assigns scv to gather vespene if needed
+            """
+            if (refinery.custom_assigned_harvesters < self.scvs_per_refinery
+                    and len(self.bot.vespene_collector_dict) < self.max_gas_miners):
+                worker = self.__select_worker(refinery.position)
+                if worker:
+                    self.bot.vespene_collector_dict[worker.tag] = refinery.tag
+                    worker.gather(refinery)
+                    return
+
+            """
+            Stops scv from gathering vespene is needed. 
+            Idle workers are given new assignment on next frame.
+            """
+            if (
+                refinery.custom_assigned_harvesters > self.scvs_per_refinery
+                or len(self.bot.vespene_collector_dict) > self.max_gas_miners
+            ):
+                for worker in self.bot.workers.sorted(lambda x: x.distance_to(refinery)):
+                    if worker.tag in self.bot.vespene_collector_dict:
+                        worker_target_refinery_tag = self.bot.vespene_collector_dict[worker.tag]
+                        if worker_target_refinery_tag == refinery.tag:
+                            worker.move(worker.position)
+                            del self.bot.vespene_collector_dict[worker.tag]
+                            return
+
+        """
+        Stops scv from over saturated townhall if under saturated townhall is available.
+        Stops only if custom_surplus_harvesters > 1 to prevent workers changing mining locations unnecessary.
+        Idle workers are given new assignment on next frame.
+        """
+        townhall_with_surplus_harvesters = next(
+            (
+                t for t in self.bot.townhalls.ready.not_flying.sorted(
+                    lambda x: x.custom_surplus_harvesters, reverse=True)
+                if t.custom_surplus_harvesters > 1
+            ),
+            None
+        )
+        if (townhall_with_surplus_harvesters
+                and self.bot.townhalls.filter(lambda x: x.custom_surplus_harvesters < 0)):
+            position = self.bot.mineral_field.closer_than(10, townhall_with_surplus_harvesters.postion).center
+            worker = self.__select_worker(position=position)
+            if worker:
+                worker.move(worker.position)
+                return
+
+
+
     def __calculate_custom_assigned_workers(self) -> None:
         """
         Calculate custom_assigned_harvesters for CC, REFINERY and MINERALFIELD
         This is needed because we get wrong information from API when using speedmining
         """
         for structure in (
-                self.bot.gas_buildings | self.bot.townhalls | self.bot.mineral_field
+                self.bot.gas_buildings | self.bot.townhalls.ready.not_flying | self.bot.mineral_field
         ):
             structure.custom_assigned_harvesters = 0
             structure.custom_surplus_harvesters = 0
@@ -137,25 +194,26 @@ class SCVManager:
         # TODO send scv to closest townhall that is not saturated. If not under saturated available send to closest.
         if not self.bot.townhalls.ready:
             return
-        for worker in self.bot.workers:
-            cc = self.bot.townhalls.ready.sorted(
+        for worker in self.bot.workers.idle:
+            if worker.tag in self.bot.contractors:
+                continue
+            cc = self.bot.townhalls.ready.not_flying.sorted(
                 lambda x: x.distance_to(worker)).filter(
-                lambda x: x.custom_surplus_harvesters < 0)
+                lambda x: x.custom_surplus_harvesters < 0).first
             if cc:
-                mfs = self.bot.mineral_field.closer_than(10, cc)
+                mfs = self.bot.mineral_field.closer_than(10, cc.position)
                 mf = mfs.closest_to(worker)
                 self.bot.mineral_collector_dict[worker.tag] = mf.tag
                 worker.gather(mf)
                 return
-            if worker.is_idle and worker.tag not in self.bot.contractors:
-                cc = self.bot.townhalls.ready.not_flying.sorted(
-                    lambda x: x.distance_to(worker)
-                ).first
-                mfs = self.bot.mineral_field.closer_than(10, cc)
-                mf = mfs.closest_to(worker)
-                self.bot.mineral_collector_dict[worker.tag] = mf.tag
-                worker.gather(mf)
-                return
+            cc = self.bot.townhalls.ready.not_flying.sorted(
+                lambda x: x.distance_to(worker)
+            ).first
+            mfs = self.bot.mineral_field.closer_than(10, cc)
+            mf = mfs.closest_to(worker)
+            self.bot.mineral_collector_dict[worker.tag] = mf.tag
+            worker.gather(mf)
+            return
 
     def __assign_worker_to_mineral_field(
         self, worker: Unit, mineral_field: Unit
@@ -180,4 +238,22 @@ class SCVManager:
             del self.bot.mineral_collector_dict[worker.tag]
             self.bot.contractors.append(worker.tag)
             order.worker_tag = worker.tag
+        return worker
+
+    def __select_worker(self, position: Point2) -> Unit | None:
+        """
+        Same as __select_contractor, but this is used for distributing workers.
+        Removes scv tag from mineral_collector_dict.
+        """
+        worker = next(
+            (
+                w
+                for w in self.bot.workers.sorted(lambda x: x.distance_to(position))
+                if w.tag in self.bot.mineral_collector_dict
+                and not w.is_carrying_resource
+            ),
+            None,
+        )
+        if worker:
+            del self.bot.mineral_collector_dict[worker.tag]
         return worker
