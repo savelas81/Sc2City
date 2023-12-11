@@ -99,9 +99,42 @@ class SCVManager:
             )
 
     def __distribute_workers(self) -> None:
+        self.__calculate_custom_assigned_workers()
         self.__handle_idle_workers()
 
+    def __calculate_custom_assigned_workers(self) -> None:
+        """
+        Calculate custom_assigned_harvesters for CC, REFINERY and MINERALFIELD
+        This is needed because we get wrong information from API when using speedmining
+        """
+        for structure in (
+                self.bot.gas_buildings | self.bot.townhalls | self.bot.mineral_field
+        ):
+            structure.custom_assigned_harvesters = 0
+            structure.custom_surplus_harvesters = 0
+        for target_refinery_tag in self.bot.vespene_collector_dict.values():
+            refinery = self.bot.gas_buildings.ready.find_by_tag(target_refinery_tag)
+            if refinery:
+                refinery.custom_assigned_harvesters += 1
+                continue
+        for target_mf_tag in self.bot.mineral_collector_dict:
+            mf = self.bot.mineral_field.find_by_tag(target_mf_tag)
+            if mf:
+                mf.custom_assigned_harvesters += 1
+                cc = self.bot.townhalls.ready.not_flying.closest_to(mf)
+                cc.custom_assigned_harvesters += 1
+                continue
+
+        for refinery in self.bot.gas_buildings.ready:
+            refinery.custom_surplus_harvesters = refinery.custom_assigned_harvesters - 3
+        for cc in self.bot.townhalls.ready.not_flying:
+            mfs_amount = self.bot.mineral_field.closer_than(10, cc).amount
+            cc.custom_surplus_harvesters = cc.custom_assigned_harvesters - mfs_amount
+        for mf in self.bot.mineral_field:
+            mf.custom_surplus_harvesters = mf.custom_assigned_harvesters - 2
+
     def __handle_idle_workers(self) -> None:
+        # TODO send scv to closest townhall that is not saturated. If not under saturated available send to closest.
         for worker in self.bot.workers:
             if worker.is_idle and worker.tag not in self.bot.contractors:
                 cc = self.bot.townhalls.ready.not_flying.sorted(
