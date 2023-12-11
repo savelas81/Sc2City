@@ -1,10 +1,12 @@
 from typing import TYPE_CHECKING
 
+import loguru
 from sc2.unit import Unit
 from sc2.units import Units
 from sc2.position import Point2
 from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.ability_id import AbilityId
+from sc2.data import Alert
 
 from utils import SCVAssignment
 from game_objects import BUILDING_PRIORITY, Order
@@ -52,8 +54,25 @@ class SCVManager:
             self.__assign_worker_to_mineral_field(worker, mineral_field)
 
     def move_scvs(self) -> None:
+        if self.bot.alert(Alert.MineralsExhausted):
+            self.__remove_scv_from_minerals()
         self.__distribute_workers()
         self.__speed_mining()
+
+    def __remove_from_minerals(self) -> None:
+        old_tags = [
+            tag.value
+            for tag in self.bot.scvs[SCVAssignment.MINERALS]
+            if tag not in self.bot.mineral_field.tags
+        ]
+
+        map(self.__remove_scv_from_list, old_tags, [SCVAssignment.MINERALS] * len(old_tags))
+
+    def __remove_scv_from_list(self, scv_tag: int, scv_assignment: SCVAssignment) -> None:
+        if scv_assignment == SCVAssignment.MINERALS | SCVAssignment.VESPENE:
+            del self.bot.scvs[scv_assignment][scv_tag]
+        else:
+            self.bot.scvs[scv_assignment].remove(scv_tag)
 
     # TODO: Handle for cases where the build command is not successful, since
     # the API does't return anything (maybe check if resources are being spent)
@@ -117,15 +136,15 @@ class SCVManager:
     def __speed_mining(self) -> None:
         for worker_tag in self.bot.scvs[SCVAssignment.MINERALS]:
             worker = self.bot.workers.find_by_tag(worker_tag)
-            mineral_tag = self.bot.scvs[SCVAssignment.MINERALS][worker_tag]
+            mineralfield_tag = self.bot.scvs[SCVAssignment.MINERALS][worker_tag]
             self.speed_mining.speed_mine_minerals_single(
-                worker, mineral_tag, self.bot.scvs[SCVAssignment.MINERALS]
+                worker, mineralfield_tag, self.bot.scvs[SCVAssignment.MINERALS]
             )
         for worker_tag in self.bot.scvs[SCVAssignment.VESPENE]:
             worker = self.bot.workers.find_by_tag(worker_tag)
             if (
                 not worker
-            ):  #  If worker is inside refinery it can't be found by find_by_tag
+            ):  # If worker is inside refinery it can't be found by find_by_tag
                 continue
             vespene_tag = self.bot.scvs[SCVAssignment.VESPENE][worker_tag]
             self.speed_mining.speed_mine_gas_single(worker, vespene_tag)
