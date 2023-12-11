@@ -36,6 +36,16 @@ class OrderType(enum.Enum):
     SCV_ACTION = 4
 
 
+class ScvAssignment(enum.Enum):
+    MINERALS = 0
+    VESPENE = 2
+    CONTRACTOR = 3
+    SCOUT = 3
+    REPAIR = 4
+    ARMY = 6
+    NONE = 7
+
+
 @dataclass
 class Settings:
     """
