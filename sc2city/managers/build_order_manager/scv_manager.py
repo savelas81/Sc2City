@@ -129,7 +129,7 @@ class SCVManager:
             refinery.custom_surplus_harvesters = refinery.custom_assigned_harvesters - 3
         for cc in self.bot.townhalls.ready.not_flying:
             mfs_amount = self.bot.mineral_field.closer_than(10, cc).amount
-            cc.custom_surplus_harvesters = cc.custom_assigned_harvesters - mfs_amount
+            cc.custom_surplus_harvesters = cc.custom_assigned_harvesters - (mfs_amount * 2)
         for mf in self.bot.mineral_field:
             mf.custom_surplus_harvesters = mf.custom_assigned_harvesters - 2
 
