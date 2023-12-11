@@ -202,9 +202,21 @@ class SCVManager:
 
     # TODO: Add logic to distribute workers between different lists
     def __handle_idle_workers(self) -> None:
-        # TODO send scv to closest townhall that is not saturated. If not under saturated available send to closest.
+        """
+        Send idle worker to closest townhall that is not saturated.
+        If no saturated townhall available send to closest.
+        """
         for worker in self.bot.workers.idle:
             if worker.tag not in self.bot.contractors:
+                cc = self.bot.townhalls.ready.not_flying.sorted(
+                    lambda x: x.distance_to(worker)).filter(
+                    lambda x: x.custom_surplus_harvesters < 0).first
+                if cc:
+                    mfs = self.bot.mineral_field.closer_than(10, cc.position)
+                    mf = mfs.closest_to(worker)
+                    self.bot.mineral_collector_dict[worker.tag] = mf.tag
+                    worker.gather(mf)
+                    return
                 cc = self.bot.townhalls.ready.not_flying.sorted(
                     lambda x: x.distance_to(worker)
                 ).first
@@ -212,6 +224,7 @@ class SCVManager:
                 mf = mfs.closest_to(worker)
                 self.bot.mineral_collector_dict[worker.tag] = mf.tag
                 worker.gather(mf)
+                return
             elif worker.tag in self.bot.contractors:
                 # TODO: Handle for different order status
                 position = next(
