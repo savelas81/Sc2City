@@ -281,7 +281,7 @@ class SCVManager:
         )
         if worker:
             del self.bot.scvs[SCVAssignment.MINERALS][worker.tag]
-            self.bot.scvs[SCVAssignment.BUILD].append(worker.tag)
+            self.bot.scvs[SCVAssignment.BUILD].add(worker.tag)
             worker.stop()  # Used to handle workers in the move method
         return worker
 
