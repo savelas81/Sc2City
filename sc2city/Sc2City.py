@@ -3,6 +3,7 @@ from typing import Optional
 from sc2.bot_ai import BotAI
 from sc2.data import Race
 from sc2.unit import Unit
+from sc2.ids.unit_typeid import UnitTypeId
 
 from utils import Settings, SCVAssignment, Workers
 from game_objects import Strategy, Order
@@ -36,7 +37,7 @@ class Sc2City(BotAI):
         self.iteration: int = 0
         self.current_strategy: Optional[Strategy] = None
         self.queue: list[Order] = []
-        self.unit_tags: set[int] = set()
+        self.scv_tags: set[int] = set()
         self.scvs: Workers = {
             SCVAssignment.MINERALS: {},
             SCVAssignment.VESPENE: {},
@@ -61,6 +62,9 @@ class Sc2City(BotAI):
         await self.map_analyzer.get_initial_map_info()
         self.micro_manager.set_initial_unit_scripts()
 
+        # Workaround for weird SCV/Refinery behavior
+        self.scv_tags = {worker.tag for worker in self.workers}
+
     async def on_step(self, iteration: int) -> None:
         self.iteration = iteration
 
@@ -79,9 +83,13 @@ class Sc2City(BotAI):
         self.build_order_manager.production_complete(unit)
 
     async def on_unit_created(self, unit: Unit) -> None:
-        if unit.tag not in self.unit_tags:  # Workaround for weird SCV/Refinery behavior
-            self.unit_tags.add(unit.tag)
-            self.build_order_manager.production_complete(unit)
+        # Workaround for weird SCV/Refinery behavior
+        if unit.type_id == UnitTypeId.SCV:
+            if unit.tag in self.scv_tags:
+                return
+            else:
+                self.scv_tags.add(unit.tag)
+        self.build_order_manager.production_complete(unit)
 
     async def on_unit_destroyed(self, unit_tag: int) -> None:
         self.map_analyzer.forget_unit(unit_tag)
