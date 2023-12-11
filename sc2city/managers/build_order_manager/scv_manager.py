@@ -55,7 +55,7 @@ class SCVManager:
 
     def move_scvs(self) -> None:
         if self.bot.alert(Alert.MineralsExhausted):
-            self.__remove_scv_from_minerals()
+            self.__remove_from_minerals()
         self.__distribute_workers()
         self.__speed_mining()
 
