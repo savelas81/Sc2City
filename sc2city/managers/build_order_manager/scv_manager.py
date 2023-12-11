@@ -33,8 +33,8 @@ class SCVManager:
             self.__assign_worker_to_mineral_field(worker, mineral_field)
 
     def move_scvs(self) -> None:
-        self.__speed_mining()
         self.__distribute_workers()
+        self.__speed_mining()
 
     # TODO: Handle for cases where the build command is not successful, since
     # the API does't return anything (maybe check if resources are being spent)
@@ -135,7 +135,18 @@ class SCVManager:
 
     def __handle_idle_workers(self) -> None:
         # TODO send scv to closest townhall that is not saturated. If not under saturated available send to closest.
+        if not self.bot.townhalls.ready:
+            return
         for worker in self.bot.workers:
+            cc = self.bot.townhalls.ready.sorted(
+                lambda x: x.distance_to(worker)).filter(
+                lambda x: x.custom_surplus_harvesters < 0)
+            if cc:
+                mfs = self.bot.mineral_field.closer_than(10, cc)
+                mf = mfs.closest_to(worker)
+                self.bot.mineral_collector_dict[worker.tag] = mf.tag
+                worker.gather(mf)
+                return
             if worker.is_idle and worker.tag not in self.bot.contractors:
                 cc = self.bot.townhalls.ready.not_flying.sorted(
                     lambda x: x.distance_to(worker)
@@ -144,6 +155,7 @@ class SCVManager:
                 mf = mfs.closest_to(worker)
                 self.bot.mineral_collector_dict[worker.tag] = mf.tag
                 worker.gather(mf)
+                return
 
     def __assign_worker_to_mineral_field(
         self, worker: Unit, mineral_field: Unit
