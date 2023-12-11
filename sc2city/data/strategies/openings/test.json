@@ -16,7 +16,7 @@
 	  "can_skip": false,
 	  "priority": 20,
       "target_value_behavior": false,
-      "target_value": 1,
+      "quantity": 1,
       "comment": "conditional_behavior accepts skip and wait"
     },
     {
@@ -27,7 +27,7 @@
 	  "can_skip": false,
 	  "priority": 19,
       "target_value_behavior": false,
-      "target_value": 1,
+      "quantity": 1,
       "comment": "write comment here"
     },
     {
@@ -38,7 +38,7 @@
 	  "can_skip": false,
 	  "priority": 15,
       "target_value_behavior": false,
-      "target_value": 1,
+      "quantity": 1,
       "comment": "write comment here"
     },
     {
@@ -49,7 +49,7 @@
 	  "can_skip": false,
 	  "priority": 12,
       "target_value_behavior": false,
-      "target_value": 1,
+      "quantity": 1,
       "comment": "write comment here"
     },
     {
@@ -60,7 +60,7 @@
 	  "can_skip": true,
 	  "priority": 1,
       "target_value_behavior": true,
-      "target_value": 50,
+      "quantity": 50,
       "comment": "write comment here"
     },
     {
@@ -71,7 +71,7 @@
 	  "can_skip": false,
 	  "priority": 8,
       "target_value_behavior": false,
-      "target_value": 2,
+      "quantity": 2,
       "comment": "write comment here"
     },
     {
@@ -82,7 +82,7 @@
 	  "can_skip": false,
 	  "priority": 6,
       "target_value_behavior": false,
-      "target_value": 1,
+      "quantity": 1,
       "comment": "write comment here"
     },
     {
@@ -93,7 +93,7 @@
 	  "can_skip": false,
 	  "priority": 7,
       "target_value_behavior": false,
-      "target_value": 1,
+      "quantity": 1,
       "comment": "write comment here"
     },
     {
@@ -104,7 +104,7 @@
 	  "can_skip": true,
 	  "priority": 11,
       "target_value_behavior": false,
-      "target_value": 3,
+      "quantity": 3,
       "comment": "conditional_behavior accepts skip and wait"
     },
     {
@@ -115,7 +115,7 @@
 	  "can_skip": false,
 	  "priority": 5,
       "target_value_behavior": false,
-      "target_value": 1,
+      "quantity": 1,
       "comment": "write comment here"
     }
   ]

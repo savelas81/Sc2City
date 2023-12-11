@@ -1,3 +1,4 @@
+import asyncio
 from typing import TYPE_CHECKING
 
 from sc2.unit import Unit
@@ -15,6 +16,13 @@ class BuildOrderManager:
         self.bot = bot
         self.scv_manager = SCVManager(bot)
         self.structure_manager = StructureManager(bot)
+        self.order_managers = {
+            OrderType.STRUCTURE: self.scv_manager.scv_build,
+            OrderType.UNIT: self.structure_manager.train_unit,
+            OrderType.TECH: self.structure_manager.upgrade,
+            # OrderType.ACTION: self.structure_manager.execute_action,
+            # OrderType.SCV_ACTION: self.scv_manager.execute_action,
+        }
 
     def execute_frame_zero(self) -> None:
         self.scv_manager.worker_split_frame_zero()
@@ -25,17 +33,13 @@ class BuildOrderManager:
             order.get_old(self.bot.client.game_step)
             if order.status != Status.PENDING:
                 continue
-            if not self.bot.can_afford(order.id):
-                break
 
-            get_next_order = order.can_skip  # Maybe redundant
-            if order.type == OrderType.STRUCTURE:
-                get_next_order = await self.scv_manager.scv_build(order)
-            elif order.type == OrderType.UNIT:
-                get_next_order = self.structure_manager.train_unit(order)
-            elif order.type == OrderType.TECH:
-                get_next_order = self.structure_manager.upgrade(order)
-
+            manager = self.order_managers[order.type]
+            get_next_order = (
+                await manager(order)
+                if asyncio.iscoroutinefunction(manager)
+                else manager(order)
+            )
             if not get_next_order:
                 break
 
@@ -63,7 +67,7 @@ class BuildOrderManager:
             (
                 order
                 for order in self.bot.queue
-                if order.id == unit.type_id and order.status == Status.PLACEHOLDER
+                if order.id == unit.type_id and order.status == Status.PENDING
             ),
             None,
         )

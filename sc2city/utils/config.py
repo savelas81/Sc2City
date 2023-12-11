@@ -22,10 +22,9 @@ class BuildTypes(enum.Enum):
 
 class Status(enum.Enum):
     PENDING = 0
-    PLACEHOLDER = 1
-    STARTED = 2
-    INTERRUPTED = 3
-    FINISHED = 4
+    STARTED = 1
+    INTERRUPTED = 2
+    FINISHED = 3
 
 
 class OrderType(enum.Enum):

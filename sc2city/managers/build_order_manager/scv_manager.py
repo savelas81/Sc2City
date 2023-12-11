@@ -4,13 +4,29 @@ from sc2.unit import Unit
 from sc2.units import Units
 from sc2.position import Point2
 from sc2.ids.unit_typeid import UnitTypeId
+from sc2.ids.ability_id import AbilityId
 
-from utils import Status
 from game_objects import BUILDING_PRIORITY, Order
 from .speed_mining import SpeedMining
 
 if TYPE_CHECKING:
     from Sc2City import Sc2City
+
+SCV_BUILDS = {
+    AbilityId.TERRANBUILD_COMMANDCENTER,
+    AbilityId.TERRANBUILD_SUPPLYDEPOT,
+    AbilityId.TERRANBUILD_REFINERY,
+    AbilityId.TERRANBUILD_BARRACKS,
+    AbilityId.TERRANBUILD_ENGINEERINGBAY,
+    AbilityId.TERRANBUILD_MISSILETURRET,
+    AbilityId.TERRANBUILD_BUNKER,
+    AbilityId.TERRANBUILD_SENSORTOWER,
+    AbilityId.TERRANBUILD_GHOSTACADEMY,
+    AbilityId.TERRANBUILD_FACTORY,
+    AbilityId.TERRANBUILD_STARPORT,
+    AbilityId.TERRANBUILD_ARMORY,
+    AbilityId.TERRANBUILD_FUSIONCORE,
+}
 
 
 class SCVManager:
@@ -42,21 +58,45 @@ class SCVManager:
         """
         Returns False When executing orders to avoid double commands.
         """
-        if self.bot.tech_requirement_progress(order.id) != 1:
+        if not order.target:
+            order.target = await self.__get_build_position(order.id)
+
+        if not order.worker_tag:
+            if not self.__can_select_builder(order):
+                return order.can_skip
+            if order.id == UnitTypeId.REFINERY:
+                position = order.target.position
+            else:
+                position = order.target
+            # TODO: Handle for when the worker is not found
+            worker = self.__select_builder(position)
+            order.worker_tag = worker.tag
+
+        # TODO: Handle for when the worker is not found
+        # TODO: Handle for cases when worker is selected and can start building in the same frame
+        worker = self.bot.workers.find_by_tag(order.worker_tag)
+        if worker.is_using_ability(SCV_BUILDS):
+            return True
+
+        if self.bot.tech_requirement_progress(order.id) != 1 or not self.bot.can_afford(
+            order.id
+        ):
             return order.can_skip
-        if order.id == UnitTypeId.REFINERY:
-            await self.__build_refinery(order)
-            return False
-        position = await self.__get_position(order.id)
-        worker = self.__select_contractor(position, order)
-        # TODO: Add logic for when there are no available workers
-        if not worker:
-            return order.can_skip
-        worker.build(order.id, position)
-        order.update_status(Status.PLACEHOLDER)
+        worker.build(order.id, order.target)
         return False
 
-    async def __get_position(self, unit_id: UnitTypeId) -> Point2:
+    async def __get_build_position(self, unit_id: UnitTypeId) -> Point2 | Unit:
+        if unit_id == UnitTypeId.REFINERY:
+            for cc in self.bot.townhalls:
+                geysers = self.bot.vespene_geyser.closer_than(10.0, cc)
+                for geyser in geysers:
+                    if await self.bot.can_place_single(
+                        UnitTypeId.REFINERY, geyser.position
+                    ):
+                        return geyser
+            # TODO: Handle for when no geysers are available
+            return None
+
         position_priority = BUILDING_PRIORITY[unit_id]
         possible_positions = self.bot.current_strategy.building_placements.lists[
             position_priority
@@ -65,24 +105,11 @@ class SCVManager:
             if await self.bot.can_place_single(unit_id, position):
                 return position
         # TODO: Handle for when all pre-defined positions are occupied
-        return possible_positions[0]
+        return None
 
-    # TODO: Improve this logic
-    async def __build_refinery(self, order: Order) -> None:
-        for cc in self.bot.townhalls:
-            geysers = self.bot.vespene_geyser.closer_than(10.0, cc)
-            for geyser in geysers:
-                if await self.bot.can_place_single(
-                    UnitTypeId.REFINERY, geyser.position
-                ):
-                    worker = self.__select_contractor(cc.position, order)
-                    break
-            if worker:
-                break
-        if not worker:
-            return
-        worker.build(UnitTypeId.REFINERY, geyser)
-        order.update_status(Status.PLACEHOLDER)
+    # TODO: Implement this method
+    def __can_select_builder(self, order: Order) -> bool:
+        return True
 
     def __speed_mining(self) -> None:
         for worker_tag in self.bot.mineral_collector_dict:
@@ -101,9 +128,10 @@ class SCVManager:
     def __distribute_workers(self) -> None:
         self.__handle_idle_workers()
 
+    # TODO: Add logic to distribute workers between different lists
     def __handle_idle_workers(self) -> None:
-        for worker in self.bot.workers:
-            if worker.is_idle and worker.tag not in self.bot.contractors:
+        for worker in self.bot.workers.idle:
+            if worker.tag not in self.bot.contractors:
                 cc = self.bot.townhalls.ready.not_flying.sorted(
                     lambda x: x.distance_to(worker)
                 ).first
@@ -111,6 +139,15 @@ class SCVManager:
                 mf = mfs.closest_to(worker)
                 self.bot.mineral_collector_dict[worker.tag] = mf.tag
                 worker.gather(mf)
+            elif worker.tag in self.bot.contractors:
+                # TODO: Handle for different order status
+                position = next(
+                    order.target
+                    for order in self.bot.queue
+                    if order.worker_tag == worker.tag
+                )
+                if worker.position != position:
+                    worker.move(position)
 
     def __assign_worker_to_mineral_field(
         self, worker: Unit, mineral_field: Unit
@@ -118,8 +155,7 @@ class SCVManager:
         worker.gather(mineral_field)
         self.bot.mineral_collector_dict[worker.tag] = mineral_field.tag
 
-    # TODO: Handle scv assigned task so that the same one is not called for more than one task
-    def __select_contractor(self, position: Point2, order: Order) -> Unit | None:
+    def __select_builder(self, position: Point2) -> Unit:
         # TODO: Add error handling for when there are no available workers
         # TODO: Add logic to select other types of SCV contractors aside from mineral collectors
         worker = next(
@@ -134,5 +170,5 @@ class SCVManager:
         if worker:
             del self.bot.mineral_collector_dict[worker.tag]
             self.bot.contractors.append(worker.tag)
-            order.worker_tag = worker.tag
+            worker.stop()  # Used to handle workers in the move method
         return worker

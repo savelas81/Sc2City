@@ -15,7 +15,7 @@ class QueueManager:
     def start_new_queue(self, orders: list[Order]) -> None:
         self.bot.queue.clear()
         for order in orders:
-            if order.target_value > 1:
+            if order.quantity > 1:
                 self.bot.queue.extend(self.__expand_order(order))
             else:
                 self.bot.queue.append(order)
@@ -29,8 +29,6 @@ class QueueManager:
                 break
             if order.status == Status.PENDING:
                 continue
-            elif order.status == Status.PLACEHOLDER:
-                continue
             elif order.status == Status.STARTED:
                 continue
             elif order.status == Status.INTERRUPTED:
@@ -40,8 +38,8 @@ class QueueManager:
 
     def __expand_order(self, order: Order) -> list[Order]:
         new_orders = []
-        for _ in range(order.target_value):
+        for _ in range(order.quantity):
             new_order = copy.deepcopy(order)
-            new_order.target_value = 1
+            new_order.quantity = 1
             new_orders.append(new_order)
         return new_orders

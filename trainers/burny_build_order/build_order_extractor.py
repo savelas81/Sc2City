@@ -51,7 +51,7 @@ class BuildOrderExtractor:
                 "type": order_type,
                 "can_skip": can_skip,
                 "priority": priority,
-                "target_value": 1,
+                "quantity": 1,
                 "comment": "Write comment here",
             }
             for priority, (new_id, order_type, can_skip) in zip(priorities, order_types)

@@ -20,7 +20,9 @@ class StructureManager:
         """
         Returns False When executing orders to avoid double commands.
         """
-        if self.bot.tech_requirement_progress(order.id) != 1:
+        if self.bot.tech_requirement_progress(order.id) != 1 or not self.bot.can_afford(
+            order.id
+        ):
             return order.can_skip
         facility_id = UNIT_TRAINED_FROM[order.id]
         # This might be a problem for buildings that can train multiple units at the same time

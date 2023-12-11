@@ -1,8 +1,9 @@
 import enum
 from dataclasses import dataclass, field
 
+from sc2.unit import Unit
 from sc2.ids.unit_typeid import UnitTypeId
-
+from sc2.position import Point2
 
 from .building_placements import BuildingPlacements
 from utils import BuildTypes, OrderType, Status
@@ -51,13 +52,16 @@ class Order:
     status: Status = Status.PENDING
     status_age: int = 0  # Measured in frames
     age: int = 0  # Measured in frames
-    worker_tag: int = None
     can_skip: bool = True
+    worker_tag: int = None
+    target: Point2 | Unit = None
+    quantity: int = 1
+    comment: str = ""
+
+    # Legacy properties
     conditional: bool = True
     conditional_behavior: str = "skip"  # TODO: Enumerate the possible values
     target_value_behavior: bool = False
-    target_value: int = 1
-    comment: str = ""
 
     @classmethod
     def from_dict(cls, dct):
