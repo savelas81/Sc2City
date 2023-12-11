@@ -139,8 +139,8 @@ class SCVManager:
         self.__handle_idle_workers()
 
         """
-		manages saturation for refineries
-		"""
+        manages saturation for refineries
+        """
         for refinery in self.bot.gas_buildings.ready:
             """
             Assigns scv to gather vespene if needed
@@ -156,9 +156,9 @@ class SCVManager:
                     return
 
             """
-			Stops scv from gathering vespene is needed. 
-			Idle workers are given new assignment on next frame.
-			"""
+            Stops scv from gathering vespene is needed. 
+            Idle workers are given new assignment on next frame.
+            """
             if (
                 refinery.custom_assigned_harvesters > self.scvs_per_refinery
                 or len(self.bot.scvs[SCVAssignment.VESPENE]) > self.max_gas_miners
@@ -176,10 +176,10 @@ class SCVManager:
                             return
 
         """
-		Stops scv from over saturated townhall if under saturated townhall is available.
-		Stops only if custom_surplus_harvesters > 1 to prevent workers changing mining locations unnecessary.
-		Idle workers are given new assignment on next frame.
-		"""
+        Stops scv from over saturated townhall if under saturated townhall is available.
+        Stops only if custom_surplus_harvesters > 1 to prevent workers changing mining locations unnecessary.
+        Idle workers are given new assignment on next frame.
+        """
         townhall_with_surplus_harvesters = next(
             (
                 t
@@ -203,7 +203,10 @@ class SCVManager:
 
     # TODO: Add logic to distribute workers between different lists
     def __handle_idle_workers(self) -> None:
-        # TODO send scv to closest townhall that is not saturated. If not under saturated available send to closest.
+        """
+        Send idle worker to closest townhall that is not saturated.
+        If no saturated townhall available send to closest.
+        """
         for worker in self.bot.workers.idle:
             if worker.tag not in self.bot.scvs[SCVAssignment.BUILD]:
                 cc = self.bot.townhalls.ready.not_flying.sorted(
