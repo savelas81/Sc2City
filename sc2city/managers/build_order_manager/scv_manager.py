@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 
+import loguru
 from sc2.unit import Unit
 from sc2.units import Units
 from sc2.position import Point2
@@ -153,15 +154,15 @@ class SCVManager:
     def __speed_mining(self) -> None:
         for worker_tag in self.bot.scvs[SCVAssignment.MINERALS]:
             worker = self.bot.workers.find_by_tag(worker_tag)
-            mineral_tag = self.bot.scvs[SCVAssignment.MINERALS][worker_tag]
+            mineralfield_tag = self.bot.scvs[SCVAssignment.MINERALS][worker_tag]
             self.speed_mining.speed_mine_minerals_single(
-                worker, mineral_tag, self.bot.scvs[SCVAssignment.MINERALS]
+                worker, mineralfield_tag, self.bot.scvs[SCVAssignment.MINERALS]
             )
         for worker_tag in self.bot.scvs[SCVAssignment.VESPENE]:
             worker = self.bot.workers.find_by_tag(worker_tag)
             if (
                 not worker
-            ):  #  If worker is inside refinery it can't be found by find_by_tag
+            ):  # If worker is inside refinery it can't be found by find_by_tag
                 continue
             vespene_tag = self.bot.scvs[SCVAssignment.VESPENE][worker_tag]
             self.speed_mining.speed_mine_gas_single(worker, vespene_tag)
