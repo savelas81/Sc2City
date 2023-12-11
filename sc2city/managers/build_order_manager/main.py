@@ -1,6 +1,7 @@
 import asyncio
 from typing import TYPE_CHECKING
 
+from sc2.ids.unit_typeid import UnitTypeId
 from sc2.unit import Unit
 
 from utils import Status, OrderType
@@ -58,6 +59,8 @@ class BuildOrderManager:
             order.update_status(Status.FINISHED)
             if order.type == OrderType.STRUCTURE:
                 self.bot.contractors.remove(order.worker_tag)
+                if order.id == UnitTypeId.REFINERY:  # worker goes automatically to gather gas.
+                    self.bot.vespene_collector_dict[order.worker_tag] = unit.tag
         else:
             # TODO: Add logic to handle errors
             print(f"{unit.type_id} not found in finished queue")
