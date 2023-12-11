@@ -127,10 +127,6 @@ class SCVManager:
                 not worker
             ):  #  If worker is inside refinery it can't be found by find_by_tag
                 continue
-            if (
-                not worker
-            ):  #  If worker is inside refinery it can't be found by find_by_tag
-                continue
             vespene_tag = self.bot.scvs[SCVAssignment.VESPENE][worker_tag]
             self.speed_mining.speed_mine_gas_single(worker, vespene_tag)
 
