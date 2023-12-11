@@ -5,6 +5,7 @@ from sc2.units import Units
 from sc2.position import Point2
 from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.ability_id import AbilityId
+from sc2.data import Alert
 
 from utils import SCVAssignment
 from game_objects import BUILDING_PRIORITY, Order
@@ -52,6 +53,7 @@ class SCVManager:
             self.__assign_worker_to_mineral_field(worker, mineral_field)
 
     def move_scvs(self) -> None:
+        self.__handle_alerts()
         self.__distribute_workers()
         self.__speed_mining()
 
@@ -114,6 +116,40 @@ class SCVManager:
     def __can_select_builder(self, order: Order) -> bool:
         return True
 
+    def __handle_alerts(self) -> None:
+        if self.bot.alert(Alert.MineralsExhausted):
+            self.__remove_miners(
+                self.bot.mineral_field.tags,
+                self.bot.scvs[SCVAssignment.MINERALS],
+                SCVAssignment.MINERALS,
+            )
+        elif self.bot.alert(Alert.VespeneExhausted):
+            self.__remove_miners(
+                self.bot.gas_buildings.tags,
+                self.bot.scvs[SCVAssignment.VESPENE],
+                SCVAssignment.VESPENE,
+            )
+
+    def __remove_miners(
+        self,
+        resource_tags: set[int],
+        scv_resource: dict[int, int],
+        assignment: SCVAssignment,
+    ) -> None:
+        tags_to_remove = [
+            scv_tag
+            for scv_tag, resource_tag in scv_resource.items()
+            if resource_tag not in resource_tags
+        ]
+        for tag in tags_to_remove:
+            self.__remove_from_list(tag, assignment)
+
+    def __remove_from_list(self, scv_tag: int, assignment: SCVAssignment) -> None:
+        if assignment in (SCVAssignment.MINERALS, SCVAssignment.VESPENE):
+            del self.bot.scvs[assignment][scv_tag]
+        else:
+            self.bot.scvs[assignment].remove(scv_tag)
+
     def __speed_mining(self) -> None:
         for worker_tag in self.bot.scvs[SCVAssignment.MINERALS]:
             worker = self.bot.workers.find_by_tag(worker_tag)
@@ -135,8 +171,8 @@ class SCVManager:
         self.__handle_idle_workers()
 
         """
-        manages saturation for refineries
-        """
+		manages saturation for refineries
+		"""
         for refinery in self.bot.gas_buildings.ready:
             """
             Assigns scv to gather vespene if needed
@@ -152,9 +188,9 @@ class SCVManager:
                     return
 
             """
-            Stops scv from gathering vespene is needed. 
-            Idle workers are given new assignment on next frame.
-            """
+			Stops scv from gathering vespene is needed. 
+			Idle workers are given new assignment on next frame.
+			"""
             if (
                 refinery.custom_assigned_harvesters > self.scvs_per_refinery
                 or len(self.bot.scvs[SCVAssignment.VESPENE]) > self.max_gas_miners
@@ -172,10 +208,10 @@ class SCVManager:
                             return
 
         """
-        Stops scv from over saturated townhall if under saturated townhall is available.
-        Stops only if custom_surplus_harvesters > 1 to prevent workers changing mining locations unnecessary.
-        Idle workers are given new assignment on next frame.
-        """
+		Stops scv from over saturated townhall if under saturated townhall is available.
+		Stops only if custom_surplus_harvesters > 1 to prevent workers changing mining locations unnecessary.
+		Idle workers are given new assignment on next frame.
+		"""
         townhall_with_surplus_harvesters = next(
             (
                 t
