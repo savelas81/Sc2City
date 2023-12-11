@@ -138,8 +138,8 @@ class SCVManager:
         self.__handle_idle_workers()
 
         """
-		manages saturation for refineries
-		"""
+        manages saturation for refineries
+        """
         for refinery in self.bot.gas_buildings.ready:
             """
             Assigns scv to gather vespene if needed
@@ -155,9 +155,9 @@ class SCVManager:
                     return
 
             """
-			Stops scv from gathering vespene is needed. 
-			Idle workers are given new assignment on next frame.
-			"""
+            Stops scv from gathering vespene is needed. 
+            Idle workers are given new assignment on next frame.
+            """
             if (
                 refinery.custom_assigned_harvesters > self.scvs_per_refinery
                 or len(self.bot.vespene_collector_dict) > self.max_gas_miners
@@ -175,10 +175,10 @@ class SCVManager:
                             return
 
         """
-		Stops scv from over saturated townhall if under saturated townhall is available.
-		Stops only if custom_surplus_harvesters > 1 to prevent workers changing mining locations unnecessary.
-		Idle workers are given new assignment on next frame.
-		"""
+        Stops scv from over saturated townhall if under saturated townhall is available.
+        Stops only if custom_surplus_harvesters > 1 to prevent workers changing mining locations unnecessary.
+        Idle workers are given new assignment on next frame.
+        """
         townhall_with_surplus_harvesters = next(
             (
                 t
