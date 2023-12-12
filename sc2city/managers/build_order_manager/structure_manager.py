@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, Optional
 from sc2.dicts.unit_trained_from import UNIT_TRAINED_FROM
 from sc2.ids.unit_typeid import UnitTypeId
 from sc2.units import Units
+from sc2.ids.ability_id import AbilityId
 
 from utils import Status
 from game_objects import Order
@@ -39,6 +40,21 @@ class StructureManager:
     # TODO: Add logic for add-ons, researches and building upgrades (e.g. planetary fortress)
     def upgrade(self) -> bool:
         return True
+
+    # TODO: Create specific sets for each type of structure
+    # TODO: Improve this logic and refactor (Try to not go through all enemies every step)
+    def handle_supply_depots(self) -> None:
+        for structure in self.bot.structures:
+            if structure.type_id not in {
+                UnitTypeId.SUPPLYDEPOT,
+                UnitTypeId.SUPPLYDEPOTLOWERED,
+            }:
+                continue
+            enemies = self.bot.enemy_units.closer_than(10, structure).not_flying
+            if structure.type_id == UnitTypeId.SUPPLYDEPOT and not enemies:
+                structure(AbilityId.MORPH_SUPPLYDEPOT_LOWER)
+            elif structure.type_id == UnitTypeId.SUPPLYDEPOTLOWERED and enemies:
+                structure(AbilityId.MORPH_SUPPLYDEPOT_RAISE)
 
     # TODO: Improve this logic and the parameters used
     # TODO: This should return a single facility

@@ -45,6 +45,7 @@ class BuildOrderManager:
                 break
 
         self.scv_manager.move_scvs()
+        self.structure_manager.handle_supply_depots()
 
     def production_complete(self, unit: Unit) -> None:
         order = next(
