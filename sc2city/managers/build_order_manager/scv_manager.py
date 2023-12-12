@@ -57,7 +57,7 @@ class SCVManager:
         self.__distribute_workers()
         self.__speed_mining()
 
-    def execute_action(self) -> bool:
+    def execute_action(self, order: Order) -> bool:
         return True
 
     # TODO: Handle for cases where the build command is not successful, since
@@ -69,20 +69,21 @@ class SCVManager:
         if not order.target:
             order.target = await self.__get_build_position(order.id)
 
-        if not order.worker_tag:
+        if not order.tag:
             if not self.__can_select_builder(order):
                 return order.can_skip
             if order.id == UnitTypeId.REFINERY:
                 position = order.target.position
             else:
                 position = order.target
-            # TODO: Handle for when the worker is not found
             worker = self.__select_builder(position)
-            order.worker_tag = worker.tag
+            if not worker:
+                return order.can_skip
+            order.tag = worker.tag
+        else:
+            # TODO: Handle for when the worker is not found
+            worker = self.bot.workers.find_by_tag(order.tag)
 
-        # TODO: Handle for when the worker is not found
-        # TODO: Handle for cases when worker is selected and can start building in the same frame
-        worker = self.bot.workers.find_by_tag(order.worker_tag)
         if worker.is_using_ability(SCV_BUILDS):
             return True
 
@@ -254,9 +255,7 @@ class SCVManager:
             elif worker.tag in self.bot.scvs[SCVAssignment.BUILD]:
                 # TODO: Handle for different order status
                 position = next(
-                    order.target
-                    for order in self.bot.queue
-                    if order.worker_tag == worker.tag
+                    order.target for order in self.bot.queue if order.tag == worker.tag
                 )
                 if worker.position != position:
                     worker.move(position)
@@ -302,7 +301,7 @@ class SCVManager:
         worker.gather(mineral_field)
         self.bot.scvs[SCVAssignment.MINERALS][worker.tag] = mineral_field.tag
 
-    def __select_builder(self, position: Point2) -> Unit:
+    def __select_builder(self, position: Point2) -> Unit | None:
         # TODO: Add error handling for when there are no available workers
         # TODO: Add logic to select other types of SCV builders aside from mineral collectors
         worker = next(

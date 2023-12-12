@@ -3,13 +3,14 @@ from dataclasses import dataclass, field
 
 from sc2.unit import Unit
 from sc2.ids.unit_typeid import UnitTypeId
+from sc2.ids.upgrade_id import UpgradeId
 from sc2.position import Point2
 
 from .building_placements import BuildingPlacements
 from utils import BuildTypes, OrderType, Status
 
 
-class CustomAbilities(enum.Enum):
+class CustomOrders(enum.Enum):
     WORKER_TO_MINS = 5000
     WORKER_TO_GAS = 5001
     WORKER_TO_GAS_3 = 5002
@@ -47,13 +48,13 @@ class ScoutTime:
 @dataclass
 class Order:
     type: OrderType
-    id: UnitTypeId
+    id: UnitTypeId | UpgradeId
     priority: int = 0
     status: Status = Status.PENDING
     status_age: int = 0  # Measured in frames
     age: int = 0  # Measured in frames
     can_skip: bool = True
-    worker_tag: int = None
+    tag: int = None
     target: Point2 | Unit = None
     quantity: int = 1
     comment: str = ""
@@ -66,7 +67,10 @@ class Order:
     @classmethod
     def from_dict(cls, dct):
         dct["type"] = OrderType[dct["type"]]
-        dct["id"] = UnitTypeId[dct["id"]]
+        if dct["id"] in UnitTypeId.__members__:
+            dct["id"] = UnitTypeId[dct["id"]]
+        elif dct["id"] in UpgradeId.__members__:
+            dct["id"] = UpgradeId[dct["id"]]
         return cls(**dct)
 
     def update_status(self, new_status: Status) -> None:

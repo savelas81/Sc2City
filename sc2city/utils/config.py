@@ -30,10 +30,9 @@ class Status(enum.Enum):
 
 class OrderType(enum.Enum):
     STRUCTURE = 0
-    UNIT = 1
-    TECH = 2
-    ACTION = 3
-    SCV_ACTION = 4
+    PRODUCTION = 1
+    ACTION = 2
+    SCV_ACTION = 3
 
 
 class SCVAssignment(enum.Enum):

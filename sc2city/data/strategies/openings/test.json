@@ -9,7 +9,7 @@
   ],
   "build_order": [
     {
-      "type": "UNIT",
+      "type": "PRODUCTION",
       "conditional": true,
       "conditional_behavior": "skip",
       "id": "SCV",
@@ -20,7 +20,7 @@
       "comment": "conditional_behavior accepts skip and wait"
     },
     {
-      "type": "UNIT",
+      "type": "PRODUCTION",
       "conditional": "self.AI.minerals > 400",
       "conditional_behavior": "skip",
       "id": "SCV",
@@ -53,7 +53,7 @@
       "comment": "write comment here"
     },
     {
-      "type": "UNIT",
+      "type": "PRODUCTION",
       "conditional": true,
       "conditional_behavior": "skip",
       "id": "SCV",
@@ -75,17 +75,39 @@
       "comment": "write comment here"
     },
     {
-      "type": "STRUCTURE",
-      "conditional": true,
-      "conditional_behavior": "skip",
-      "id": "FACTORY",
-	  "can_skip": false,
-	  "priority": 6,
-      "target_value_behavior": false,
-      "quantity": 1,
-      "comment": "write comment here"
-    },
-    {
+		"type": "PRODUCTION",
+		"conditional": true,
+		"conditional_behavior": "skip",
+		"id": "BARRACKSTECHLAB",
+		"can_skip": false,
+		"priority": 6,
+		"target_value_behavior": false,
+		"quantity": 1,
+		"comment": "write comment here"
+	  },
+	  {
+		"type": "PRODUCTION",
+		"conditional": true,
+		"conditional_behavior": "skip",
+		"id": "SHIELDWALL",
+		"can_skip": true,
+		"priority": 6,
+		"target_value_behavior": false,
+		"quantity": 1,
+		"comment": "write comment here"
+	  },
+	  {
+		"type": "PRODUCTION",
+		"conditional": true,
+		"conditional_behavior": "skip",
+		"id": "ORBITALCOMMAND",
+		"can_skip": true,
+		"priority": 6,
+		"target_value_behavior": false,
+		"quantity": 1,
+		"comment": "write comment here"
+	  },
+		{
       "type": "STRUCTURE",
       "conditional": true,
       "conditional_behavior": "skip",
@@ -97,7 +119,7 @@
       "comment": "write comment here"
     },
     {
-      "type": "UNIT",
+      "type": "PRODUCTION",
       "conditional": true,
       "conditional_behavior": "skip",
       "id": "MARINE",

@@ -1,8 +1,7 @@
 import copy
 from typing import TYPE_CHECKING
 
-from utils import Status
-from game_objects import Order
+from game_objects import Order, CustomOrders
 
 if TYPE_CHECKING:
     from Sc2City import Sc2City
@@ -15,26 +14,19 @@ class QueueManager:
     def start_new_queue(self, orders: list[Order]) -> None:
         self.bot.queue.clear()
         for order in orders:
+            if order.id in CustomOrders:
+                self.__handle_custom_order(order)
             if order.quantity > 1:
                 self.bot.queue.extend(self.__expand_order(order))
             else:
                 self.bot.queue.append(order)
-        self.bot.queue.sort(key=lambda x: x.priority, reverse=True)
+        self.__sort_queue()
 
-    # TODO: Improve this logic
-    # TODO: Add logic for deciding what to do with each order based on it's age
     def update_queue(self) -> None:
-        for order in self.bot.queue:
-            if order.age == 0:
-                break
-            if order.status == Status.PENDING:
-                continue
-            elif order.status == Status.STARTED:
-                continue
-            elif order.status == Status.INTERRUPTED:
-                continue
-            elif order.status == Status.FINISHED:
-                self.bot.queue.remove(order)
+        self.__sort_queue()
+
+    def __handle_custom_order(self, order: Order) -> None:
+        pass
 
     def __expand_order(self, order: Order) -> list[Order]:
         new_orders = []
@@ -43,3 +35,6 @@ class QueueManager:
             new_order.quantity = 1
             new_orders.append(new_order)
         return new_orders
+
+    def __sort_queue(self) -> None:
+        self.bot.queue.sort(key=lambda x: x.priority, reverse=True)

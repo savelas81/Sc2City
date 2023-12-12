@@ -72,7 +72,6 @@ class Sc2City(BotAI):
         self.macro_manager.update_strategy()
         self.micro_manager.update_unit_scripts()
 
-        # TODO: Implement synchronous execution of managers
         await self.build_order_manager.execute_strategy()
         self.units_manager.give_orders()
 

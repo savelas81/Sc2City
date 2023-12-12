@@ -5,8 +5,8 @@ from sc2.unit import Unit
 from sc2.position import Point2
 from sc2.ids.unit_typeid import UnitTypeId
 
-from utils import strategies, SCVAssignment
-from game_objects import Strategy, ScoutTime
+from utils import strategies, SCVAssignment, Status
+from game_objects import Strategy, ScoutTime, Order
 from .queue_manager import QueueManager
 
 if TYPE_CHECKING:
@@ -24,6 +24,12 @@ class MacroManager:
         self.pending_scv_scouts: list[ScoutTime] = []
         self.queue_manager = QueueManager(bot)
         self.map_file = None
+        self.order_handlers = {
+            Status.PENDING: self.__handle_pending_order,
+            Status.STARTED: self.__handle_started_order,
+            Status.INTERRUPTED: self.__handle_interrupted_order,
+            Status.FINISHED: self.__handle_finished_order,
+        }
 
     def choose_first_strategy(self) -> None:
         self.__set_map_filename()
@@ -35,12 +41,30 @@ class MacroManager:
             s for s in self.bot.current_strategy.scout_times if s.id == UnitTypeId.SCV
         ]
 
+    # TODO: Add logic to update strategy based on game state
+    # TODO: Add logic to make decisions outside of imported strategies
+    # TODO: Add logic for deciding what to do with each order
     def update_strategy(self) -> None:
-        # TODO: Add logic to update strategy based on game state
-        # TODO: Add logic to make decisions outside of imported strategies
+        for order in self.bot.queue:
+            if order.age == 0:
+                break
+            self.order_handlers[order.status](order)
         self.queue_manager.update_queue()
+
         if self.pending_scv_scouts:
             self.__update_scv_scouts()
+
+    def __handle_pending_order(self, order: Order) -> None:
+        pass
+
+    def __handle_started_order(self, order: Order) -> None:
+        pass
+
+    def __handle_interrupted_order(self, order: Order) -> None:
+        pass
+
+    def __handle_finished_order(self, order: Order) -> None:
+        self.bot.queue.remove(order)
 
     def __update_scv_scouts(self) -> None:
         # TODO: Add logic to select the best scv scout position

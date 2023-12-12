@@ -19,8 +19,7 @@ class BuildOrderManager:
         self.structure_manager = StructureManager(bot)
         self.order_managers = {
             OrderType.STRUCTURE: self.scv_manager.scv_build,
-            OrderType.UNIT: self.structure_manager.train_unit,
-            OrderType.TECH: self.structure_manager.upgrade,
+            OrderType.PRODUCTION: self.structure_manager.produce,
             OrderType.ACTION: self.structure_manager.execute_action,
             OrderType.SCV_ACTION: self.scv_manager.execute_action,
         }
@@ -28,22 +27,8 @@ class BuildOrderManager:
     def execute_frame_zero(self) -> None:
         self.scv_manager.worker_split_frame_zero()
 
-    # TODO: Implement logic for conditional orders
     async def execute_strategy(self) -> None:
-        for order in self.bot.queue:
-            order.get_old(self.bot.client.game_step)
-            if order.status != Status.PENDING:
-                continue
-
-            manager = self.order_managers[order.type]
-            get_next_order = (
-                await manager(order)
-                if asyncio.iscoroutinefunction(manager)
-                else manager(order)
-            )
-            if not get_next_order:
-                break
-
+        await self.__execute_next_order()
         self.scv_manager.move_scvs()
         self.structure_manager.handle_supply_depots()
 
@@ -59,11 +44,11 @@ class BuildOrderManager:
         if order is not None:
             order.update_status(Status.FINISHED)
             if order.type == OrderType.STRUCTURE:
-                self.bot.scvs[SCVAssignment.BUILD].remove(order.worker_tag)
+                self.bot.scvs[SCVAssignment.BUILD].remove(order.tag)
                 if (
                     order.id == UnitTypeId.REFINERY
                 ):  # worker goes automatically to gather gas.
-                    self.bot.scvs[SCVAssignment.VESPENE][order.worker_tag] = unit.tag
+                    self.bot.scvs[SCVAssignment.VESPENE][order.tag] = unit.tag
         else:
             # TODO: Add logic to handle errors
             print(f"{unit.type_id} not found in finished queue")
@@ -82,3 +67,19 @@ class BuildOrderManager:
         else:
             # TODO: Add logic to handle errors
             print(f"{unit.type_id} not found in starting queue")
+
+    # TODO: Implement logic for conditional orders
+    async def __execute_next_order(self) -> None:
+        for order in self.bot.queue:
+            order.get_old(self.bot.client.game_step)
+            if order.status != Status.PENDING:
+                continue
+
+            manager = self.order_managers[order.type]
+            get_next_order = (
+                await manager(order)
+                if asyncio.iscoroutinefunction(manager)
+                else manager(order)
+            )
+            if not get_next_order:
+                break
