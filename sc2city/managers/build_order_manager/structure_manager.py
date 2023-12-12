@@ -41,6 +41,9 @@ class StructureManager:
     def upgrade(self) -> bool:
         return True
 
+    def execute_action(self) -> bool:
+        return True
+
     # TODO: Create specific sets for each type of structure
     # TODO: Improve this logic and refactor (Try to not go through all enemies every step)
     def handle_supply_depots(self) -> None:

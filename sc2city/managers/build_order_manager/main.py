@@ -21,8 +21,8 @@ class BuildOrderManager:
             OrderType.STRUCTURE: self.scv_manager.scv_build,
             OrderType.UNIT: self.structure_manager.train_unit,
             OrderType.TECH: self.structure_manager.upgrade,
-            # OrderType.ACTION: self.structure_manager.execute_action,
-            # OrderType.SCV_ACTION: self.scv_manager.execute_action,
+            OrderType.ACTION: self.structure_manager.execute_action,
+            OrderType.SCV_ACTION: self.scv_manager.execute_action,
         }
 
     def execute_frame_zero(self) -> None:

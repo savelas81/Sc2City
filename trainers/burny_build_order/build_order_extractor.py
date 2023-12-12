@@ -3,10 +3,11 @@ import time
 import json
 import uuid
 import pyperclip
-
 import concurrent.futures
+
 from selenium import webdriver
 from selenium.webdriver import ActionChains
+from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.firefox.options import Options as FirefoxOptions
 from selenium.webdriver.support.ui import WebDriverWait
@@ -27,11 +28,8 @@ class BuildOrderExtractor:
         self.download_dir = os.path.join(download_dir, self.download_folder)
 
     def get_build_order(self) -> None:
-        self.__copy_build_order()
-        # Wait for the clipboard content to be available
-        time.sleep(1)  # adjust this delay as needed
-        clipboard_content = pyperclip.paste()
-        self.__save_build_order(clipboard_content)
+        build_order = self.__copy_build_order()
+        self.__save_build_order(build_order)
 
     def __save_build_order(self, build_order: str) -> None:
         filename = str(uuid.uuid4()) + ".json"
@@ -44,7 +42,6 @@ class BuildOrderExtractor:
     def __format_build_order(self, build_order: list[BurnyOrder]) -> list[Order]:
         priorities = range(len(build_order) * 5, 0, -5)
         order_types = map(self.__get_type, build_order)
-
         formatted_orders = [
             {
                 "id": new_id,
@@ -72,18 +69,8 @@ class BuildOrderExtractor:
         can_skip = False if new_type == OrderType.STRUCTURE.name else True
         return new_id, new_type, can_skip
 
-    def __copy_build_order(self) -> None:
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            future = executor.submit(self.__get_chrome_driver)
-            try:
-                driver = future.result(
-                    timeout=self.timeout
-                )  # Set timeout to 10 seconds
-            except concurrent.futures.TimeoutError:
-                driver = self.__get_firefox_driver()
-            except Exception as e:
-                print(f"An error occurred: {e}")
-
+    def __copy_build_order(self) -> str:
+        driver = self.__get_driver()
         wait = WebDriverWait(driver, self.timeout)
         driver.get(self.url)
         action = ActionChains(driver)
@@ -106,6 +93,22 @@ class BuildOrderExtractor:
             )
         )
         copy_button.click()
+        # Wait for the clipboard content to be available
+        time.sleep(1)  # adjust this delay as needed
+        return pyperclip.paste()
+
+    def __get_driver(self) -> WebDriver:
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(self.__get_chrome_driver)
+            try:
+                driver = future.result(
+                    timeout=self.timeout
+                )  # Set timeout to 10 seconds
+            except concurrent.futures.TimeoutError:
+                driver = self.__get_firefox_driver()
+            except Exception as e:
+                print(f"An error occurred: {e}")
+        return driver
 
     def __get_chrome_driver(self) -> webdriver.Chrome:
         chrome_options = ChromeOptions()

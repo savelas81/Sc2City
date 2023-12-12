@@ -1,6 +1,5 @@
 from typing import TYPE_CHECKING
 
-import loguru
 from sc2.unit import Unit
 from sc2.units import Units
 from sc2.position import Point2
@@ -57,6 +56,9 @@ class SCVManager:
         self.__handle_alerts()
         self.__distribute_workers()
         self.__speed_mining()
+
+    def execute_action(self) -> bool:
+        return True
 
     # TODO: Handle for cases where the build command is not successful, since
     # the API does't return anything (maybe check if resources are being spent)
