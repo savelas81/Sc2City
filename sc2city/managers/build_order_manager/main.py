@@ -2,6 +2,7 @@ import asyncio
 from typing import TYPE_CHECKING
 
 from sc2.ids.unit_typeid import UnitTypeId
+from sc2.ids.ability_id import AbilityId
 from sc2.unit import Unit
 
 from utils import Status, OrderType, SCVAssignment
@@ -33,11 +34,16 @@ class BuildOrderManager:
         self.structure_manager.handle_supply_depots()
 
     def production_complete(self, unit: Unit) -> None:
+        order_id = (
+            AbilityId.CALLDOWNMULE_CALLDOWNMULE
+            if unit.type_id == UnitTypeId.MULE
+            else unit.type_id
+        )
         order = next(
             (
                 order
                 for order in self.bot.queue
-                if order.id == unit.type_id and order.status == Status.STARTED
+                if order.id == order_id and order.status == Status.STARTED
             ),
             None,
         )

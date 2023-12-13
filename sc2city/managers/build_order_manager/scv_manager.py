@@ -172,7 +172,7 @@ class SCVManager:
             worker = self.bot.workers.find_by_tag(tag)
             self.__update_worker_assignment(worker, assignment)
 
-    # TODO: Add logic to handle more than one scout
+    # TODO: Move this to scripts when implemented
     def __move_scouts(self) -> None:
         scout = None
         for scout_tag in self.bot.scvs[SCVAssignment.SCOUT]:

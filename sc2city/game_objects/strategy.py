@@ -1,6 +1,7 @@
 import enum
 from dataclasses import dataclass, field
 
+from sc2.bot_ai import BotAI
 from sc2.unit import Unit
 from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.upgrade_id import UpgradeId
@@ -111,3 +112,181 @@ class Strategy:
             ],
             build_order=[Order.from_dict(order) for order in dct["build_order"]],
         )
+
+
+class Base:
+    """
+    Represents a base in the game.
+
+    Attributes:
+    - location: The position of the base.
+    - townhalls: A list of townhall tags associated with the base.
+    - mineral_fields: A list of mineral field tags within range of the base.
+    - vespene_geysers: A list of vespene geyser tags within range of the base.
+    - mineral_workers: A list of worker tags assigned to mine minerals.
+    - vespene_workers: A list of worker tags assigned to gather vespene gas.
+    - structures: A list of structure tags associated with the base.
+
+    Properties:
+    - mineral_workers_needed: Total number of workers needed based on the number of mineral fields.
+    - vespene_workers_needed: Total number of workers needed based on the number of vespene geysers.
+    - mineral_workers_assigned: Number of workers assigned to minerals.
+    - vespene_workers_assigned: Number of workers assigned to vespene.
+    - mineral_workers_surplus: Number of extra workers assigned to minerals.
+    - vespene_workers_surplus: Number of extra workers assigned to vespene.
+    - mineral_workers_deficit: Number of workers that can still be assigned to minerals before saturation.
+    - vespene_workers_deficit: Number of workers that can still be assigned to vespene before saturation.
+    - mineral_workers_available: Number of workers above mineral saturation.
+    - vespene_workers_available: Number of workers above vespene saturation.
+
+    Methods:
+    - add_townhall(townhall: Unit): Add a townhall to the base.
+    - add_worker_to_minerals(worker: Unit): Add a worker to the mineral workers list.
+    - add_worker_to_vespene(worker: Unit): Add a worker to the vespene workers list.
+    - add_structure(structure: Unit): Add a structure to the structures list.
+    - remove_worker_from_minerals(worker: Unit): Remove a worker from the mineral workers list.
+    - remove_worker_from_vespene(worker: Unit): Remove a worker from the vespene workers list.
+    - remove_structure(structure: Unit): Remove a structure from the structures list.
+    - remove_mineral_field(mineral_field: Unit): Remove a mineral field from the mineral fields list.
+    - remove_vespene_geyser(vespene_geyser: Unit): Remove a vespene geyser from the vespene geysers list.
+    - remove_townhall(townhall: Unit): Remove a townhall from the townhalls list.
+    """
+
+    def __init__(self, bot: BotAI, townhall: Unit):
+        self.location = townhall.position
+        self.townhalls = [townhall.tag]
+        self.mineral_fields = bot.mineral_field.closer_than(10, townhall).tags
+        self.vespene_geysers = bot.vespene_geyser.closer_than(10, townhall).tags
+        self.mineral_workers = []
+        self.vespene_workers = []
+        self.structures = []
+
+    @property
+    def mineral_workers_needed(self):
+        """
+        Total number of workers needed based on the number of mineral fields.
+        """
+        return len(self.mineral_fields) * 2
+
+    @property
+    def vespene_workers_needed(self):
+        """
+        Total number of workers needed based on the number of vespene geysers.
+        """
+        return len(self.vespene_geysers) * 3
+
+    @property
+    def mineral_workers_assigned(self):
+        """
+        Number of workers assigned to minerals.
+        """
+        return len(self.mineral_workers)
+
+    @property
+    def vespene_workers_assigned(self):
+        """
+        Number of workers assigned to vespene.
+        """
+        return len(self.vespene_workers)
+
+    @property
+    def mineral_workers_surplus(self):
+        """
+        Number of extra workers assigned to minerals.
+        """
+        return self.mineral_workers_assigned - self.mineral_workers_needed
+
+    @property
+    def vespene_workers_surplus(self):
+        """
+        Number of extra workers assigned to vespene.
+        """
+        return self.vespene_workers_assigned - self.vespene_workers_needed
+
+    @property
+    def mineral_workers_deficit(self):
+        """
+        Number of workers that can still be assigned to minerals before saturation.
+        """
+        return self.mineral_workers_needed - self.mineral_workers_assigned
+
+    @property
+    def vespene_workers_deficit(self):
+        """
+        Number of workers that can still be assigned to vespene before saturation.
+        """
+        return self.vespene_workers_needed - self.vespene_workers_assigned
+
+    @property
+    def mineral_workers_available(self):
+        """
+        Number of workers above mineral saturation.
+        """
+        return self.mineral_workers_surplus > 0
+
+    @property
+    def vespene_workers_available(self):
+        """
+        Number of workers above vespene saturation.
+        """
+        return self.vespene_workers_surplus > 0
+
+    def add_townhall(self, townhall: Unit):
+        """
+        Add a townhall to the base.
+        """
+        self.townhalls.append(townhall.tag)
+
+    def add_worker_to_minerals(self, worker: Unit):
+        """
+        Add a worker to the mineral workers list.
+        """
+        self.mineral_workers.append(worker.tag)
+
+    def add_worker_to_vespene(self, worker: Unit):
+        """
+        Add a worker to the vespene workers list.
+        """
+        self.vespene_workers.append(worker.tag)
+
+    def add_structure(self, structure: Unit):
+        """
+        Add a structure to the structures list.
+        """
+        self.structures.append(structure.tag)
+
+    def remove_worker_from_minerals(self, worker: Unit):
+        """
+        Remove a worker from the mineral workers list.
+        """
+        self.mineral_workers.remove(worker.tag)
+
+    def remove_worker_from_vespene(self, worker: Unit):
+        """
+        Remove a worker from the vespene workers list.
+        """
+        self.vespene_workers.remove(worker.tag)
+
+    def remove_structure(self, structure: Unit):
+        """
+        Remove a structure from the structures list.
+        """
+        self.structures.remove(structure.tag)
+
+    def remove_mineral_field(self, mineral_field: Unit):
+        """
+        Remove a mineral field from the mineral fields list.
+        """
+        self.mineral_fields.remove(mineral_field.tag)
+
+    def remove_vespene_geyser(self, vespene_geyser: Unit):
+        """
+        Remove a vespene geyser from the vespene geysers list.
+        """
+        self.vespene_geysers.remove(vespene_geyser.tag)
+
+    def remove_townhall(self, townhall: Unit):
+        """
+        Remove a townhall from the townhalls list.
+        """
+        self.townhalls.remove(townhall.tag)

@@ -7,7 +7,7 @@ from sc2.unit import Unit
 from sc2.ids.unit_typeid import UnitTypeId
 
 from utils import Settings, SCVAssignment, Workers
-from game_objects import Strategy, Order
+from game_objects import Strategy, Order, Base
 from managers import (
     HistoryAnalyzer,
     MapAnalyzer,
@@ -48,6 +48,7 @@ class Sc2City(BotAI):
             SCVAssignment.ARMY: set(),
             SCVAssignment.NONE: set(),
         }
+        self.bases: list[Base] = []
 
         # TODO: Implement army logic with scripts. Eg: army = {soldiers: [(Unit, Script)], squads: [(Squad, Script)], scouts: [(Scout, Script)]}
         # TODO: Merge this with scouting logic in micro manager

@@ -24,6 +24,7 @@ class PositionPriority(enum.Enum):
 PositionPriorityLists: TypeAlias = dict[PositionPriority, list[Point2]]
 
 
+# TODO: Add @properties for getting the lists
 @dataclass
 class BuildingPlacements:
     # TODO: Add a default building placements to fallback on
