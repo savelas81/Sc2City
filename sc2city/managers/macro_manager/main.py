@@ -57,7 +57,7 @@ class MacroManager:
 
     def __choose_opening(self) -> dict:
         # TODO: Replace with logic to choose opening
-        opening_file = str(self.openings.TEST)
+        opening_file = str(self.mid_games.TEST)
         opening = self.__load_strategy(opening_file)
         return opening
 

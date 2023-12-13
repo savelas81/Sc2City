@@ -2,6 +2,7 @@ from typing import Optional
 
 from sc2.bot_ai import BotAI
 from sc2.data import Race
+from sc2.ids.upgrade_id import UpgradeId
 from sc2.unit import Unit
 from sc2.ids.unit_typeid import UnitTypeId
 
@@ -79,6 +80,14 @@ class Sc2City(BotAI):
 
     async def on_building_construction_complete(self, unit: Unit):
         self.build_order_manager.production_complete(unit)
+
+    # TODO: Implement this
+    async def on_unit_type_changed(self, unit: Unit, previous_type: UnitTypeId):
+        pass
+
+    # TODO: Implement this
+    async def on_upgrade_complete(self, upgrade: UpgradeId):
+        pass
 
     async def on_unit_created(self, unit: Unit) -> None:
         # Workaround for weird SCV/Refinery behavior

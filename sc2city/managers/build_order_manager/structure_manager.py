@@ -57,7 +57,8 @@ class StructureManager:
             structure.research(order.id)
         else:
             structure.train(order.id)
-        order.update_status(Status.STARTED)  # TODO: Move this to build order manager
+        # TODO: Fix bugs with the starting queue
+        order.update_status(Status.STARTED)
         return False
 
     async def execute_action(self, order: Order) -> bool:
@@ -73,13 +74,13 @@ class StructureManager:
             structure = self.bot.structures.find_by_tag(order.tag)
 
         if not order.target:
-            order.target = self.__select_target()
+            order.target = self.__select_target(order)
 
         if not await self.bot.can_cast(structure, order.id, order.target):
             return order.can_skip
 
-        # Test if abilities without a target break when sending with None
         structure(order.id, order.target)
+        order.update_status(Status.STARTED)  # TODO: Move this to build order manager
 
     # TODO: Create specific sets for each type of structure
     # TODO: Improve this logic and refactor (Try to not go through all enemies every step)
@@ -101,6 +102,7 @@ class StructureManager:
     async def __select_structure(
         self, order_id: UnitTypeId | UpgradeId | AbilityId
     ) -> Unit | None:
+        structure_id = None
         if order_id in UNIT_TRAINED_FROM:
             structure_id = UNIT_TRAINED_FROM[order_id]
         elif order_id in UPGRADE_RESEARCHED_FROM:
@@ -110,8 +112,12 @@ class StructureManager:
         else:
             # TODO: Optimize searches by structure type
             for structure in self.bot.structures:
-                if await self.bot.can_cast(structure, order_id):
+                if await self.bot.can_cast(
+                    structure, order_id, only_check_energy_and_cooldown=True
+                ):
                     return structure
+        if not structure_id:
+            return None
 
         # This might be a problem for buildings that can train multiple units at the same time
         # TODO: Add better logic for choosing structure

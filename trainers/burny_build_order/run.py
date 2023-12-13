@@ -10,8 +10,9 @@ sys.path.append(main_bot_path)
 from build_order_extractor import BuildOrderExtractor
 
 
-url = "https://burnysc2.github.io/sc2-planner/?&race=terran&bo=002eJy9UssKwjAQ/Jc992Cy1tT+ingobZAgtCUmiIj/7q0R7I5tkF4zzOw8cnqS66jelwWFx2ippvvgr9bTq/iFqOOE3IKPbYjeLqDpHaBBkCesaYMb+iXHtqEoFAmBOb0DJC0SexfSUqyBB7yjIKkNIBmpQtyFcCqnCUb2IAjbYFhVJbSfXMbx4pvuQ4/nKVwhhwdRT7IgWkN5xBXXXpFSrtXJSlGqeZL0/q9w21S7Np0y33/n/AYyNOO0"
-
+url = """
+https://burnysc2.github.io/sc2-planner/?&race=terran&bo=002eJy9UksKwjAUvMtbd9EkrY29irgobZAgtCUmiIh3d9cI9o1NkG4zzLz55PQkO1Bb1QX5x2yopfvkrsbRq/iFiOOC3LwLvQ/ObKDJEtAgqBas672dxi3H9qEIFAmBOb0DJC4SRuvjUkoCD3hHRlI2gNRwFeIumFM5TShkD4KwDQWr0kz70WWYL64bPvTUOkVp5PDA6nEWWGsoD7ti6hUuZapOVoparJO493+F26fa1HSiYf+OrNDfLjnH+gs4vwFKk/0A
+"""
 
 if __name__ == "__main__":
     bo_extractor = BuildOrderExtractor(url, dir_path)
