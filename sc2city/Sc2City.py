@@ -49,7 +49,6 @@ class Sc2City(BotAI):
         }
 
         # TODO: Implement army logic with scripts. Eg: army = {soldiers: [(Unit, Script)], squads: [(Squad, Script)], scouts: [(Scout, Script)]}
-        self.scouts: list[Unit] = []
         # TODO: Merge this with scouting logic in micro manager
         self.pending_scouting_points = None
 

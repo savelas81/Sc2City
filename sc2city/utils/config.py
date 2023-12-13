@@ -37,12 +37,12 @@ class OrderType(enum.Enum):
 
 class SCVAssignment(enum.Enum):
     MINERALS = 0
-    VESPENE = 2
-    BUILD = 3
+    VESPENE = 1
+    BUILD = 2
     SCOUT = 3
     REPAIR = 4
-    ARMY = 6
-    NONE = 7
+    ARMY = 5
+    NONE = 6
 
 
 Workers: TypeAlias = dict[SCVAssignment, dict[int, int] | set[int]]

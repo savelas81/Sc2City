@@ -28,7 +28,7 @@ class StructureManager:
     def __init__(self, bot: "Sc2City"):
         self.bot = bot
 
-    def produce(self, order: Order) -> bool:
+    async def produce(self, order: Order) -> bool:
         """
         Executes the given order by producing the specified unit or upgrading/researching
         the specified technology.
@@ -46,7 +46,7 @@ class StructureManager:
             return order.can_skip
 
         if not order.tag:
-            structure = self.__select_structure(order.id)
+            structure = await self.__select_structure(order.id)
             if not structure:
                 return order.can_skip
             order.tag = structure.tag
@@ -65,7 +65,9 @@ class StructureManager:
         Returns False when executing orders to avoid double commands.
         """
         if not order.tag:
-            structure = self.__select_structure()
+            structure = await self.__select_structure(order.id)
+            if not structure:
+                return order.can_skip
             order.tag = structure.tag
         else:
             structure = self.bot.structures.find_by_tag(order.tag)
@@ -73,7 +75,8 @@ class StructureManager:
         if not order.target:
             order.target = self.__select_target()
 
-        await self.bot.can_cast(structure, order.id, order.target)
+        if not await self.bot.can_cast(structure, order.id, order.target):
+            return order.can_skip
 
         # Test if abilities without a target break when sending with None
         structure(order.id, order.target)
@@ -95,7 +98,9 @@ class StructureManager:
             elif structure.type_id == UnitTypeId.SUPPLYDEPOTLOWERED and enemies:
                 structure(AbilityId.MORPH_SUPPLYDEPOT_RAISE)
 
-    def __select_structure(self, order_id: UnitTypeId | UpgradeId) -> Unit | None:
+    async def __select_structure(
+        self, order_id: UnitTypeId | UpgradeId | AbilityId
+    ) -> Unit | None:
         if order_id in UNIT_TRAINED_FROM:
             structure_id = UNIT_TRAINED_FROM[order_id]
         elif order_id in UPGRADE_RESEARCHED_FROM:
@@ -103,7 +108,10 @@ class StructureManager:
         elif order_id in ADDON_BUILT_FROM:
             structure_id = ADDON_BUILT_FROM[order_id]
         else:
-            return None
+            # TODO: Optimize searches by structure type
+            for structure in self.bot.structures:
+                if await self.bot.can_cast(structure, order_id):
+                    return structure
 
         # This might be a problem for buildings that can train multiple units at the same time
         # TODO: Add better logic for choosing structure
@@ -112,3 +120,15 @@ class StructureManager:
             return None
         structure = structures.random
         return structure
+
+    def __select_target(self, order: Order) -> Unit | None:
+        if order.id == AbilityId.CALLDOWNMULE_CALLDOWNMULE:
+            for townhall in self.bot.townhalls.ready:
+                minerals = self.bot.mineral_field.closer_than(10, townhall.position)
+                if minerals:
+                    return minerals.random
+        elif order.id == AbilityId.SUPPLYDROP_SUPPLYDROP:
+            self.bot.structures(UnitTypeId.SUPPLYDEPOT).closest_to(
+                self.bot.start_location
+            )
+        return None

@@ -53,17 +53,28 @@
       "comment": "write comment here"
     },
     {
-      "type": "PRODUCTION",
-      "conditional": true,
-      "conditional_behavior": "skip",
-      "id": "SCV",
-	  "can_skip": true,
-	  "priority": 1,
-      "target_value_behavior": true,
-      "quantity": 50,
-      "comment": "write comment here"
-    },
-    {
+		"type": "SCV_ACTION",
+		"conditional": true,
+		"conditional_behavior": "skip",
+		"id": "WORKER_TO_SCOUT",
+		"can_skip": true,
+		"priority": 11,
+		"target_value_behavior": true,
+		"quantity": 1,
+		"comment": "write comment here"
+	  },
+	  {
+		"type": "PRODUCTION",
+		"conditional": true,
+		"conditional_behavior": "skip",
+		"id": "SCV",
+		"can_skip": true,
+		"priority": 1,
+		"target_value_behavior": true,
+		"quantity": 50,
+		"comment": "write comment here"
+	  },
+		{
       "type": "STRUCTURE",
       "conditional": true,
       "conditional_behavior": "skip",

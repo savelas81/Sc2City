@@ -1,7 +1,7 @@
 import copy
 from typing import TYPE_CHECKING
 
-from game_objects import Order, CustomOrders
+from game_objects import Order
 
 if TYPE_CHECKING:
     from Sc2City import Sc2City
@@ -14,8 +14,6 @@ class QueueManager:
     def start_new_queue(self, orders: list[Order]) -> None:
         self.bot.queue.clear()
         for order in orders:
-            if order.id in CustomOrders:
-                self.__handle_custom_order(order)
             if order.quantity > 1:
                 self.bot.queue.extend(self.__expand_order(order))
             else:
@@ -24,9 +22,6 @@ class QueueManager:
 
     def update_queue(self) -> None:
         self.__sort_queue()
-
-    def __handle_custom_order(self, order: Order) -> None:
-        pass
 
     def __expand_order(self, order: Order) -> list[Order]:
         new_orders = []

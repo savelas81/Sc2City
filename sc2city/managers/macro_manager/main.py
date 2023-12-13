@@ -1,11 +1,7 @@
 import json
 from typing import TYPE_CHECKING
 
-from sc2.unit import Unit
-from sc2.position import Point2
-from sc2.ids.unit_typeid import UnitTypeId
-
-from utils import strategies, SCVAssignment, Status
+from utils import strategies, Status
 from game_objects import Strategy, ScoutTime, Order
 from .queue_manager import QueueManager
 
@@ -36,10 +32,6 @@ class MacroManager:
         opening = self.__choose_opening()
         self.bot.current_strategy = Strategy.from_dict(opening, self.map_file)
         self.queue_manager.start_new_queue(self.bot.current_strategy.build_order)
-        # TODO: Create method to handle SCV scouts
-        self.pending_scv_scouts = [
-            s for s in self.bot.current_strategy.scout_times if s.id == UnitTypeId.SCV
-        ]
 
     # TODO: Add logic to update strategy based on game state
     # TODO: Add logic to make decisions outside of imported strategies
@@ -50,9 +42,6 @@ class MacroManager:
                 break
             self.order_handlers[order.status](order)
         self.queue_manager.update_queue()
-
-        if self.pending_scv_scouts:
-            self.__update_scv_scouts()
 
     def __handle_pending_order(self, order: Order) -> None:
         pass
@@ -65,35 +54,6 @@ class MacroManager:
 
     def __handle_finished_order(self, order: Order) -> None:
         self.bot.queue.remove(order)
-
-    def __update_scv_scouts(self) -> None:
-        # TODO: Add logic to select the best scv scout position
-        position = self.bot.start_location
-        for scout in self.pending_scv_scouts:
-            if self.bot.time < scout.time:
-                continue
-
-            scv = self.__select_scv_scout(position)
-            if scv is None:
-                print("No available SCVs to scout")
-                return
-
-            self.bot.scouts.append(scv)
-            del self.bot.scvs[SCVAssignment.MINERALS][scv.tag]
-            self.pending_scv_scouts.remove(scout)
-
-    def __select_scv_scout(self, position: Point2) -> Unit | None:
-        # TODO: Add more robust logic to select other types of SCV scouts aside from mineral collectors
-        worker = next(
-            (
-                w
-                for w in self.bot.workers.sorted(lambda x: x.distance_to(position))
-                if w.tag in self.bot.scvs[SCVAssignment.MINERALS]
-                and not w.is_carrying_resource
-            ),
-            None,
-        )
-        return worker
 
     def __choose_opening(self) -> dict:
         # TODO: Replace with logic to choose opening

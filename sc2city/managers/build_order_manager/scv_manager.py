@@ -1,3 +1,6 @@
+import math
+import numpy as np
+from copy import copy
 from typing import TYPE_CHECKING
 
 from sc2.unit import Unit
@@ -7,8 +10,8 @@ from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.ability_id import AbilityId
 from sc2.data import Alert
 
-from utils import SCVAssignment
-from game_objects import BUILDING_PRIORITY, Order
+from utils import SCVAssignment, Status
+from game_objects import BUILDING_PRIORITY, Order, CustomOrders
 from .speed_mining import SpeedMining
 
 if TYPE_CHECKING:
@@ -37,6 +40,7 @@ class SCVManager:
         self.speed_mining = SpeedMining(bot)
         self.scvs_per_refinery: int = 3
         self.max_gas_miners: int = 100
+        self.next_point = None  # TODO: Remove this when refactoring scouting logic
 
     def worker_split_frame_zero(self) -> None:
         mineral_fields = self.bot.mineral_field.closer_than(
@@ -45,20 +49,38 @@ class SCVManager:
         workers = Units(self.bot.workers, self.bot)
         for mineral_field in mineral_fields:
             worker = workers.closest_to(mineral_field)
-            self.__assign_worker_to_mineral_field(worker, mineral_field)
+            self.__assign_worker_to_resource(worker, mineral_field)
             workers.remove(worker)
 
         for worker in workers:
-            mineral_field = mineral_fields.closest_to(worker)
-            self.__assign_worker_to_mineral_field(worker, mineral_field)
+            self.__assign_worker_to_resource(worker)
 
     def move_scvs(self) -> None:
         self.__handle_alerts()
+        self.__move_scouts()
         self.__distribute_workers()
         self.__speed_mining()
 
+    # TODO: Include more possible orders
     def execute_action(self, order: Order) -> bool:
-        return True
+        if order.id != CustomOrders.WORKER_TO_SCOUT:
+            return True
+
+        if not order.target and order.id:
+            order.target = self.bot.enemy_start_locations[0]
+
+        if not order.tag:
+            worker = self.__select_worker(order.target, SCVAssignment.SCOUT)
+            if not worker:
+                return order.can_skip
+            order.tag = worker.tag
+        else:
+            worker = self.bot.workers.find_by_tag(order.tag)
+            if worker.is_using_ability(AbilityId.MOVE):
+                order.update_status(Status.STARTED)
+                return True
+        worker.move(order.target)
+        return False
 
     # TODO: Handle for cases where the build command is not successful, since
     # the API does't return anything (maybe check if resources are being spent)
@@ -76,7 +98,7 @@ class SCVManager:
                 position = order.target.position
             else:
                 position = order.target
-            worker = self.__select_builder(position)
+            worker = self.__select_worker(position, SCVAssignment.BUILD)
             if not worker:
                 return order.can_skip
             order.tag = worker.tag
@@ -134,6 +156,7 @@ class SCVManager:
                 SCVAssignment.VESPENE,
             )
 
+    # TODO: Test if this method is working for gas geysers
     def __remove_miners(
         self,
         resource_tags: set[int],
@@ -146,13 +169,56 @@ class SCVManager:
             if resource_tag not in resource_tags
         ]
         for tag in tags_to_remove:
-            self.__remove_from_list(tag, assignment)
+            worker = self.bot.workers.find_by_tag(tag)
+            self.__update_worker_assignment(worker, assignment)
 
-    def __remove_from_list(self, scv_tag: int, assignment: SCVAssignment) -> None:
-        if assignment in (SCVAssignment.MINERALS, SCVAssignment.VESPENE):
-            del self.bot.scvs[assignment][scv_tag]
-        else:
-            self.bot.scvs[assignment].remove(scv_tag)
+    # TODO: Add logic to handle more than one scout
+    def __move_scouts(self) -> None:
+        scout = None
+        for scout_tag in self.bot.scvs[SCVAssignment.SCOUT]:
+            scout = self.bot.units.find_by_tag(scout_tag)
+            break
+        if not scout:
+            return
+
+        if self.bot.pending_scouting_points is not None:
+            if self.bot.pending_scouting_points.any():
+                if scout.type_id == UnitTypeId.REAPER:
+                    grid = copy(self.bot.map_analyzer.reaper_grid)
+                elif scout.is_flying:
+                    grid = copy(self.bot.map_analyzer.enemy_air_grid)
+                else:
+                    grid = copy(self.bot.map_analyzer.enemy_ground_grid)
+                condition_list = [
+                    self.bot.pending_scouting_points == 1,
+                    self.bot.pending_scouting_points != 1,
+                ]
+                choice_list = [grid, math.inf]
+                scouting_grid = np.select(condition_list, choice_list)
+                lowest_cost_points = (
+                    self.bot.map_analyzer.map_data.lowest_cost_points_array(
+                        from_pos=scout.position, radius=500, grid=scouting_grid
+                    )
+                )
+
+                if self.bot.iteration % 4 == 0:
+                    self.next_point = (
+                        self.bot.map_analyzer.map_data.closest_towards_point(
+                            points=lowest_cost_points, target=scout.position
+                        )
+                    )
+                if self.next_point is not None and self.next_point.any():
+                    path = self.bot.map_analyzer.map_data.pathfind(
+                        start=scout.position.rounded,
+                        goal=self.next_point,
+                        grid=grid,
+                        sensitivity=3,
+                    )
+                    if path is not None and len(path) > 0:
+                        scout.move(path[0])
+                else:
+                    # logger.info(f"No self.next_point {str(self.next_point)}")
+                    return
 
     def __speed_mining(self) -> None:
         for worker_tag in self.bot.scvs[SCVAssignment.MINERALS]:
@@ -175,8 +241,8 @@ class SCVManager:
         self.__handle_idle_workers()
 
         """
-		manages saturation for refineries
-		"""
+        manages saturation for refineries
+        """
         for refinery in self.bot.gas_buildings.ready:
             """
             Assigns scv to gather vespene if needed
@@ -185,16 +251,16 @@ class SCVManager:
                 refinery.custom_assigned_harvesters < self.scvs_per_refinery
                 and len(self.bot.scvs[SCVAssignment.VESPENE]) < self.max_gas_miners
             ):
-                worker = self.__select_worker(refinery.position)
+                worker = self.__select_worker(
+                    refinery.position, SCVAssignment.VESPENE, resource=refinery
+                )
                 if worker:
-                    self.bot.scvs[SCVAssignment.VESPENE][worker.tag] = refinery.tag
-                    worker.gather(refinery)
                     return
 
             """
-			Stops scv from gathering vespene is needed. 
-			Idle workers are given new assignment on next frame.
-			"""
+            Stops scv from gathering vespene is needed. 
+            Idle workers are given new assignment on next frame.
+            """
             if (
                 refinery.custom_assigned_harvesters > self.scvs_per_refinery
                 or len(self.bot.scvs[SCVAssignment.VESPENE]) > self.max_gas_miners
@@ -212,10 +278,10 @@ class SCVManager:
                             return
 
         """
-		Stops scv from over saturated townhall if under saturated townhall is available.
-		Stops only if custom_surplus_harvesters > 1 to prevent workers changing mining locations unnecessary.
-		Idle workers are given new assignment on next frame.
-		"""
+        Stops scv from over saturated townhall if under saturated townhall is available.
+        Stops only if custom_surplus_harvesters > 1 to prevent workers changing mining locations unnecessary.
+        Idle workers are given new assignment on next frame.
+        """
         townhall_with_surplus_harvesters = next(
             (
                 t
@@ -232,33 +298,33 @@ class SCVManager:
             position = self.bot.mineral_field.closer_than(
                 10, townhall_with_surplus_harvesters.postion
             ).center
-            worker = self.__select_worker(position=position)
+            worker = self.__select_worker(from_position=position)
             if worker:
                 worker.move(worker.position)
                 return
 
-    # TODO: Add logic to distribute workers between different lists
+    # TODO: Add handlers for other worker assignments
+    # TODO: Refactor scout logic
     def __handle_idle_workers(self) -> None:
         """
         Send idle worker to closest townhall that is not saturated.
         If no saturated townhall available send to closest.
         """
         for worker in self.bot.workers.idle:
-            if worker.tag not in self.bot.scvs[SCVAssignment.BUILD]:
-                cc = self.bot.townhalls.ready.not_flying.sorted(
-                    lambda x: x.distance_to(worker)
-                ).first
-                mfs = self.bot.mineral_field.closer_than(10, cc)
-                mf = mfs.closest_to(worker)
-                self.bot.scvs[SCVAssignment.MINERALS][worker.tag] = mf.tag
-                worker.gather(mf)
-            elif worker.tag in self.bot.scvs[SCVAssignment.BUILD]:
+            if worker.tag in self.bot.scvs[SCVAssignment.BUILD]:
                 # TODO: Handle for different order status
                 position = next(
                     order.target for order in self.bot.queue if order.tag == worker.tag
                 )
                 if worker.position != position:
                     worker.move(position)
+            elif (
+                worker.tag in self.bot.scvs[SCVAssignment.SCOUT]
+                and self.bot.pending_scouting_points is not None
+            ):
+                continue
+            else:
+                self.__update_worker_assignment(worker)
 
     def __calculate_custom_assigned_workers(self) -> None:
         """
@@ -295,45 +361,149 @@ class SCVManager:
         for mf in self.bot.mineral_field:
             mf.custom_surplus_harvesters = mf.custom_assigned_harvesters - 2
 
-    def __assign_worker_to_mineral_field(
-        self, worker: Unit, mineral_field: Unit
+    def __select_worker(
+        self,
+        from_position: Point2 = None,
+        to_assignment: SCVAssignment = None,
+        from_assignment: SCVAssignment = SCVAssignment.MINERALS,
+        resource: Unit = None,
+    ) -> Unit | None:
+        """
+        Selects a worker to be assigned to a new task.
+
+        Args:
+            from_position (Point2, optional): The position from which to select the worker. Defaults to None.
+            to_assignment (SCVAssignment, optional): The new assignment for the worker. Defaults to None.
+            from_assignment (SCVAssignment, optional): The current assignment of the worker. Defaults to SCVAssignment.MINERALS.
+            resource (Unit, optional): The resource unit associated with the assignment (e.g., mineral field or refinery).
+                If not provided, the closest refinery or mineral field to the worker will be assigned.
+
+        Returns:
+            Unit | None: The selected worker unit, or None if no worker is available.
+        """
+        if not from_position:
+            from_position = self.bot.start_location
+        worker = next(
+            (
+                w
+                for w in self.bot.workers.sorted(lambda x: x.distance_to(from_position))
+                if w.tag in self.bot.scvs[from_assignment]
+                and not w.is_carrying_resource
+            ),
+            None,
+        )
+        if not worker:
+            return None
+        if to_assignment:
+            self.__update_worker_assignment(
+                worker, from_assignment, to_assignment, resource
+            )
+        return worker
+
+    def __update_worker_assignment(
+        self,
+        worker: Unit,
+        from_assignment: SCVAssignment = None,
+        to_assignment: SCVAssignment = SCVAssignment.MINERALS,
+        resource: Unit = None,
     ) -> None:
-        worker.gather(mineral_field)
-        self.bot.scvs[SCVAssignment.MINERALS][worker.tag] = mineral_field.tag
-
-    def __select_builder(self, position: Point2) -> Unit | None:
-        # TODO: Add error handling for when there are no available workers
-        # TODO: Add logic to select other types of SCV builders aside from mineral collectors
-        worker = next(
-            (
-                w
-                for w in self.bot.workers.sorted(lambda x: x.distance_to(position))
-                if w.tag in self.bot.scvs[SCVAssignment.MINERALS]
-                and not w.is_carrying_resource
-            ),
-            None,
-        )
-        if worker:
-            del self.bot.scvs[SCVAssignment.MINERALS][worker.tag]
-            self.bot.scvs[SCVAssignment.BUILD].add(worker.tag)
-            worker.stop()  # Used to handle workers in the move method
-        return worker
-
-    # TODO: Merge this method with __select_builder
-    def __select_worker(self, position: Point2) -> Unit | None:
         """
-        Same as __select_contractor, but this is used for distributing workers.
-        Removes scv tag from scvs[SCVAssignment.MINERALS].
+        Updates worker assignment.
+
+        Args:
+            worker (Unit): The worker unit to update the assignment for.
+            from_assignment (SCVAssignment): The current assignment of the worker. Defaults to NONE.
+            to_assignment (SCVAssignment, optional): The new assignment for the worker. Defaults to SCVAssignment.MINERALS.
+            resource (Unit, optional): The resource unit associated with the assignment (e.g., mineral field or gas geyser).
+                Defaults to None.
         """
-        worker = next(
-            (
-                w
-                for w in self.bot.workers.sorted(lambda x: x.distance_to(position))
-                if w.tag in self.bot.scvs[SCVAssignment.MINERALS]
-                and not w.is_carrying_resource
-            ),
-            None,
+        if not from_assignment:
+            from_assignment = self.__find_assignment(worker)
+
+        if not from_assignment:
+            pass
+        elif from_assignment in {SCVAssignment.MINERALS, SCVAssignment.VESPENE}:
+            del self.bot.scvs[from_assignment][worker.tag]
+        else:
+            self.bot.scvs[from_assignment].remove(worker.tag)
+
+        if to_assignment in {SCVAssignment.MINERALS, SCVAssignment.VESPENE}:
+            self.__assign_worker_to_resource(worker, resource)
+        else:
+            self.bot.scvs[to_assignment].add(worker.tag)
+            worker.stop()  # Stops worker from executing previous command to be handled by the idle handler in the next frame
+
+    def __find_assignment(self, worker: Unit) -> SCVAssignment | None:
+        """
+        Finds the current assignment of a worker.
+
+        Args:
+            worker (Unit): The worker unit to find the assignment for.
+
+        Returns:
+            SCVAssignment: The current assignment of the worker.
+        """
+        for assignment, workers in self.bot.scvs.items():
+            if worker.tag in workers:
+                return assignment
+        return None
+
+    def __assign_worker_to_resource(
+        self, worker: Unit, resource: Unit = None, assignment: SCVAssignment = None
+    ) -> None:
+        """
+        Assigns a worker to a target unit for gathering resources. If no resource and no assignment
+        are provided, the worker will be assigned to the closest mineral field.
+
+        Args:
+            worker (Unit): The worker unit to assign.
+            resource (Unit, optional): The target resource to assign the worker to. If not provided,
+                the closest resource to the worker will be assigned.
+            assignment (SCVAssignment, optional): The assignment type to update the worker with.
+                Defaults to None.
+
+        Returns:
+            None
+        """
+        if not resource and not assignment:
+            resource = self.__find_closest_resource(worker, SCVAssignment.MINERALS)
+        elif not resource:
+            resource = self.__find_closest_resource(worker, assignment)
+        if not assignment:
+            assignment = (
+                SCVAssignment.MINERALS
+                if resource.is_mineral_field
+                else SCVAssignment.VESPENE
+            )
+        worker.gather(resource)
+        self.bot.scvs[assignment][worker.tag] = resource.tag
+
+    # TODO: Test if it's not including exhausted refinery
+    def __find_closest_resource(self, worker: Unit, assignment: SCVAssignment) -> Unit:
+        """
+        Finds the closest resource to the worker.
+
+        Args:
+            worker (Unit): The worker unit.
+            assignment (SCVAssignment): The assignment type.
+
+        Returns:
+            Unit: The closest resource unit.
+        """
+        for townhall in self.bot.townhalls.ready.not_flying.sorted_by_distance_to(
+            worker
+        ):
+            resources = (
+                self.bot.mineral_field
+                if assignment == SCVAssignment.MINERALS
+                else self.bot.gas_buildings.ready
+            ).closer_than(10, townhall)
+            if resources:
+                return resources.closest_to(worker)
+
+        resources = (
+            self.bot.mineral_field
+            if assignment == SCVAssignment.MINERALS
+            else self.bot.gas_buildings.ready
         )
-        if worker:
-            del self.bot.scvs[SCVAssignment.MINERALS][worker.tag]
-        return worker
+        return resources.closest_to(worker)

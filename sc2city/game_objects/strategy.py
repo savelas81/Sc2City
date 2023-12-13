@@ -4,6 +4,7 @@ from dataclasses import dataclass, field
 from sc2.unit import Unit
 from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.upgrade_id import UpgradeId
+from sc2.ids.ability_id import AbilityId
 from sc2.position import Point2
 
 from .building_placements import BuildingPlacements
@@ -48,7 +49,7 @@ class ScoutTime:
 @dataclass
 class Order:
     type: OrderType
-    id: UnitTypeId | UpgradeId
+    id: UnitTypeId | UpgradeId | AbilityId | CustomOrders
     priority: int = 0
     status: Status = Status.PENDING
     status_age: int = 0  # Measured in frames
@@ -71,6 +72,10 @@ class Order:
             dct["id"] = UnitTypeId[dct["id"]]
         elif dct["id"] in UpgradeId.__members__:
             dct["id"] = UpgradeId[dct["id"]]
+        elif dct["id"] in AbilityId.__members__:
+            dct["id"] = AbilityId[dct["id"]]
+        elif dct["id"] in CustomOrders.__members__:
+            dct["id"] = CustomOrders[dct["id"]]
         return cls(**dct)
 
     def update_status(self, new_status: Status) -> None:
