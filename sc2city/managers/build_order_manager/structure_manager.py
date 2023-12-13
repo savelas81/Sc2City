@@ -24,12 +24,6 @@ ADDON_BUILT_FROM = {
     UnitTypeId.STARPORTTECHLAB: UnitTypeId.STARPORT,
 }
 
-TOWNHALL_TYPES = [
-    UnitTypeId.COMMANDCENTER,
-    UnitTypeId.PLANETARYFORTRESS,
-    UnitTypeId.ORBITALCOMMAND,
-]
-
 NEED_TECHLAB = [
     UnitTypeId.MARAUDER,
     UnitTypeId.GHOST,
@@ -152,9 +146,8 @@ class StructureManager:
                 return structures_without_addon.random
         return None
 
-    @staticmethod
-    def __select_best_structure_to_train_unit(structures: Units, order_id: UnitTypeId) -> Unit | None:
-        if structures.first.type_id in TOWNHALL_TYPES:
+    def __select_best_structure_to_train_unit(self, structures: Units, order_id: UnitTypeId) -> Unit | None:
+        if structures.first in self.bot.townhalls:
             townhalls = structures.idle
             if townhalls:
                 return townhalls.random
