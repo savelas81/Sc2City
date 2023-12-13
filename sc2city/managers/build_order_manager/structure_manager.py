@@ -6,6 +6,7 @@ from sc2.dicts.upgrade_researched_from import UPGRADE_RESEARCHED_FROM
 from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.ability_id import AbilityId
 from sc2.ids.upgrade_id import UpgradeId
+from sc2.units import Units
 
 from utils import Status
 from game_objects import Order
@@ -22,6 +23,24 @@ ADDON_BUILT_FROM = {
     UnitTypeId.STARPORTREACTOR: UnitTypeId.STARPORT,
     UnitTypeId.STARPORTTECHLAB: UnitTypeId.STARPORT,
 }
+
+TOWNHALL_TYPES = [
+    UnitTypeId.COMMANDCENTER,
+    UnitTypeId.PLANETARYFORTRESS,
+    UnitTypeId.ORBITALCOMMAND,
+]
+
+NEED_TECHLAB = [
+    UnitTypeId.MARAUDER,
+    UnitTypeId.GHOST,
+    UnitTypeId.SIEGETANK,
+    UnitTypeId.CYCLONE,
+    UnitTypeId.THOR,
+    UnitTypeId.MARAUDER,
+    UnitTypeId.RAVEN,
+    UnitTypeId.BANSHEE,
+    UnitTypeId.BATTLECRUISER,
+]
 
 
 class StructureManager:
@@ -119,16 +138,42 @@ class StructureManager:
         if not structure_id:
             return None
 
-        # This might be a problem for buildings that can train multiple units at the same time
-        # TODO: Add better logic for choosing structure
-        structures = self.bot.structures(structure_id).idle.ready
+        structures = self.bot.structures(structure_id).ready  # we can use only ready structures
         if not structures:
             return None
-        structure = structures.random
-        return structure
+        if order_id in UNIT_TRAINED_FROM:
+            return self.__select_best_structure_to_train_unit(structures=structures, order_id=order_id)
+        elif order_id in UPGRADE_RESEARCHED_FROM:
+            if structures.idle:
+                return structures.idle.random
+        elif order_id in ADDON_BUILT_FROM:
+            structures_without_addon = structures.filter(lambda x: not x.has_techlab and not x.has_reactor).idle
+            if structures_without_addon:
+                return structures_without_addon.random
+        return None
+
+    @staticmethod
+    def __select_best_structure_to_train_unit(structures: Units, order_id: UnitTypeId) -> Unit | None:
+        if structures.first.type_id in TOWNHALL_TYPES:
+            townhalls = structures.idle
+            if townhalls:
+                return townhalls.random
+            else:
+                return None
+        if order_id not in NEED_TECHLAB:  # when training marines etc. we want to prioritise reactors
+            structures_with_reactors = structures.filter(lambda x: len(x.orders) < 2 and x.has_reactor)
+            if structures_with_reactors:
+                return structures_with_reactors.random
+        structures_with_techlabs = structures.idle.filter(lambda x: x.has_techlab)
+        if structures_with_techlabs:  # prioritise structures with techlabs over structures without addon
+            return structures.random
+        if structures.idle:  # if we have any idle structures one of them is used
+            return structures.idle.random
+        return None
 
     def __select_target(self, order: Order) -> Unit | None:
         if order.id == AbilityId.CALLDOWNMULE_CALLDOWNMULE:
+            # TODO prioritise mineral_field with highest content
             for townhall in self.bot.townhalls.ready:
                 minerals = self.bot.mineral_field.closer_than(10, townhall.position)
                 if minerals:
