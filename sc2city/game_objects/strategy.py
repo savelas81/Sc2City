@@ -162,130 +162,130 @@ class Base:
         self.structures = []
 
     @property
-    def mineral_workers_needed(self):
+    def mineral_workers_needed(self) -> int:
         """
         Total number of workers needed based on the number of mineral fields.
         """
         return len(self.mineral_fields) * 2
 
     @property
-    def vespene_workers_needed(self):
+    def vespene_workers_needed(self) -> int:
         """
         Total number of workers needed based on the number of vespene geysers.
         """
         return len(self.vespene_geysers) * 3
 
     @property
-    def mineral_workers_assigned(self):
+    def mineral_workers_assigned(self) -> int:
         """
         Number of workers assigned to minerals.
         """
         return len(self.mineral_workers)
 
     @property
-    def vespene_workers_assigned(self):
+    def vespene_workers_assigned(self) -> int:
         """
         Number of workers assigned to vespene.
         """
         return len(self.vespene_workers)
 
     @property
-    def mineral_workers_surplus(self):
+    def mineral_workers_surplus(self) -> int:
         """
         Number of extra workers assigned to minerals.
         """
         return self.mineral_workers_assigned - self.mineral_workers_needed
 
     @property
-    def vespene_workers_surplus(self):
+    def vespene_workers_surplus(self) -> int:
         """
         Number of extra workers assigned to vespene.
         """
         return self.vespene_workers_assigned - self.vespene_workers_needed
 
     @property
-    def mineral_workers_deficit(self):
+    def mineral_workers_deficit(self) -> int:
         """
         Number of workers that can still be assigned to minerals before saturation.
         """
         return self.mineral_workers_needed - self.mineral_workers_assigned
 
     @property
-    def vespene_workers_deficit(self):
+    def vespene_workers_deficit(self) -> int:
         """
         Number of workers that can still be assigned to vespene before saturation.
         """
         return self.vespene_workers_needed - self.vespene_workers_assigned
 
     @property
-    def mineral_workers_available(self):
+    def mineral_workers_available(self) -> int:
         """
         Number of workers above mineral saturation.
         """
         return self.mineral_workers_surplus > 0
 
     @property
-    def vespene_workers_available(self):
+    def vespene_workers_available(self) -> int:
         """
         Number of workers above vespene saturation.
         """
         return self.vespene_workers_surplus > 0
 
-    def add_townhall(self, townhall: Unit):
+    def add_townhall(self, townhall: Unit) -> None:
         """
         Add a townhall to the base.
         """
         self.townhalls.append(townhall.tag)
 
-    def add_worker_to_minerals(self, worker: Unit):
+    def add_worker_to_minerals(self, worker: Unit) -> None:
         """
         Add a worker to the mineral workers list.
         """
         self.mineral_workers.append(worker.tag)
 
-    def add_worker_to_vespene(self, worker: Unit):
+    def add_worker_to_vespene(self, worker: Unit) -> None:
         """
         Add a worker to the vespene workers list.
         """
         self.vespene_workers.append(worker.tag)
 
-    def add_structure(self, structure: Unit):
+    def add_structure(self, structure: Unit) -> None:
         """
         Add a structure to the structures list.
         """
         self.structures.append(structure.tag)
 
-    def remove_worker_from_minerals(self, worker: Unit):
+    def remove_worker_from_minerals(self, worker: Unit) -> None:
         """
         Remove a worker from the mineral workers list.
         """
         self.mineral_workers.remove(worker.tag)
 
-    def remove_worker_from_vespene(self, worker: Unit):
+    def remove_worker_from_vespene(self, worker: Unit) -> None:
         """
         Remove a worker from the vespene workers list.
         """
         self.vespene_workers.remove(worker.tag)
 
-    def remove_structure(self, structure: Unit):
+    def remove_structure(self, structure: Unit) -> None:
         """
         Remove a structure from the structures list.
         """
         self.structures.remove(structure.tag)
 
-    def remove_mineral_field(self, mineral_field: Unit):
+    def remove_mineral_field(self, mineral_field: Unit) -> None:
         """
         Remove a mineral field from the mineral fields list.
         """
         self.mineral_fields.remove(mineral_field.tag)
 
-    def remove_vespene_geyser(self, vespene_geyser: Unit):
+    def remove_vespene_geyser(self, vespene_geyser: Unit) -> None:
         """
         Remove a vespene geyser from the vespene geysers list.
         """
         self.vespene_geysers.remove(vespene_geyser.tag)
 
-    def remove_townhall(self, townhall: Unit):
+    def remove_townhall(self, townhall: Unit) -> None:
         """
         Remove a townhall from the townhalls list.
         """
