@@ -2,7 +2,7 @@ import json
 from typing import TYPE_CHECKING
 
 from utils import strategies, Status
-from game_objects import Strategy, ScoutTime, Order
+from game_objects import Strategy, Order
 from .queue_manager import QueueManager
 
 if TYPE_CHECKING:
@@ -17,7 +17,6 @@ class MacroManager:
 
     def __init__(self, bot: "Sc2City"):
         self.bot = bot
-        self.pending_scv_scouts: list[ScoutTime] = []
         self.queue_manager = QueueManager(bot)
         self.map_file = None
         self.order_handlers = {

@@ -5,7 +5,7 @@ from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.ability_id import AbilityId
 from sc2.unit import Unit
 
-from utils import Status, OrderType, SCVAssignment
+from utils import Status, OrderType
 from .scv_manager import SCVManager
 from .structure_manager import StructureManager
 
@@ -50,11 +50,11 @@ class BuildOrderManager:
         if order is not None:
             order.update_status(Status.FINISHED)
             if order.type == OrderType.STRUCTURE:
-                self.bot.scvs[SCVAssignment.BUILD].remove(order.tag)
+                self.bot.scvs.builders.remove(order.tag)
                 if (
                     order.id == UnitTypeId.REFINERY
                 ):  # worker goes automatically to gather gas.
-                    self.bot.scvs[SCVAssignment.VESPENE][order.tag] = unit.tag
+                    self.bot.scvs.gas_miners[order.tag] = unit.tag
         else:
             # TODO: Add logic to handle errors
             print(f"{unit.type_id} not found in finished queue")

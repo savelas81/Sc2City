@@ -146,13 +146,13 @@ class SCVManager:
         if self.bot.alert(Alert.MineralsExhausted):
             self.__remove_miners(
                 self.bot.mineral_field.tags,
-                self.bot.scvs[SCVAssignment.MINERALS],
+                self.bot.scvs.mineral_miners,
                 SCVAssignment.MINERALS,
             )
         elif self.bot.alert(Alert.VespeneExhausted):
             self.__remove_miners(
                 self.bot.gas_buildings.tags,
-                self.bot.scvs[SCVAssignment.VESPENE],
+                self.bot.scvs.gas_miners,
                 SCVAssignment.VESPENE,
             )
 
@@ -311,7 +311,7 @@ class SCVManager:
         If no saturated townhall available send to closest.
         """
         for worker in self.bot.workers.idle:
-            if worker.tag in self.bot.scvs[SCVAssignment.BUILD]:
+            if worker.tag in self.bot.scvs.builders:
                 # TODO: Handle for different order status
                 position = next(
                     order.target for order in self.bot.queue if order.tag == worker.tag
@@ -319,7 +319,7 @@ class SCVManager:
                 if worker.position != position:
                     worker.move(position)
             elif (
-                worker.tag in self.bot.scvs[SCVAssignment.SCOUT]
+                worker.tag in self.bot.scvs.scouts
                 and self.bot.pending_scouting_points is not None
             ):
                 continue
@@ -385,10 +385,12 @@ class SCVManager:
             from_position = self.bot.start_location
         worker = next(
             (
-                w
-                for w in self.bot.workers.sorted(lambda x: x.distance_to(from_position))
-                if w.tag in self.bot.scvs[from_assignment]
-                and not w.is_carrying_resource
+                worker
+                for worker in self.bot.workers.sorted(
+                    lambda x: x.distance_to(from_position)
+                )
+                if worker.tag in self.bot.scvs[from_assignment]
+                and not worker.is_carrying_resource
             ),
             None,
         )
@@ -417,36 +419,12 @@ class SCVManager:
             resource (Unit, optional): The resource unit associated with the assignment (e.g., mineral field or gas geyser).
                 Defaults to None.
         """
-        if not from_assignment:
-            from_assignment = self.__find_assignment(worker)
-
-        if not from_assignment:
-            pass
-        elif from_assignment in {SCVAssignment.MINERALS, SCVAssignment.VESPENE}:
-            del self.bot.scvs[from_assignment][worker.tag]
-        else:
-            self.bot.scvs[from_assignment].remove(worker.tag)
-
+        self.bot.scvs.remove(worker.tag, from_assignment)
         if to_assignment in {SCVAssignment.MINERALS, SCVAssignment.VESPENE}:
             self.__assign_worker_to_resource(worker, resource)
         else:
             self.bot.scvs[to_assignment].add(worker.tag)
             worker.stop()  # Stops worker from executing previous command to be handled by the idle handler in the next frame
-
-    def __find_assignment(self, worker: Unit) -> SCVAssignment | None:
-        """
-        Finds the current assignment of a worker.
-
-        Args:
-            worker (Unit): The worker unit to find the assignment for.
-
-        Returns:
-            SCVAssignment: The current assignment of the worker.
-        """
-        for assignment, workers in self.bot.scvs.items():
-            if worker.tag in workers:
-                return assignment
-        return None
 
     def __assign_worker_to_resource(
         self, worker: Unit, resource: Unit = None, assignment: SCVAssignment = None

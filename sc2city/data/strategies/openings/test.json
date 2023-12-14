@@ -1,12 +1,5 @@
 {
   "build_type": "ONE_BASE",
-  "scout_times": [
-	{
-	  "id": "SCV",
-	  "time": 37,
-	  "comment": "write comment here"
-	}
-  ],
   "build_order": [
     {
       "type": "PRODUCTION",
