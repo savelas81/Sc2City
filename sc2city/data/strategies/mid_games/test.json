@@ -503,6 +503,14 @@
 	  "priority": 5,
 	  "quantity": 1,
 	  "comment": "Write comment here"
+	},
+	{
+	  "id": "MARINE",
+	  "type": "PRODUCTION",
+	  "can_skip": true,
+	  "priority": 1,
+	  "quantity": 10,
+	  "comment": "Write comment here"
 	}
   ]
 }

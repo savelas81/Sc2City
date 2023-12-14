@@ -6,7 +6,6 @@ from sc2.dicts.upgrade_researched_from import UPGRADE_RESEARCHED_FROM
 from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.ability_id import AbilityId
 from sc2.ids.upgrade_id import UpgradeId
-from sc2.units import Units
 
 from utils import Status
 from game_objects import Order
@@ -15,7 +14,7 @@ if TYPE_CHECKING:
     from Sc2City import Sc2City
 
 
-ADDON_BUILT_FROM = {
+ADDON_BUILT_FROM: dict[UnitTypeId, UnitTypeId] = {
     UnitTypeId.BARRACKSREACTOR: UnitTypeId.BARRACKS,
     UnitTypeId.BARRACKSTECHLAB: UnitTypeId.BARRACKS,
     UnitTypeId.FACTORYREACTOR: UnitTypeId.FACTORY,
@@ -24,7 +23,7 @@ ADDON_BUILT_FROM = {
     UnitTypeId.STARPORTTECHLAB: UnitTypeId.STARPORT,
 }
 
-NEED_TECHLAB = [
+NEED_TECHLAB: list[UnitTypeId] = [
     UnitTypeId.MARAUDER,
     UnitTypeId.GHOST,
     UnitTypeId.SIEGETANK,
@@ -40,6 +39,11 @@ NEED_TECHLAB = [
 class StructureManager:
     def __init__(self, bot: "Sc2City"):
         self.bot = bot
+        self.__selection_methods = {
+            frozenset(UNIT_TRAINED_FROM): self.__select_to_train,
+            frozenset(UPGRADE_RESEARCHED_FROM): self.__select_to_research,
+            frozenset(ADDON_BUILT_FROM): self.__select_to_build,
+        }
 
     async def produce(self, order: Order) -> bool:
         """
@@ -70,8 +74,9 @@ class StructureManager:
             structure.research(order.id)
         else:
             structure.train(order.id)
-        # TODO: Fix bugs with the starting queue
-        order.update_status(Status.STARTED)
+
+        if not order.id in ADDON_BUILT_FROM:
+            order.update_status(Status.STARTED)
         return False
 
     async def execute_action(self, order: Order) -> bool:
@@ -95,7 +100,7 @@ class StructureManager:
         structure(order.id, order.target)
         order.update_status(Status.STARTED)  # TODO: Move this to build order manager
 
-    # TODO: Create specific sets for each type of structure
+    # TODO: Search only through supply depots
     # TODO: Improve this logic and refactor (Try to not go through all enemies every step)
     def handle_supply_depots(self) -> None:
         for structure in self.bot.structures:
@@ -115,64 +120,105 @@ class StructureManager:
     async def __select_structure(
         self, order_id: UnitTypeId | UpgradeId | AbilityId
     ) -> Unit | None:
-        structure_id = None
-        if order_id in UNIT_TRAINED_FROM:
-            structure_id = UNIT_TRAINED_FROM[order_id]
-        elif order_id in UPGRADE_RESEARCHED_FROM:
-            structure_id = UPGRADE_RESEARCHED_FROM[order_id]
-        elif order_id in ADDON_BUILT_FROM:
-            structure_id = ADDON_BUILT_FROM[order_id]
-        else:
-            # TODO: Optimize searches by structure type
-            for structure in self.bot.structures:
-                if await self.bot.can_cast(
-                    structure, order_id, only_check_energy_and_cooldown=True
-                ):
-                    return structure
-        if not structure_id:
-            return None
+        method = next(
+            (
+                method
+                for order_set, method in self.__selection_methods.items()
+                if order_id in order_set
+            ),
+            None,
+        )
+        return (
+            method(order_id) if method else await self.__select_to_use_ability(order_id)
+        )
 
-        structures = self.bot.structures(structure_id).ready  # we can use only ready structures
+    # Do we actually want random or the closest to starting position?
+    def __select_to_train(self, order_id: UnitTypeId) -> Unit | None:
+        structure_id = UNIT_TRAINED_FROM[order_id]
+        structures = self.bot.structures(structure_id).ready
         if not structures:
             return None
-        if order_id in UNIT_TRAINED_FROM:
-            return self.__select_best_structure_to_train_unit(structures=structures, order_id=order_id)
-        elif order_id in UPGRADE_RESEARCHED_FROM:
-            if structures.idle:
-                return structures.idle.random
-        elif order_id in ADDON_BUILT_FROM:
-            structures_without_addon = structures.filter(lambda x: not x.has_techlab and not x.has_reactor).idle
-            if structures_without_addon:
-                return structures_without_addon.random
-        return None
 
-    def __select_best_structure_to_train_unit(self, structures: Units, order_id: UnitTypeId) -> Unit | None:
-        if structures.first in self.bot.townhalls:
-            townhalls = structures.idle
-            if townhalls:
-                return townhalls.random
-            else:
-                return None
-        if order_id not in NEED_TECHLAB:  # when training marines etc. we want to prioritise reactors
-            structures_with_reactors = structures.filter(lambda x: len(x.orders) < 2 and x.has_reactor)
-            if structures_with_reactors:
-                return structures_with_reactors.random
-        structures_with_techlabs = structures.idle.filter(lambda x: x.has_techlab)
-        if structures_with_techlabs:  # prioritise structures with techlabs over structures without addon
-            return structures.random
-        if structures.idle:  # if we have any idle structures one of them is used
-            return structures.idle.random
-        return None
+        idle_structures = structures.idle
+        if order_id in NEED_TECHLAB:
+            return (
+                idle_structures.random
+                if idle_structures.filter(lambda x: x.has_techlab)
+                else None
+            )
+
+        structures_with_reactors = structures.filter(
+            lambda x: len(x.orders) < 2 and x.has_reactor
+        )
+        if structures_with_reactors:
+            return structures_with_reactors.random
+
+        return idle_structures.random if idle_structures else None
+
+    def __select_to_research(self, order_id: UpgradeId) -> Unit | None:
+        structure_id = UPGRADE_RESEARCHED_FROM[order_id]
+        structures = self.bot.structures(structure_id).ready.idle
+        return structures.random if structures else None
+
+    def __select_to_build(self, order_id: UnitTypeId) -> Unit | None:
+        structure_id = ADDON_BUILT_FROM[order_id]
+        structures = (
+            self.bot.structures(structure_id)
+            .filter(lambda x: not x.has_techlab and not x.has_reactor)
+            .ready.idle
+        )
+        return structures.random if structures else None
+
+    async def __select_to_use_ability(self, order_id: AbilityId) -> Unit | None:
+        if order_id in {
+            AbilityId.CALLDOWNMULE_CALLDOWNMULE,
+            AbilityId.SUPPLYDROP_SUPPLYDROP,
+            AbilityId.SCANNERSWEEP_SCAN,
+        }:
+            return next(
+                (
+                    townhall
+                    for townhall in self.bot.townhalls(UnitTypeId.ORBITALCOMMAND).ready
+                    if townhall.energy > 50
+                ),
+                None,
+            )
+
+        if order_id == AbilityId.EFFECT_SALVAGE:
+            return next(
+                (
+                    structure
+                    for structure in self.bot.structures(UnitTypeId.BUNKER).ready
+                    if not structure.has_cargo
+                ),
+                None,
+            )
+
+        return next(
+            (
+                structure
+                for structure in self.bot.structures
+                if await self.bot.can_cast(
+                    structure, order_id, only_check_energy_and_cooldown=True
+                )
+            ),
+            None,
+        )
 
     def __select_target(self, order: Order) -> Unit | None:
         if order.id == AbilityId.CALLDOWNMULE_CALLDOWNMULE:
-            # TODO prioritise mineral_field with highest content
+            # TODO prioritize mineral_field with highest content
             for townhall in self.bot.townhalls.ready:
                 minerals = self.bot.mineral_field.closer_than(10, townhall.position)
                 if minerals:
                     return minerals.random
         elif order.id == AbilityId.SUPPLYDROP_SUPPLYDROP:
-            self.bot.structures(UnitTypeId.SUPPLYDEPOT).closest_to(
-                self.bot.start_location
-            )
+            try:
+                return self.bot.structures(
+                    UnitTypeId.SUPPLYDEPOTLOWERED
+                ).ready.closest_to(self.bot.start_location)
+            except AssertionError:
+                return self.bot.structures(UnitTypeId.SUPPLYDEPOT).ready.closest_to(
+                    self.bot.start_location
+                )
         return None

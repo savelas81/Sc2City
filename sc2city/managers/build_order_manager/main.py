@@ -18,7 +18,7 @@ class BuildOrderManager:
         self.bot = bot
         self.scv_manager = SCVManager(bot)
         self.structure_manager = StructureManager(bot)
-        self.order_managers = {
+        self.__order_managers = {
             OrderType.STRUCTURE: self.scv_manager.scv_build,
             OrderType.PRODUCTION: self.structure_manager.produce,
             OrderType.ACTION: self.structure_manager.execute_action,
@@ -81,7 +81,7 @@ class BuildOrderManager:
             if order.status != Status.PENDING:
                 continue
 
-            manager = self.order_managers[order.type]
+            manager = self.__order_managers[order.type]
             get_next_order = (
                 await manager(order)
                 if asyncio.iscoroutinefunction(manager)
