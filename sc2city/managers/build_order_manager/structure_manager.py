@@ -160,6 +160,7 @@ class StructureManager:
         structures = self.bot.structures(structure_id).ready.idle
         return structures.random if structures else None
 
+    # TODO: Implement logic for when lacking building space
     def __select_to_build(self, order_id: UnitTypeId) -> Unit | None:
         structure_id = ADDON_BUILT_FROM[order_id]
         structures = (
