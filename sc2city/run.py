@@ -4,12 +4,12 @@ from sc2.data import Difficulty, Race
 from sc2.player import Bot, Computer
 
 # Load game client and bot
-from utils import Game, load_settings
+from utils import Game, Settings
 from Sc2City import Sc2City
 
 # Start game
 if __name__ == "__main__":
-    bot = Sc2City(load_settings())
+    bot = Sc2City(Settings.from_json_file())
     player = Bot(bot.race, bot)
     opponent = Computer(Race.Protoss, Difficulty.VeryHard)
     map = "DragonScalesAIE"
