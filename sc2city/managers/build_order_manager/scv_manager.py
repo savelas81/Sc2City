@@ -129,7 +129,7 @@ class SCVManager:
             return None
 
         position_priority = BUILDING_PRIORITY[unit_id]
-        possible_positions = self.bot.current_strategy.building_placements.lists[
+        possible_positions = self.bot.current_strategy.building_placements[
             position_priority
         ]
         for position in possible_positions:

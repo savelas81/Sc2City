@@ -69,14 +69,16 @@ class Order:
     @classmethod
     def from_dict(cls, dct):
         dct["type"] = OrderType[dct["type"]]
-        if dct["id"] in UnitTypeId.__members__:
-            dct["id"] = UnitTypeId[dct["id"]]
-        elif dct["id"] in UpgradeId.__members__:
-            dct["id"] = UpgradeId[dct["id"]]
-        elif dct["id"] in AbilityId.__members__:
-            dct["id"] = AbilityId[dct["id"]]
-        elif dct["id"] in CustomOrders.__members__:
-            dct["id"] = CustomOrders[dct["id"]]
+        matching_type = next(
+            (
+                t
+                for t in [UnitTypeId, UpgradeId, AbilityId, CustomOrders]
+                if dct["id"] in t.__members__
+            ),
+            None,
+        )
+        if matching_type:
+            dct["id"] = matching_type[dct["id"]]
         return cls(**dct)
 
     def update_status(self, new_status: Status) -> None:
