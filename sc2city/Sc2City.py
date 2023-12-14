@@ -7,7 +7,7 @@ from sc2.unit import Unit
 from sc2.ids.unit_typeid import UnitTypeId
 
 from utils import Settings
-from game_objects import Strategy, Order, Base, Workers
+from game_objects import Strategy, Order, Base, Workers, Economy
 from managers import (
     HistoryAnalyzer,
     MapAnalyzer,
@@ -39,6 +39,7 @@ class Sc2City(BotAI):
         self.current_strategy: Optional[Strategy] = None
         self.queue: list[Order] = []
         self.scv_tags: set[int] = set()
+        self.economy = Economy(self)
         self.scvs = Workers()
         self.bases: list[Base] = []
 

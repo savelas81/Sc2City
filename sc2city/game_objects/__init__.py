@@ -4,5 +4,5 @@ from .building_placements import (
     BUILDING_PRIORITY,
     MAP_PINS,
 )
-from .strategy_objects import Strategy, Order, CustomOrders, Base, Workers
+from .strategy_objects import Strategy, Order, CustomOrders, Base, Workers, Economy
 from .script import Script

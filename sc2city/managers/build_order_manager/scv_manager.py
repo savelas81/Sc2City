@@ -152,7 +152,7 @@ class SCVManager:
         elif self.bot.alert(Alert.VespeneExhausted):
             self.__remove_miners(
                 self.bot.gas_buildings.tags,
-                self.bot.scvs.gas_miners,
+                self.bot.scvs.vespene_miners,
                 SCVAssignment.VESPENE,
             )
 

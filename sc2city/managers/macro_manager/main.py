@@ -36,6 +36,7 @@ class MacroManager:
     # TODO: Add logic to make decisions outside of imported strategies
     # TODO: Add logic for deciding what to do with each order
     def update_strategy(self) -> None:
+        self.bot.economy.update()
         for order in self.bot.queue:
             if order.age == 0:
                 break

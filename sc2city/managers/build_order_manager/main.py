@@ -54,7 +54,7 @@ class BuildOrderManager:
                 if (
                     order.id == UnitTypeId.REFINERY
                 ):  # worker goes automatically to gather gas.
-                    self.bot.scvs.gas_miners[order.tag] = unit.tag
+                    self.bot.scvs.vespene_miners[order.tag] = unit.tag
         else:
             # TODO: Add logic to handle errors
             print(f"{unit.type_id} not found in finished queue")
