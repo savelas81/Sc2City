@@ -6,8 +6,8 @@ from sc2.ids.upgrade_id import UpgradeId
 from sc2.unit import Unit
 from sc2.ids.unit_typeid import UnitTypeId
 
-from utils import Settings, SCVAssignment, Workers
-from game_objects import Strategy, Order, Base
+from utils import Settings
+from game_objects import Strategy, Order, Base, Workers
 from managers import (
     HistoryAnalyzer,
     MapAnalyzer,
@@ -39,15 +39,7 @@ class Sc2City(BotAI):
         self.current_strategy: Optional[Strategy] = None
         self.queue: list[Order] = []
         self.scv_tags: set[int] = set()
-        self.scvs: Workers = {
-            SCVAssignment.MINERALS: {},
-            SCVAssignment.VESPENE: {},
-            SCVAssignment.BUILD: set(),
-            SCVAssignment.SCOUT: set(),
-            SCVAssignment.REPAIR: set(),
-            SCVAssignment.ARMY: set(),
-            SCVAssignment.NONE: set(),
-        }
+        self.scvs = Workers()
         self.bases: list[Base] = []
 
         # TODO: Implement army logic with scripts. Eg: army = {soldiers: [(Unit, Script)], squads: [(Squad, Script)], scouts: [(Scout, Script)]}

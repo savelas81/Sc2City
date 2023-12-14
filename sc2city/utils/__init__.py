@@ -6,5 +6,4 @@ from .config import (
     BuildTypes,
     OrderType,
     SCVAssignment,
-    Workers,
 )

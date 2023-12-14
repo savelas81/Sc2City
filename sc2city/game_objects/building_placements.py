@@ -1,8 +1,5 @@
 import enum
 import json
-from typing import TypeAlias
-from dataclasses import dataclass, field
-from collections import defaultdict
 
 from sc2.position import Point2
 from sc2.ids.unit_typeid import UnitTypeId
@@ -21,121 +18,7 @@ class PositionPriority(enum.Enum):
     SENSOR_TOWER = 7
 
 
-PositionPriorityLists: TypeAlias = dict[PositionPriority, list[Point2]]
-
-
-@dataclass
-class BuildingPlacements:
-    # TODO: Add a default building placements to fallback on
-    _lists: PositionPriorityLists = field(
-        default_factory=lambda: defaultdict(list[Point2])
-    )
-
-    @classmethod
-    def from_dict(cls, dct: dict):
-        _lists = {
-            PositionPriority[key.upper()]: [Point2(coord) for coord in value]
-            for key, value in dct.items()
-        }
-        return cls(_lists)
-
-    @classmethod
-    def from_build_type(cls, build_type: BuildTypes, map_file: str):
-        build_path = build_type.value
-        file = build_path + map_file
-        # TODO: Add a default building placements file to fallback on
-        with open(file, "r") as f:
-            building_placements = json.load(f)
-        return cls.from_dict(building_placements)
-
-    @property
-    def main(self) -> list[Point2]:
-        """
-        Returns the main list of building placements.
-        """
-        return self._lists[PositionPriority.MAIN]
-
-    @property
-    def auxiliary(self) -> list[Point2]:
-        """
-        Returns the auxiliary list of building placements.
-        """
-        return self._lists[PositionPriority.AUXILIARY]
-
-    @property
-    def supply_depot(self) -> list[Point2]:
-        """
-        Returns the supply depot list of building placements.
-        """
-        return self._lists[PositionPriority.SUPPLY_DEPOT]
-
-    @property
-    def turret(self) -> list[Point2]:
-        """
-        Returns the turret list of building placements.
-        """
-        return self._lists[PositionPriority.TURRET]
-
-    @property
-    def macro_orbital(self) -> list[Point2]:
-        """
-        Returns the macro orbital list of building placements.
-        """
-        return self._lists[PositionPriority.MACRO_ORBITAL]
-
-    @property
-    def expansion(self) -> list[Point2]:
-        """
-        Returns the expansion list of building placements.
-        """
-        return self._lists[PositionPriority.EXPANSION]
-
-    @property
-    def bunker(self) -> list[Point2]:
-        """
-        Returns the bunker list of building placements.
-        """
-        return self._lists[PositionPriority.BUNKER]
-
-    @property
-    def sensor_tower(self) -> list[Point2]:
-        """
-        Returns the sensor tower list of building placements.
-        """
-        return self._lists[PositionPriority.SENSOR_TOWER]
-
-    def __getitem__(self, key: PositionPriority) -> list[Point2]:
-        """
-        Returns the list of building placements for the given priority.
-        """
-        return self._lists[key]
-
-    def __setitem__(self, key: PositionPriority, value: list[Point2]) -> None:
-        """
-        Sets the list of building placements for the given priority.
-        """
-        self._lists[key] = value
-
-    def __contains__(self, key: PositionPriority) -> bool:
-        """
-        Returns whether the given priority is in the building placements.
-        """
-        return key in self._lists
-
-    def __iter__(self) -> PositionPriority:
-        """
-        Returns an iterator over the building placements.
-        """
-        return iter(self._lists)
-
-    def __len__(self) -> int:
-        """
-        Returns the number of building placements.
-        """
-        return len(self._lists)
-
-
-BUILDING_PRIORITY = {
+BUILDING_PRIORITY: dict[UnitTypeId, PositionPriority] = {
     UnitTypeId.BARRACKS: PositionPriority.MAIN,
     UnitTypeId.FACTORY: PositionPriority.MAIN,
     UnitTypeId.STARPORT: PositionPriority.MAIN,
@@ -175,3 +58,124 @@ MAP_PINS: dict[UnitTypeId, tuple[PositionPriority, int]] = {
     UnitTypeId.BUNKER: (PositionPriority.BUNKER, 1),
     UnitTypeId.SENSORTOWER: (PositionPriority.SENSOR_TOWER, 1),
 }
+
+
+class BuildingPlacements(dict[PositionPriority, list[Point2]]):
+    """
+    A class representing the building placements in a Starcraft 2 map.
+
+    This class extends the built-in `dict` class and maps `PositionPriority` to a list of `Point2` objects.
+    It provides methods to initialize the building placements, load from a dictionary, and load from a build type.
+
+    Attributes:
+        main (list[Point2]): The main list of building placements.
+        auxiliary (list[Point2]): The auxiliary list of building placements.
+        supply_depot (list[Point2]): The supply depot list of building placements.
+        turret (list[Point2]): The turret list of building placements.
+        macro_orbital (list[Point2]): The macro orbital list of building placements.
+        expansion (list[Point2]): The expansion list of building placements.
+        bunker (list[Point2]): The bunker list of building placements.
+        sensor_tower (list[Point2]): The sensor tower list of building placements.
+    """
+
+    # TODO: Add default building placements to fallback on if no build type is specified
+    def __init__(self):
+        super().__init__(
+            {
+                PositionPriority.MAIN: [],
+                PositionPriority.AUXILIARY: [],
+                PositionPriority.SUPPLY_DEPOT: [],
+                PositionPriority.TURRET: [],
+                PositionPriority.MACRO_ORBITAL: [],
+                PositionPriority.EXPANSION: [],
+                PositionPriority.BUNKER: [],
+                PositionPriority.SENSOR_TOWER: [],
+            }
+        )
+
+    @classmethod
+    def from_dict(cls, dct: dict):
+        """
+        Creates a `BuildingPlacements` object from a dictionary.
+        """
+        new_instance = cls()
+        for key, value in dct.items():
+            if key.upper() in PositionPriority.__members__:
+                new_instance[PositionPriority[key.upper()]] = [
+                    Point2(coord) for coord in value
+                ]
+        return new_instance
+
+    @classmethod
+    def from_build_type(cls, build_type: BuildTypes, map_file: str):
+        """
+        Creates a `BuildingPlacements` object from a build type and map file.
+
+        Args:
+            build_type (BuildTypes): The build type.
+            map_file (str): The path to the map file.
+
+        Returns:
+            BuildingPlacements: The `BuildingPlacements` object.
+        """
+        build_path = build_type.value
+        file = build_path + map_file
+        with open(file, "r") as f:
+            building_placements = json.load(f)
+        return cls.from_dict(building_placements)
+
+    @property
+    def main(self) -> list[Point2]:
+        """
+        Returns the main list of building placements.
+        """
+        return self[PositionPriority.MAIN]
+
+    @property
+    def auxiliary(self) -> list[Point2]:
+        """
+        Returns the auxiliary list of building placements.
+        """
+        return self[PositionPriority.AUXILIARY]
+
+    @property
+    def supply_depot(self) -> list[Point2]:
+        """
+        Returns the supply depot list of building placements.
+        """
+        return self[PositionPriority.SUPPLY_DEPOT]
+
+    @property
+    def turret(self) -> list[Point2]:
+        """
+        Returns the turret list of building placements.
+        """
+        return self[PositionPriority.TURRET]
+
+    @property
+    def macro_orbital(self) -> list[Point2]:
+        """
+        Returns the macro orbital list of building placements.
+        """
+        return self[PositionPriority.MACRO_ORBITAL]
+
+    @property
+    def expansion(self) -> list[Point2]:
+        """
+        Returns the expansion list of building placements.
+        """
+        return self[PositionPriority.EXPANSION]
+
+    @property
+    def bunker(self) -> list[Point2]:
+        """
+        Returns the bunker list of building placements.
+        """
+        return self[PositionPriority.BUNKER]
+
+    @property
+    def sensor_tower(self) -> list[Point2]:
+        """
+        Returns the sensor tower list of building placements.
+        """
+        return self[PositionPriority.SENSOR_TOWER]

@@ -9,7 +9,7 @@ from sc2.ids.ability_id import AbilityId
 from sc2.position import Point2
 
 from .building_placements import BuildingPlacements
-from utils import BuildTypes, OrderType, Status
+from utils import BuildTypes, OrderType, Status, SCVAssignment
 
 
 class CustomOrders(enum.Enum):
@@ -292,3 +292,229 @@ class Base:
         Remove a townhall from the townhalls list.
         """
         self.townhalls.remove(townhall.tag)
+
+
+class Workers(dict[SCVAssignment, dict[int, int] | set[int]]):
+    """
+    Represents a collection of workers in the game.
+
+    This class extends the built-in `dict` class and provides additional properties and methods
+    for managing workers and their assignments.
+
+    Attributes:
+        mineral_miners (dict[int, int]): A dictionary mapping worker tags to mineral resource tags.
+        vespene_miners (dict[int, int]): A dictionary mapping worker tags to vespene resource tags.
+        builders (set[int]): A set of worker tags assigned to building tasks.
+        scouts (set[int]): A set of worker tags assigned to scouting tasks.
+        repairers (set[int]): A set of worker tags assigned to repair tasks.
+        army (set[int]): A set of worker tags assigned to army tasks.
+        none (set[int]): A set of worker tags with no assigned task.
+        all (set[int]): A set of all worker tags.
+        mineral_tags (set[int]): A set of all mineral resource tags.
+        vespene_tags (set[int]): A set of all vespene resource tags.
+
+    Methods:
+        remove(worker: Unit | int, assignment: SCVAssignment = None): Removes the given worker from the given assignment.
+        add(worker: Unit | int, assignment: SCVAssignment, resource: Unit | int = None): Adds the given worker to the given assignment.
+        get_assignment(worker: Unit | int): Returns the current assignment of a worker.
+        change_assignment(worker: Unit | int, new_assignment: SCVAssignment, resource: Unit | int = None, is_new: bool = False, old_assignment: SCVAssignment = None): Change the assignment of a worker to a new assignment.
+        get_resource_tag(worker: Unit | int, assignment: SCVAssignment = None): Get the resource tag (mineral or vespene) assigned to the worker.
+    """
+
+    def __init__(self):
+        super().__init__(
+            {
+                SCVAssignment.MINERALS: dict[int, int](),
+                SCVAssignment.VESPENE: dict[int, int](),
+                SCVAssignment.BUILD: set[int](),
+                SCVAssignment.SCOUT: set[int](),
+                SCVAssignment.REPAIR: set[int](),
+                SCVAssignment.ARMY: set[int](),
+                SCVAssignment.NONE: set[int](),
+            }
+        )
+
+    @property
+    def mineral_miners(self) -> dict[int, int]:
+        """
+        Returns the mineral workers dictionary.
+        """
+        return self[SCVAssignment.MINERALS]
+
+    @property
+    def vespene_miners(self) -> dict[int, int]:
+        """
+        Returns the vespene workers dictionary.
+        """
+        return self[SCVAssignment.VESPENE]
+
+    @property
+    def builders(self) -> set[int]:
+        """
+        Returns the build workers set.
+        """
+        return self[SCVAssignment.BUILD]
+
+    @property
+    def scouts(self) -> set[int]:
+        """
+        Returns the scout workers set.
+        """
+        return self[SCVAssignment.SCOUT]
+
+    @property
+    def repairers(self) -> set[int]:
+        """
+        Returns the repair workers set.
+        """
+        return self[SCVAssignment.REPAIR]
+
+    @property
+    def army(self) -> set[int]:
+        """
+        Returns the army workers set.
+        """
+        return self[SCVAssignment.ARMY]
+
+    @property
+    def none(self) -> set[int]:
+        """
+        Returns the none workers set.
+        """
+        return self[SCVAssignment.NONE]
+
+    @property
+    def all(self) -> set[int]:
+        """
+        Returns all workers.
+        """
+        return (
+            self[SCVAssignment.MINERALS].keys()
+            | self[SCVAssignment.VESPENE].keys()
+            | self[SCVAssignment.BUILD]
+            | self[SCVAssignment.SCOUT]
+            | self[SCVAssignment.REPAIR]
+            | self[SCVAssignment.ARMY]
+            | self[SCVAssignment.NONE]
+        )
+
+    @property
+    def mineral_tags(self) -> set[int]:
+        """
+        Returns all mineral worker tags.
+        """
+        return self[SCVAssignment.MINERALS].values()
+
+    @property
+    def vespene_tags(self) -> set[int]:
+        """
+        Returns all vespene worker tags.
+        """
+        return self[SCVAssignment.VESPENE].values()
+
+    def remove(self, worker: Unit | int, assignment: SCVAssignment = None) -> None:
+        """
+        Removes the given worker from the given assignment.
+
+        If the assignment is not provided, it will try to find it.
+        """
+        if not assignment:
+            assignment = self.get_assignment(worker)
+
+        if not assignment:
+            return
+
+        worker_tag = self.__get_tag(worker)
+        if assignment in {SCVAssignment.MINERALS, SCVAssignment.VESPENE}:
+            del self[assignment][worker_tag]
+        else:
+            self[assignment].remove(worker_tag)
+
+    def add(
+        self, worker: Unit | int, assignment: SCVAssignment, resource: Unit | int = None
+    ) -> None:
+        """
+        Adds the given worker to the given assignment.
+
+        If the assignment involves a resource, the resource must be provided.
+        """
+        worker_tag = self.__get_tag(worker)
+        if assignment in {SCVAssignment.MINERALS, SCVAssignment.VESPENE}:
+            if not resource:
+                raise ValueError(
+                    f"Resource not provided for worker {worker_tag} and assignment {assignment}"
+                )
+            resource_tag = self.__get_tag(resource)
+            self[assignment][worker_tag] = resource_tag
+        else:
+            self[assignment].add(worker_tag)
+
+    def get_assignment(self, worker: Unit | int) -> SCVAssignment | None:
+        """
+        Returns the current assignment of a worker.
+        """
+        worker_tag = self.__get_tag(worker)
+        return next(
+            (
+                assignment
+                for assignment, workers in self.items()
+                if worker_tag in workers
+            ),
+            None,
+        )
+
+    def change_assignment(
+        self,
+        worker: Unit | int,
+        new_assignment: SCVAssignment,
+        resource: Unit | int = None,
+        is_new: bool = False,
+        old_assignment: SCVAssignment = None,
+    ) -> None:
+        """
+        Change the assignment of a worker to a new assignment.
+
+        Args:
+            worker (Unit | int): The worker unit or worker ID.
+            new_assignment (SCVAssignment): The new assignment for the worker.
+            resource (Unit | int, optional): If the assignment involves a resource,
+                the resource must be provided.
+            is_new (bool, optional): Indicates if the worker is new. Set to true to skip
+                trying to find the old assignment. Defaults to False.
+            old_assignment (SCVAssignment, optional): The old assignment of the worker.
+                If the assignment is not provided, it will try to find it.
+        """
+        if not is_new:
+            self.remove(worker, old_assignment)
+        self.add(worker, new_assignment, resource)
+
+    def get_resource_tag(
+        self,
+        worker: Unit | int,
+        assignment: SCVAssignment = None,
+    ) -> int | None:
+        """
+        Get the resource tag (mineral or vespene) assigned to the worker.
+
+        Args:
+            worker (Unit): The worker unit.
+            assignment (SCVAssignment, optional): The assignment of the worker. If not provided it will try to find.
+            return_tag (bool, optional): Whether to return the resource tag instead of the unit. Defaults to False.
+
+        Returns:
+            Unit | int | None: The resource unit or its tag, or None if the assignment is invalid.
+        """
+        if not assignment:
+            assignment = self.get_assignment(worker)
+
+        if assignment not in {SCVAssignment.MINERALS, SCVAssignment.VESPENE}:
+            return None
+
+        worker_tag = self.__get_tag(worker)
+        return self[assignment][worker_tag]
+
+    def __get_tag(self, unit: Unit | int) -> int:
+        """
+        Returns the tag of the given unit.
+        """
+        return unit.tag if isinstance(unit, Unit) else unit
