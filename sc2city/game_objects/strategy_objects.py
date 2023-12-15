@@ -512,28 +512,27 @@ class Workers(dict[SCVAssignment, dict[int, int] | set[int]]):
         return unit.tag if isinstance(unit, Unit) else unit
 
 
+# TODO: Implement better prediction models
 @dataclass
 class Economy:
     """
-    Represents the economy of the bot in the Starcraft 2 game.
+    Represents the economy of the game.
 
     Attributes:
-        bot (BotAI): The instance of the bot.
-        mineral_history (list[int]): The history of mineral values.
-        total_minerals_history (list[int]): The history of total mineral values.
-        minerals_spent_since_last_collection (int): The amount of minerals spent since the last collection.
-        vespene_history (list[int]): The history of vespene values.
-        total_vespene_history (list[int]): The history of total vespene values.
-        vespene_spent_since_last_collection (int): The amount of vespene spent since the last collection.
-        collection_interval (int): The interval between data collection (measured in frames).
+        bot (Sc2City): The main bot instance.
+        mineral_history (list[int]): A list of mineral values over time.
+        total_minerals_history (list[int]): A list of total mineral values (excluding spent minerals) over time.
+        total_minerals_spent (int): The total amount of minerals spent.
+        vespene_history (list[int]): A list of vespene values over time.
+        total_vespene_history (list[int]): A list of total vespene values (excluding spent vespene) over time.
+        total_vespene_spent (int): The total amount of vespene spent.
+        collection_interval (int): The interval (in frames) at which the economy data is collected.
         collection_limit (int): The maximum number of data points to keep in the history.
-        collection_frames (list[int]): The frames at which the data was collected.
-        last_training (int): The game loop at which the models were last trained.
-        models (tuple[LinearRegression]): The trained linear regression models for mineral and vespene prediction.
+        collection_frames (list[int]): A list of game frames at which the economy data was collected.
+        last_training (int): The game loop at which the prediction models were last trained.
+        models (tuple[LinearRegression]): The prediction models for mineral and vespene collection rates.
 
     Properties:
-        total_minerals_spent (int): Total minerals spent in the game.
-        total_vespene_spent (int): Total vespene spent in the game.
         mineral_rate (float): The mineral collection rate in minerals per frame.
         vespene_rate (float): The vespene collection rate in vespene per frame.
         mineral_rate_per_worker (float): The mineral collection rate per worker in minerals per frame.
@@ -543,71 +542,61 @@ class Economy:
 
     Methods:
         update(): Update the economy data.
-        spend_resources(minerals: int = None, vespene: int = None): Update the spent resources.
+        spend(minerals: int = None, vespene: int = None): Update the spent resources.
+        recover_resources(minerals: int = None, vespene: int = None): Update the recovered resources.
         predict_frame(minerals: int = None, vespene: int = None): Predict the frame at which the given resource will reach the given value.
-        train_model(): Train the prediction models.
+        calculate_frames_to_value(minerals: int = None, vespene: int = None): Calculate how many frames until the given resource will reach the given value.
+        mineral_rate_for_base(base: Base): Returns the mineral collection rate per worker for a base in minerals per frame.
+        vespene_rate_for_base(base: Base): Returns the vespene collection rate per worker for a base in vespene per frame.
     """
 
     bot: "Sc2City"
 
-    mineral_history: list[int] = field(default_factory=list)
+    minerals_history: list[int] = field(default_factory=list)
     total_minerals_history: list[int] = field(default_factory=list)
-    minerals_spent_since_last_collection: int = 0
     total_minerals_spent: int = 0
 
     vespene_history: list[int] = field(default_factory=list)
     total_vespene_history: list[int] = field(default_factory=list)
-    vespene_spent_since_last_collection: int = 0
     total_vespene_spent: int = 0
 
     collection_interval = 10  # Measured in frames
     collection_limit = 100
     collection_frames: list[int] = field(default_factory=list)
     last_training = 0
+
     models: tuple[LinearRegression] = None
 
     @staticmethod
-    def __can_train_model(func):
+    def __can_train_models(func):
         @functools.wraps(func)
         def wrapper(self, *args, **kwargs):
+            if self.bot.state.game_loop < self.collection_interval * 10:
+                return None
             if (
                 self.bot.state.game_loop - self.last_training > self.collection_interval
-                or not self.__models
+                or not self.models
             ):
-                self.train_model()
+                self.train_models()
             return func(self, *args, **kwargs)
 
         return wrapper
 
-    @property
-    def total_minerals_spent(self) -> int:
-        """
-        Total minerals spent in the game.
-        """
-        return self.total_minerals_history[-1] - self.bot.minerals
-
-    @property
-    def total_vespene_spent(self) -> int:
-        """
-        Total vespene spent in the game.
-        """
-        return self.total_vespene_history[-1] - self.bot.vespene
-
-    @__can_train_model
+    @__can_train_models
     @property
     def mineral_rate(self) -> float:
         """
         Returns the mineral collection rate in minerals per frame.
         """
-        return self.__models[0].coef_
+        return self.models[0].coef_[0]
 
-    @__can_train_model
+    @__can_train_models
     @property
     def vespene_rate(self) -> float:
         """
         Returns the vespene collection rate in vespene per frame.
         """
-        return self.__models[1].coef_
+        return self.models[1].coef_[0]
 
     @property
     def mineral_rate_per_worker(self) -> float:
@@ -637,17 +626,15 @@ class Economy:
         """
         return self.vespene_rate / len(self.bot.bases)
 
-    @property
     def mineral_rate_for_base(self, base: Base) -> float:
         """
-        Returns the mineral collection rate per worker per base in minerals per frame.
+        Returns the mineral collection rate per worker for a base in minerals per frame.
         """
         return self.mineral_rate_per_worker * len(base.mineral_workers)
 
-    @property
     def vespene_rate_for_base(self, base: Base) -> float:
         """
-        Returns the vespene collection rate per worker per base in vespene per frame.
+        Returns the vespene collection rate per worker for a base in vespene per frame.
         """
         return self.vespene_rate_per_worker * len(base.vespene_workers)
 
@@ -658,7 +645,7 @@ class Economy:
         if self.bot.state.game_loop % self.collection_interval != 0:
             return
 
-        self.mineral_history.append(self.bot.minerals)
+        self.minerals_history.append(self.bot.minerals)
         self.total_minerals_history.append(
             self.bot.minerals + self.total_minerals_spent
         )
@@ -668,7 +655,7 @@ class Economy:
 
         self.collection_frames.append(self.bot.state.game_loop)
 
-    def spend_resources(self, minerals: int = None, vespene: int = None) -> None:
+    def spend(self, minerals: int = None, vespene: int = None) -> None:
         """
         Update the spent resources.
 
@@ -679,7 +666,18 @@ class Economy:
         self.total_minerals_spent += minerals if minerals else 0
         self.total_vespene_spent += vespene if vespene else 0
 
-    @__can_train_model
+    def recover_resources(self, minerals: int = None, vespene: int = None) -> None:
+        """
+        Update the recovered resources.
+
+        Args:
+            minerals (int, optional): The amount of minerals spent. Defaults to None.
+            vespene (int, optional): The amount of vespene spent. Defaults to None.
+        """
+        self.total_minerals_spent -= minerals if minerals else 0
+        self.total_vespene_spent -= vespene if vespene else 0
+
+    @__can_train_models
     def predict_frame(
         self, minerals: int = None, vespene: int = None
     ) -> tuple[int, int]:
@@ -693,15 +691,37 @@ class Economy:
         Returns:
             tuple[int, int]: The predicted frame for minerals and vespene.
         """
-        predicted_mineral_time = (
-            self.__predict_frame(self.bot.minerals) if minerals else None
-        )
+        predicted_mineral_time = self.__predict_frame(minerals) if minerals else None
         predicted_vespene_time = (
-            self.__predict_frame(self.bot.vespene, True) if vespene else None
+            self.__predict_frame(vespene, True) if vespene else None
         )
-        return predicted_mineral_time, predicted_vespene_time
+        time = self.__choose_max(predicted_mineral_time, predicted_vespene_time)
+        return time
 
-    def train_model(self) -> None:
+    @__can_train_models
+    def calculate_frames_to_value(
+        self, minerals: int = None, vespene: int = None
+    ) -> tuple[int, int]:
+        """
+        Calculate how many frames until the given resource will reach the given value.
+
+        Args:
+            minerals (int, optional): The desired mineral value.
+            vespene (int, optional): The desired vespene value.
+
+        Returns:
+            tuple[int, int]: The predicted frame for minerals and vespene.
+        """
+        calculated_mineral_frames = (
+            self.__calculate_frames(minerals) if minerals else None
+        )
+        calculated_vespene_frames = (
+            self.__calculate_frames(vespene, True) if vespene else None
+        )
+        frames = self.__choose_max(calculated_mineral_frames, calculated_vespene_frames)
+        return frames
+
+    def train_models(self) -> None:
         """
         Train the prediction models.
         """
@@ -710,14 +730,14 @@ class Economy:
         Y2 = np.array(self.total_vespene_history[-self.collection_limit :])
         mineral_model = LinearRegression().fit(X, Y)
         vespene_model = LinearRegression().fit(X, Y2)
-        self.__models = (mineral_model, vespene_model)
+        self.models = (mineral_model, vespene_model)
         self.last_training = self.bot.state.game_loop
 
     def __predict_frame(self, resource: int, is_gas: bool = False) -> int:
         """
         Predict the frame at which the given resource will reach the given value.
         """
-        model = self.__models[1] if is_gas else self.__models[0]
+        model = self.models[1] if is_gas else self.models[0]
         total_resource = (
             self.total_vespene_history[-1]
             if is_gas
@@ -726,7 +746,26 @@ class Economy:
         current_resource = self.bot.vespene if is_gas else self.bot.minerals
         target_value = total_resource + resource - current_resource
         return (
-            int((target_value - model.intercept_) / model.coef_)
-            if model.coef_ != 0
+            int((target_value - model.intercept_) / model.coef_[0])
+            if model.coef_[0] != 0
             else np.inf
         )
+
+    def __calculate_frames(self, resource: int, is_gas: bool = False) -> int:
+        """
+        Calculate how many frames until the given resource will reach the given value.
+        """
+        model = self.models[1] if is_gas else self.models[0]
+        current_resource = self.bot.vespene if is_gas else self.bot.minerals
+        target_value = resource - current_resource
+        return int(target_value / model.coef_[0]) if model.coef_[0] != 0 else np.inf
+
+    def __choose_max(
+        self, mineral_frames: int | None, vespene_frames: int | None
+    ) -> int | None:
+        """
+        Choose the maximum value between the given frames.
+        """
+        if mineral_frames and vespene_frames:
+            return max(mineral_frames, vespene_frames)
+        return mineral_frames if mineral_frames else vespene_frames

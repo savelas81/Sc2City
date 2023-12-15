@@ -75,10 +75,14 @@ class StructureManager:
         else:
             structure.train(order.id)
 
+        # TODO: Move this to some confirmation logic
         if not order.id in ADDON_BUILT_FROM:
             order.update_status(Status.STARTED)
+        cost = self.bot.calculate_cost(order.id)
+        self.bot.economy.spend(cost.minerals, cost.vespene)
         return False
 
+    # TODO: Create a method to calculate resources returned when cancelling a production
     async def execute_action(self, order: Order) -> bool:
         """
         Returns False when executing orders to avoid double commands.

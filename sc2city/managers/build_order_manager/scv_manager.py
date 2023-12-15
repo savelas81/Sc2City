@@ -40,6 +40,7 @@ class SCVManager:
         self.speed_mining = SpeedMining(bot)
         self.scvs_per_refinery: int = 3
         self.max_gas_miners: int = 100
+        self.worker_speed: float = 1  # Measured in frames
         self.next_point = None  # TODO: Remove this when refactoring scouting logic
 
     def worker_split_frame_zero(self) -> None:
@@ -54,6 +55,7 @@ class SCVManager:
 
         for worker in workers:
             self.__assign_worker_to_resource(worker)
+        self.worker_speed = worker.distance_per_step / self.bot.client.game_step
 
     def move_scvs(self) -> None:
         self.__handle_alerts()
@@ -62,6 +64,7 @@ class SCVManager:
         self.__speed_mining()
 
     # TODO: Include more possible orders
+    # TODO: Create a method to calculate resources spent on repairs
     def execute_action(self, order: Order) -> bool:
         if order.id != CustomOrders.WORKER_TO_SCOUT:
             return True
@@ -103,8 +106,9 @@ class SCVManager:
                 return order.can_skip
             order.tag = worker.tag
         else:
-            # TODO: Handle for when the worker is not found
             worker = self.bot.workers.find_by_tag(order.tag)
+            if not worker:
+                return order.can_skip
 
         if worker.is_using_ability(SCV_BUILDS):
             return True
@@ -114,6 +118,10 @@ class SCVManager:
         ):
             return order.can_skip
         worker.build(order.id, order.target)
+        # TODO: Move this to some placeholder confirmation logic
+        # TODO: Calculate when placeholder is cancelled and return resources
+        cost = self.bot.calculate_cost(order.id)
+        self.bot.economy.spend(cost.minerals, cost.vespene)
         return False
 
     async def __get_build_position(self, unit_id: UnitTypeId) -> Point2 | Unit:
@@ -138,9 +146,24 @@ class SCVManager:
         # TODO: Handle for when all pre-defined positions are occupied
         return None
 
-    # TODO: Implement this method
+    # TODO: Improve selection criteria
     def __can_select_builder(self, order: Order) -> bool:
-        return True
+        worker = self.__select_worker(order.target)
+        if not worker:
+            return False
+
+        target = (
+            order.target if isinstance(order.target, Point2) else order.target.position
+        )
+        cost = self.bot.calculate_cost(order.id)
+        distance = self.bot.distance_math_hypot(worker.position, target)
+        time = distance / self.worker_speed
+        frames_until_resources = self.bot.economy.calculate_frames_to_value(
+            cost.minerals, cost.vespene
+        )
+        if not frames_until_resources:
+            return False
+        return time > frames_until_resources
 
     def __handle_alerts(self) -> None:
         if self.bot.alert(Alert.MineralsExhausted):
