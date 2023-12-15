@@ -31,6 +31,7 @@ class MapAnalyzer:
 
     async def get_initial_map_info(self) -> None:
         await self.__get_expansions()
+        self.__set_bases()
         self.__set_scouting_grid_for_enemy_main()
         self.__add_to_pending_scouting_points(
             position=self.enemy_expansions[0], radius=2
@@ -76,6 +77,11 @@ class MapAnalyzer:
 
         self.expansions = [expansion for _, expansion in distances]
         self.enemy_expansions = [expansion for _, expansion in enemy_distances]
+
+    def __set_bases(self) -> None:
+        self.bot.bases.add(self.bot.start_location)
+        self.bot.bases.add(self.bot.enemy_start_locations)
+        self.bot.bases.add(self.expansions)
 
     def __update_pending_scouting_points(self) -> None:
         # TODO: Add flexibility for adding any number of scouts and scouting targets

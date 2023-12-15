@@ -1,7 +1,7 @@
 import enum
 import numpy as np
 import functools
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable
 from dataclasses import dataclass, field
 
 from sc2.bot_ai import BotAI
@@ -108,52 +108,78 @@ class Strategy:
         )
 
 
+def get_tags(func):
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        args = tuple(arg.tag if isinstance(arg, Unit) else arg for arg in args)
+        return func(self, *args, **kwargs)
+
+    return wrapper
+
+
+def get_positions(func):
+    @functools.wraps(func)
+    def wrapper(self, *args, **kwargs):
+        args = tuple(arg.position if isinstance(arg, Unit) else arg for arg in args)
+        return func(self, *args, **kwargs)
+
+    return wrapper
+
+
 class Base:
     """
-    Represents a base in the game.
+    ### Represents a base in the game.
 
-    Attributes:
-    - location: The position of the base.
-    - townhalls: A list of townhall tags associated with the base.
-    - mineral_fields: A list of mineral field tags within range of the base.
-    - vespene_geysers: A list of vespene geyser tags within range of the base.
-    - mineral_workers: A list of worker tags assigned to mine minerals.
-    - vespene_workers: A list of worker tags assigned to gather vespene gas.
-    - structures: A list of structure tags associated with the base.
+    ### Attributes:
+    - bot (BotAI): The bot state.
+    - location (Point2): The position of the base.
+    - townhalls (set[int]): The set of townhall tags in the base.
+    - mineral_fields (set[int]): The set of mineral field tags in the base.
+    - vespene_geysers (set[int]): The set of vespene geyser tags in the base.
+    - mineral_workers (set[int]): The set of worker tags assigned to minerals in the base.
+    - vespene_workers (set[int]): The set of worker tags assigned to vespene in the base.
+    - structures (set[int]): The set of structure tags in the base.
+    - enemy (bool): Indicates if the base belongs to the enemy.
 
-    Properties:
-    - mineral_workers_needed: Total number of workers needed based on the number of mineral fields.
-    - vespene_workers_needed: Total number of workers needed based on the number of vespene geysers.
-    - mineral_workers_assigned: Number of workers assigned to minerals.
-    - vespene_workers_assigned: Number of workers assigned to vespene.
-    - mineral_workers_surplus: Number of extra workers assigned to minerals.
-    - vespene_workers_surplus: Number of extra workers assigned to vespene.
-    - mineral_workers_deficit: Number of workers that can still be assigned to minerals before saturation.
-    - vespene_workers_deficit: Number of workers that can still be assigned to vespene before saturation.
-    - mineral_workers_available: Number of workers above mineral saturation.
-    - vespene_workers_available: Number of workers above vespene saturation.
+    ### Properties:
+    - mineral_workers_needed (int): Total number of workers needed based on the number of mineral fields.
+    - vespene_workers_needed (int): Total number of workers needed based on the number of vespene geysers.
+    - mineral_workers_assigned (int): Number of workers assigned to minerals.
+    - vespene_workers_assigned (int): Number of workers assigned to vespene.
+    - mineral_workers_surplus (int): Number of extra workers assigned to minerals.
+    - vespene_workers_surplus (int): Number of extra workers assigned to vespene.
+    - mineral_workers_deficit (int): Number of workers that can still be assigned to minerals before saturation.
+    - vespene_workers_deficit (int): Number of workers that can still be assigned to vespene before saturation.
+    - mineral_workers_available (bool): If base has mineral workers above saturation.
+    - vespene_workers_available (bool): If base has vespene workers above saturation.
+    - minerals_left (int): Number of minerals left in the base.
+    - vespene_left (int): Number of vespene left in the base.
+    - has_minerals (bool): If the base still has mineral fields.
+    - has_vespene (bool): If the base still has vespene geysers.
 
-    Methods:
-    - add_townhall(townhall: Unit): Add a townhall to the base.
-    - add_worker_to_minerals(worker: Unit): Add a worker to the mineral workers list.
-    - add_worker_to_vespene(worker: Unit): Add a worker to the vespene workers list.
-    - add_structure(structure: Unit): Add a structure to the structures list.
-    - remove_worker_from_minerals(worker: Unit): Remove a worker from the mineral workers list.
-    - remove_worker_from_vespene(worker: Unit): Remove a worker from the vespene workers list.
-    - remove_structure(structure: Unit): Remove a structure from the structures list.
-    - remove_mineral_field(mineral_field: Unit): Remove a mineral field from the mineral fields list.
-    - remove_vespene_geyser(vespene_geyser: Unit): Remove a vespene geyser from the vespene geysers list.
-    - remove_townhall(townhall: Unit): Remove a townhall from the townhalls list.
+    ### Methods:
+    - add_townhall(townhall: Unit | int) -> None: Add a townhall to the base.
+    - add_worker_to_minerals(worker: Unit | int) -> None: Add a worker to the mineral workers list.
+    - add_worker_to_vespene(worker: Unit | int) -> None: Add a worker to the vespene workers list.
+    - add_structure(structure: Unit | int) -> None: Add a structure to the structures list.
+    - remove_worker_from_minerals(worker: Unit | int) -> None: Remove a worker from the mineral workers list.
+    - remove_worker_from_vespene(worker: Unit | int) -> None: Remove a worker from the vespene workers list.
+    - remove_structure(structure: Unit | int) -> None: Remove a structure from the structures list.
+    - remove_mineral_field(mineral_field: Unit | int) -> None: Remove a mineral field from the mineral fields list.
+    - remove_vespene_geyser(vespene_geyser: Unit | int) -> None: Remove a vespene geyser from the vespene geysers list.
+    - remove_townhall(townhall: Unit | int) -> None: Remove a townhall from the townhalls list.
     """
 
-    def __init__(self, bot: BotAI, townhall: Unit):
-        self.location = townhall.position
-        self.townhalls = [townhall.tag]
-        self.mineral_fields = bot.mineral_field.closer_than(10, townhall).tags
-        self.vespene_geysers = bot.vespene_geyser.closer_than(10, townhall).tags
-        self.mineral_workers = []
-        self.vespene_workers = []
-        self.structures = []
+    def __init__(self, bot: BotAI, position: Point2):
+        self.bot = bot
+        self.location = position
+        self.townhalls: set[int] = set()
+        self.mineral_fields = bot.mineral_field.closer_than(10, position).tags
+        self.vespene_geysers = bot.vespene_geyser.closer_than(10, position).tags
+        self.mineral_workers: set[int] = set()
+        self.vespene_workers: set[int] = set()
+        self.structures: set[int] = set()
+        self.enemy = False
 
     @property
     def mineral_workers_needed(self) -> int:
@@ -212,105 +238,499 @@ class Base:
         return self.vespene_workers_needed - self.vespene_workers_assigned
 
     @property
-    def mineral_workers_available(self) -> int:
+    def mineral_workers_available(self) -> bool:
         """
-        Number of workers above mineral saturation.
+        If base has mineral workers above saturation.
         """
         return self.mineral_workers_surplus > 0
 
     @property
-    def vespene_workers_available(self) -> int:
+    def vespene_workers_available(self) -> bool:
         """
-        Number of workers above vespene saturation.
+        If base has vespene workers above saturation.
         """
         return self.vespene_workers_surplus > 0
 
-    def add_townhall(self, townhall: Unit) -> None:
+    @property
+    def minerals_left(self) -> int:
+        """
+        Number of minerals left in the base.
+        """
+        return sum(
+            (
+                self.bot.mineral_field.find_by_tag(mineral_tag).mineral_contents
+                for mineral_tag in self.mineral_fields
+            )
+        )
+
+    @property
+    def vespene_left(self) -> int:
+        """
+        Number of vespene left in the base.
+        """
+        return sum(
+            (
+                self.bot.vespene_geyser.find_by_tag(vespene_tag).vespene_contents
+                for vespene_tag in self.vespene_geysers
+            )
+        )
+
+    @property
+    def has_minerals(self) -> bool:
+        """
+        Indicates if the base still has mineral fields.
+        """
+        return bool(self.mineral_fields)
+
+    @property
+    def has_vespene(self) -> bool:
+        """
+        Indicates if the base still has vespene geysers.
+        """
+        return self.vespene_left > 0
+
+    @get_tags
+    def add_townhall(self, townhall: Unit | int) -> None:
         """
         Add a townhall to the base.
         """
-        self.townhalls.append(townhall.tag)
+        self.townhalls.add(townhall)
 
-    def add_worker_to_minerals(self, worker: Unit) -> None:
+    @get_tags
+    def add_worker_to_minerals(self, worker: Unit | int) -> None:
         """
         Add a worker to the mineral workers list.
         """
-        self.mineral_workers.append(worker.tag)
+        self.mineral_workers.add(worker)
 
-    def add_worker_to_vespene(self, worker: Unit) -> None:
+    @get_tags
+    def add_worker_to_vespene(self, worker: Unit | int) -> None:
         """
         Add a worker to the vespene workers list.
         """
-        self.vespene_workers.append(worker.tag)
+        self.vespene_workers.add(worker)
 
-    def add_structure(self, structure: Unit) -> None:
+    @get_tags
+    def add_structure(self, structure: Unit | int) -> None:
         """
         Add a structure to the structures list.
         """
-        self.structures.append(structure.tag)
+        self.structures.add(structure)
 
-    def remove_worker_from_minerals(self, worker: Unit) -> None:
+    @get_tags
+    def remove_worker_from_minerals(self, worker: Unit | int) -> None:
         """
         Remove a worker from the mineral workers list.
         """
-        self.mineral_workers.remove(worker.tag)
+        self.mineral_workers.remove(worker)
 
-    def remove_worker_from_vespene(self, worker: Unit) -> None:
+    @get_tags
+    def remove_worker_from_vespene(self, worker: Unit | int) -> None:
         """
         Remove a worker from the vespene workers list.
         """
-        self.vespene_workers.remove(worker.tag)
+        self.vespene_workers.remove(worker)
 
-    def remove_structure(self, structure: Unit) -> None:
+    @get_tags
+    def remove_structure(self, structure: Unit | int) -> None:
         """
         Remove a structure from the structures list.
         """
-        self.structures.remove(structure.tag)
+        self.structures.remove(structure)
 
-    def remove_mineral_field(self, mineral_field: Unit) -> None:
+    @get_tags
+    def remove_mineral_field(self, mineral_field: Unit | int) -> None:
         """
         Remove a mineral field from the mineral fields list.
         """
-        self.mineral_fields.remove(mineral_field.tag)
+        self.mineral_fields.remove(mineral_field)
 
-    def remove_vespene_geyser(self, vespene_geyser: Unit) -> None:
+    @get_tags
+    def remove_vespene_geyser(self, vespene_geyser: Unit | int) -> None:
         """
         Remove a vespene geyser from the vespene geysers list.
         """
-        self.vespene_geysers.remove(vespene_geyser.tag)
+        self.vespene_geysers.remove(vespene_geyser)
 
-    def remove_townhall(self, townhall: Unit) -> None:
+    @get_tags
+    def remove_townhall(self, townhall: Unit | int) -> None:
         """
         Remove a townhall from the townhalls list.
         """
-        self.townhalls.remove(townhall.tag)
+        self.townhalls.remove(townhall)
+
+
+class Bases(dict[Point2, Base]):
+    """
+    ### A collection of bases in the game.
+
+    This class represents a dictionary of bases, where the keys are the locations of the bases and the values are instances of the Base class.
+    Bases can be accessed using square bracket notation, e.g., bases[location].
+
+    ### Attributes:
+        - bot (BotAI): The bot instance associated with the bases.
+
+    ### Properties:
+        - owned: Returns bases that are owned by the bot.
+        - enemy: Returns bases that are owned by the enemy.
+        - empty: Returns bases that are empty.
+        - have_minerals: Returns bases that still have mineral fields.
+        - have_vespene: Returns bases that still have vespene geysers.
+        - mineral_workers_needed: Returns the number of mineral workers needed to saturate all bases.
+        - vespene_workers_needed: Returns the number of vespene workers needed to saturate all bases.
+        - mineral_workers_assigned: Returns the number of workers assigned to minerals.
+        - vespene_workers_assigned: Returns the number of workers assigned to vespene.
+        - mineral_workers_surplus: Returns the number of extra workers assigned to minerals.
+        - vespene_workers_surplus: Returns the number of extra workers assigned to vespene.
+        - mineral_workers_deficit: Returns the number of workers that can still be assigned to minerals before saturation.
+        - vespene_workers_deficit: Returns the number of workers that can still be assigned to vespene before saturation.
+        - have_available_workers: Returns bases that have workers above saturation.
+        - minerals_left: Returns the number of minerals left in all bases.
+        - vespene_left: Returns the number of vespene left in all bases.
+
+    ### Methods:
+        - add(location: Point2 | list[Point2]) -> None: Add a new base location to the collection.
+        - filter(condition: Callable[[Base], bool]) -> Bases: Returns bases that satisfy a given condition.
+        - sorted(condition: Callable[[Base], bool]) -> list[Base]: Returns a list of bases sorted by a given condition.
+        - closest_to(location: Unit | Point2) -> Base: Returns the base closest to the given location.
+        - contains_worker(worker: Unit | int) -> Base | None: Returns the base that contains the given worker.
+        - contains_resource(resource: Unit | int) -> Base | None: Returns the base that contains the given resource.
+        - contains_structure(structure: Unit | int) -> Base | None: Returns the base that contains the given structure.
+        - contains_townhall(townhall: Unit | int) -> Base | None: Returns the base that contains the given townhall.
+        - remove_worker(worker: Unit | int) -> None: Removes the given worker from the base it is assigned to.
+        - remove_resource(resource: Unit | int) -> None: Removes the given resource from the base it is assigned to.
+        - remove_structure(structure: Unit | int) -> None: Removes the given structure from the base it is assigned to.
+        - remove_townhall(townhall: Unit | int) -> None: Removes the given townhall from the base it is assigned to.
+        - remove_building(building: Unit | int) -> None: Removes the given building from the base it is assigned to.
+        - assign_worker_to_resource(worker: Unit | int, resource: Unit | int) -> None: Assigns the given worker to the given resource.
+    """
+
+    def __init__(self, bot: BotAI):
+        self.bot = bot
+        super().__init__()
+
+    @property
+    def owned(self) -> "Bases":
+        """
+        Returns bases that are owned by the bot.
+        """
+        return {base: self[base] for base in self if self[base].townhalls}
+
+    @property
+    def enemy(self) -> "Bases":
+        """
+        Returns base that are owned by the enemy.
+        """
+        return {base: self[base] for base in self if self[base].enemy}
+
+    @property
+    def empty(self) -> "Bases":
+        """
+        Returns the bases that are empty.
+        """
+        return {
+            base: self[base]
+            for base in self
+            if not self[base].townhalls and not self[base].enemy
+        }
+
+    @property
+    def have_minerals(self) -> "Bases":
+        """
+        Returns the bases that still have mineral_fields.
+        """
+        return {base: self[base] for base in self if self[base].mineral_fields}
+
+    @property
+    def have_vespene(self) -> "Bases":
+        """
+        Returns the bases that still have vespene_geysers.
+        """
+        return {base: self[base] for base in self if self[base].vespene_geysers}
+
+    @property
+    def mineral_workers_needed(self) -> int:
+        """
+        Returns the number of mineral workers needed to saturate all bases.
+        """
+        return sum(base.mineral_workers_needed for base in self.values())
+
+    @property
+    def vespene_workers_needed(self) -> int:
+        """
+        Returns the number of vespene workers needed to saturate all bases.
+        """
+        return sum(base.vespene_workers_needed for base in self.values())
+
+    @property
+    def mineral_workers_assigned(self) -> int:
+        """
+        Returns the number of workers assigned to minerals.
+        """
+        return sum(base.mineral_workers_assigned for base in self.values())
+
+    @property
+    def vespene_workers_assigned(self) -> int:
+        """
+        Returns the number of workers assigned to vespene.
+        """
+        return sum(base.vespene_workers_assigned for base in self.values())
+
+    @property
+    def mineral_workers_surplus(self) -> int:
+        """
+        Returns the number of extra workers assigned to minerals.
+        """
+        return sum(base.mineral_workers_surplus for base in self.values())
+
+    @property
+    def vespene_workers_surplus(self) -> int:
+        """
+        Returns the number of extra workers assigned to vespene.
+        """
+        return sum(base.vespene_workers_surplus for base in self.values())
+
+    @property
+    def mineral_workers_deficit(self) -> int:
+        """
+        Returns the number of workers that can still be assigned to minerals before saturation.
+        """
+        return sum(base.mineral_workers_deficit for base in self.values())
+
+    @property
+    def vespene_workers_deficit(self) -> int:
+        """
+        Returns the number of workers that can still be assigned to vespene before saturation.
+        """
+        return sum(base.vespene_workers_deficit for base in self.values())
+
+    @property
+    def have_available_workers(self) -> "Bases":
+        """
+        Returns bases that have workers above saturation.
+        """
+        return {
+            base: self[base]
+            for base in self
+            if self[base].mineral_workers_available
+            or self[base].vespene_workers_available
+        }
+
+    @property
+    def minerals_left(self) -> int:
+        """
+        Returns the number of minerals left in all bases.
+        """
+        return sum(base.minerals_left for base in self.values())
+
+    @property
+    def vespene_left(self) -> int:
+        """
+        Returns the number of vespene left in all bases.
+        """
+        return sum(base.vespene_left for base in self.values())
+
+    def add(self, location: Point2 | list[Point2]) -> None:
+        """
+        Add a new base location to the collection.
+
+        Args:
+            location (Point2 | list[Point2]): The location of the bases.
+        """
+        if isinstance(location, Point2):
+            location = [location]
+        for loc in location:
+            self[loc] = Base(self.bot, loc)
+
+    from typing import Callable
+
+    def filter(self, condition: Callable[[Base], bool]) -> "Bases":
+        """
+        Returns bases that satisfy a given condition.
+
+        Eg.:
+        ```python
+            no_worker_bases = bases.filter(lambda base: base.mineral_workers == 0)
+        ```
+
+        Args:
+            condition (Callable[[Base], bool]): A function that takes a Base and returns a bool.
+        """
+        return {base: self[base] for base in self if condition(self[base])}
+
+    def sorted(self, condition: Callable[[Base], bool]) -> list[Base]:
+        """
+        Returns a list of bases sorted by a given condition.
+
+        Eg.:
+        ```python
+            bases_by_minerals = bases.sorted(lambda base: base.minerals_left)
+        ```
+
+        Args:
+            condition (Callable[[Base], bool]): A function that takes a Base and returns a bool.
+        """
+        return sorted(self.values(), key=condition)
+
+    @get_positions
+    def closest_to(self, location: Unit | Point2) -> Base:
+        """
+        Returns the base closest to the given location.
+        """
+        return self[location]
+
+    @get_tags
+    def contains_worker(self, worker: Unit | int) -> Base | None:
+        """
+        Returns the base that contains the given worker.
+        """
+        return next(
+            (
+                base
+                for base in self.values()
+                if worker in base.mineral_workers or worker in base.vespene_workers
+            ),
+            None,
+        )
+
+    @get_tags
+    def contains_resource(self, resource: Unit | int) -> Base | None:
+        """
+        Returns the base that contains the given resource.
+        """
+        return next(
+            (
+                base
+                for base in self.values()
+                if resource in base.mineral_fields or resource in base.vespene_geysers
+            ),
+            None,
+        )
+
+    @get_tags
+    def contains_structure(self, structure: Unit | int) -> Base | None:
+        """
+        Returns the base that contains the given structure.
+        """
+        return next(
+            (base for base in self.values() if structure in base.structures),
+            None,
+        )
+
+    @get_tags
+    def contains_townhall(self, townhall: Unit | int) -> Base | None:
+        """
+        Returns the base that contains the given townhall.
+        """
+        return next(
+            (base for base in self.values() if townhall in base.townhalls),
+            None,
+        )
+
+    @get_tags
+    def remove_worker(self, worker: Unit | int) -> None:
+        """
+        Removes the given worker from the base it is assigned to.
+        """
+        base = self.contains_worker(worker)
+        if base:
+            if worker in base.mineral_workers:
+                base.remove_worker_from_minerals(worker)
+            elif worker in base.vespene_workers:
+                base.remove_worker_from_vespene(worker)
+
+    @get_tags
+    def remove_resource(self, resource: Unit | int) -> None:
+        """
+        Removes the given resource from the base it is assigned to.
+        """
+        base = self.contains_resource(resource)
+        if base:
+            if resource in base.mineral_fields:
+                base.remove_mineral_field(resource)
+            elif resource in base.vespene_geysers:
+                base.remove_vespene_geyser(resource)
+
+    def remove_structure(self, structure: Unit | int) -> None:
+        """
+        Removes the given structure from the base it is assigned to.
+        """
+        base = self.contains_structure(structure)
+        if base:
+            base.remove_structure(structure)
+
+    def remove_townhall(self, townhall: Unit | int) -> None:
+        """
+        Removes the given townhall from the base it is assigned to.
+        """
+        base = self.contains_townhall(townhall)
+        if base:
+            base.remove_townhall(townhall)
+
+    def remove_building(self, building: Unit | int) -> None:
+        """
+        Removes the given building from the base it is assigned to.
+        """
+        base = self.contains_structure(building)
+        if not base:
+            base = self.contains_townhall(building)
+        if base:
+            base.remove_structure(building)
+
+    @get_tags
+    def assign_worker_to_resource(
+        self, worker: Unit | int, resource: Unit | int
+    ) -> None:
+        """
+        Assigns the given worker to the given resource.
+        """
+        resource = resource.tag if isinstance(resource, Unit) else resource
+        base = self.contains_resource(resource)
+        if base:
+            if resource in base.mineral_fields:
+                base.add_worker_to_minerals(worker)
+            elif resource in base.vespene_geysers:
+                base.add_worker_to_vespene(worker)
+
+    @get_positions
+    def __getitem__(self, __key: Unit | Point2) -> Base:
+        """
+        Returns the base closest to the given location.
+        """
+        if __key not in self:
+            __key = __key.closest(self.keys())
+        return super().__getitem__(__key)
 
 
 class Workers(dict[SCVAssignment, dict[int, int] | set[int]]):
     """
-    Represents a collection of workers in the game.
+    ### Represents a collection of workers in the game.
 
-    This class extends the built-in `dict` class and provides additional properties and methods
-    for managing workers and their assignments.
+    This class extends the built-in `dict` class and uses `SCVAssignment` as the key type.
+    The values of the dictionary can be either a dictionary of integers or a set of integers,
+    depending on the assignment type.
 
-    Attributes:
-        mineral_miners (dict[int, int]): A dictionary mapping worker tags to mineral resource tags.
-        vespene_miners (dict[int, int]): A dictionary mapping worker tags to vespene resource tags.
-        builders (set[int]): A set of worker tags assigned to building tasks.
-        scouts (set[int]): A set of worker tags assigned to scouting tasks.
-        repairers (set[int]): A set of worker tags assigned to repair tasks.
-        army (set[int]): A set of worker tags assigned to army tasks.
-        none (set[int]): A set of worker tags with no assigned task.
-        all (set[int]): A set of all worker tags.
-        mineral_tags (set[int]): A set of all mineral resource tags.
-        vespene_tags (set[int]): A set of all vespene resource tags.
+    ### Attributes:
+        - mineral_miners (dict[int, int]): A dictionary of worker tags assigned to mineral mining.
+        - vespene_miners (dict[int, int]): A dictionary of worker tags assigned to vespene gas mining.
+        - builders (set[int]): A set of worker tags assigned to building construction.
+        - scouts (set[int]): A set of worker tags assigned to scouting.
+        - repairers (set[int]): A set of worker tags assigned to repairing.
+        - army (set[int]): A set of worker tags assigned to army-related tasks.
+        - none (set[int]): A set of worker tags with no specific assignment.
 
-    Methods:
-        remove(worker: Unit | int, assignment: SCVAssignment = None): Removes the given worker from the given assignment.
-        add(worker: Unit | int, assignment: SCVAssignment, resource: Unit | int = None): Adds the given worker to the given assignment.
-        get_assignment(worker: Unit | int): Returns the current assignment of a worker.
-        change_assignment(worker: Unit | int, new_assignment: SCVAssignment, resource: Unit | int = None, is_new: bool = False, old_assignment: SCVAssignment = None): Change the assignment of a worker to a new assignment.
-        get_resource_tag(worker: Unit | int, assignment: SCVAssignment = None): Get the resource tag (mineral or vespene) assigned to the worker.
+    ### Properties:
+        - all (set[int]): Returns all workers.
+        - mineral_tags (set[int]): Returns all mineral worker tags.
+        - vespene_tags (set[int]): Returns all vespene worker tags.
+
+    ### Methods:
+        - remove(worker: Unit | int, assignment: SCVAssignment = None) -> None: Removes the given worker from the given assignment.
+        - add(worker: Unit | int, assignment: SCVAssignment, resource: Unit | int = None) -> None: Adds the given worker to the given assignment.
+        - get_assignment(worker: Unit | int) -> SCVAssignment | None: Returns the current assignment of a worker.
+        - change_assignment(worker: Unit | int, new_assignment: SCVAssignment, resource: Unit | int = None, is_new: bool = False, old_assignment: SCVAssignment = None) -> None: Change the assignment of a worker to a new assignment.
+        - get_resource_tag(worker: Unit | int, assignment: SCVAssignment = None) -> int | None: Get the resource tag (mineral or vespene) assigned to the worker.
+        - get_workers_for_resource(resource: Unit | int) -> set[int]: Returns the workers assigned to the given resource.
     """
 
     def __init__(self):
@@ -404,6 +824,7 @@ class Workers(dict[SCVAssignment, dict[int, int] | set[int]]):
         """
         return self[SCVAssignment.VESPENE].values()
 
+    @get_tags
     def remove(self, worker: Unit | int, assignment: SCVAssignment = None) -> None:
         """
         Removes the given worker from the given assignment.
@@ -416,12 +837,12 @@ class Workers(dict[SCVAssignment, dict[int, int] | set[int]]):
         if not assignment:
             return
 
-        worker_tag = self.__get_tag(worker)
         if assignment in {SCVAssignment.MINERALS, SCVAssignment.VESPENE}:
-            del self[assignment][worker_tag]
+            del self[assignment][worker]
         else:
-            self[assignment].remove(worker_tag)
+            self[assignment].remove(worker)
 
+    @get_tags
     def add(
         self, worker: Unit | int, assignment: SCVAssignment, resource: Unit | int = None
     ) -> None:
@@ -430,28 +851,22 @@ class Workers(dict[SCVAssignment, dict[int, int] | set[int]]):
 
         If the assignment involves a resource, the resource must be provided.
         """
-        worker_tag = self.__get_tag(worker)
         if assignment in {SCVAssignment.MINERALS, SCVAssignment.VESPENE}:
             if not resource:
                 raise ValueError(
-                    f"Resource not provided for worker {worker_tag} and assignment {assignment}"
+                    f"Resource not provided for worker {worker} and assignment {assignment}"
                 )
-            resource_tag = self.__get_tag(resource)
-            self[assignment][worker_tag] = resource_tag
+            self[assignment][worker] = resource
         else:
-            self[assignment].add(worker_tag)
+            self[assignment].add(worker)
 
+    @get_tags
     def get_assignment(self, worker: Unit | int) -> SCVAssignment | None:
         """
         Returns the current assignment of a worker.
         """
-        worker_tag = self.__get_tag(worker)
         return next(
-            (
-                assignment
-                for assignment, workers in self.items()
-                if worker_tag in workers
-            ),
+            (assignment for assignment, workers in self.items() if worker in workers),
             None,
         )
 
@@ -480,6 +895,7 @@ class Workers(dict[SCVAssignment, dict[int, int] | set[int]]):
             self.remove(worker, old_assignment)
         self.add(worker, new_assignment, resource)
 
+    @get_tags
     def get_resource_tag(
         self,
         worker: Unit | int,
@@ -502,52 +918,65 @@ class Workers(dict[SCVAssignment, dict[int, int] | set[int]]):
         if assignment not in {SCVAssignment.MINERALS, SCVAssignment.VESPENE}:
             return None
 
-        worker_tag = self.__get_tag(worker)
-        return self[assignment][worker_tag]
+        return self[assignment][worker]
 
-    def __get_tag(self, unit: Unit | int) -> int:
+    @get_tags
+    def get_workers_for_resource(self, resource: Unit | int) -> set[int]:
         """
-        Returns the tag of the given unit.
+        Get the workers assigned to the given resource.
+
+        Args:
+            resource (Unit | int): The resource unit or its tag.
+
+        Returns:
+            set[int]: The set of worker tags assigned to the given resource.
         """
-        return unit.tag if isinstance(unit, Unit) else unit
+        return {
+            worker
+            for worker, tag in self[SCVAssignment.MINERALS].items()
+            if tag == resource
+        } | {
+            worker
+            for worker, tag in self[SCVAssignment.VESPENE].items()
+            if tag == resource
+        }
 
 
 # TODO: Implement better prediction models
 @dataclass
 class Economy:
     """
-    Represents the economy of the game.
+    ### Represents the economy of the game.
 
-    Attributes:
-        bot (Sc2City): The main bot instance.
-        mineral_history (list[int]): A list of mineral values over time.
-        total_minerals_history (list[int]): A list of total mineral values (excluding spent minerals) over time.
-        total_minerals_spent (int): The total amount of minerals spent.
-        vespene_history (list[int]): A list of vespene values over time.
-        total_vespene_history (list[int]): A list of total vespene values (excluding spent vespene) over time.
-        total_vespene_spent (int): The total amount of vespene spent.
-        collection_interval (int): The interval (in frames) at which the economy data is collected.
-        collection_limit (int): The maximum number of data points to keep in the history.
-        collection_frames (list[int]): A list of game frames at which the economy data was collected.
-        last_training (int): The game loop at which the prediction models were last trained.
-        models (tuple[LinearRegression]): The prediction models for mineral and vespene collection rates.
+    ### Attributes:
+        - bot (Sc2City): The instance of the Sc2City bot.
+        - minerals_history (list[int]): The history of mineral values.
+        - total_minerals_history (list[int]): The history of total mineral values.
+        - total_minerals_spent (int): The total amount of minerals spent.
+        - vespene_history (list[int]): The history of vespene values.
+        - total_vespene_history (list[int]): The history of total vespene values.
+        - total_vespene_spent (int): The total amount of vespene spent.
+        - collection_interval (int): The interval at which the economy data is collected, measured in frames.
+        - collection_limit (int): The maximum number of frames to keep in the history.
+        - collection_frames (list[int]): The frames at which the economy data is collected.
+        - last_training (int): The game loop at which the models were last trained.
+        - models (tuple[LinearRegression]): The prediction models for mineral and vespene collection rates.
 
-    Properties:
-        mineral_rate (float): The mineral collection rate in minerals per frame.
-        vespene_rate (float): The vespene collection rate in vespene per frame.
-        mineral_rate_per_worker (float): The mineral collection rate per worker in minerals per frame.
-        vespene_rate_per_worker (float): The vespene collection rate per worker in vespene per frame.
-        mineral_rate_per_base (float): The mineral collection rate per base in minerals per frame.
-        vespene_rate_per_base (float): The vespene collection rate per base in vespene per frame.
+    ### Properties:
+        - mineral_rate (float): The mineral collection rate in minerals per frame.
+        - vespene_rate (float): The vespene collection rate in vespene per frame.
+        - mineral_rate_per_worker (float): The mineral collection rate per worker in minerals per frame.
+        - vespene_rate_per_worker (float): The vespene collection rate per worker in vespene per frame.
+        - mineral_rate_per_base (float): The mineral collection rate per base in minerals per frame.
+        - vespene_rate_per_base (float): The vespene collection rate per base in vespene per frame.
 
-    Methods:
-        update(): Update the economy data.
-        spend(minerals: int = None, vespene: int = None): Update the spent resources.
-        recover_resources(minerals: int = None, vespene: int = None): Update the recovered resources.
-        predict_frame(minerals: int = None, vespene: int = None): Predict the frame at which the given resource will reach the given value.
-        calculate_frames_to_value(minerals: int = None, vespene: int = None): Calculate how many frames until the given resource will reach the given value.
-        mineral_rate_for_base(base: Base): Returns the mineral collection rate per worker for a base in minerals per frame.
-        vespene_rate_for_base(base: Base): Returns the vespene collection rate per worker for a base in vespene per frame.
+    ### Methods:
+        - update() -> None: Update the economy data.
+        - spend(minerals: int = None, vespene: int = None) -> None: Update the spent resources.
+        - recover_resources(minerals: int = None, vespene: int = None) -> None: Update the recovered resources.
+        - predict_frame(minerals: int = None, vespene: int = None) -> tuple[int, int]: Predict the frame at which the given resource will reach the given value.
+        - calculate_frames_to_value(minerals: int = None, vespene: int = None) -> tuple[int, int]: Calculate the frames until the given resource reaches the given value.
+        - train_models() -> None: Train the prediction models.
     """
 
     bot: "Sc2City"
@@ -626,16 +1055,20 @@ class Economy:
         """
         return self.vespene_rate / len(self.bot.bases)
 
-    def mineral_rate_for_base(self, base: Base) -> float:
+    def mineral_rate_for_base(self, base: Base | Unit | Point2) -> float:
         """
         Returns the mineral collection rate per worker for a base in minerals per frame.
         """
+        if not isinstance(base, Base):
+            base = self.bot.bases[base]
         return self.mineral_rate_per_worker * len(base.mineral_workers)
 
     def vespene_rate_for_base(self, base: Base) -> float:
         """
         Returns the vespene collection rate per worker for a base in vespene per frame.
         """
+        if not isinstance(base, Base):
+            base = self.bot.bases[base]
         return self.vespene_rate_per_worker * len(base.vespene_workers)
 
     def update(self) -> None:
@@ -703,7 +1136,7 @@ class Economy:
         self, minerals: int = None, vespene: int = None
     ) -> tuple[int, int]:
         """
-        Calculate how many frames until the given resource will reach the given value.
+        Calculate frames until the given resource reaches the given value.
 
         Args:
             minerals (int, optional): The desired mineral value.

@@ -40,7 +40,7 @@ class SCVManager:
         self.speed_mining = SpeedMining(bot)
         self.scvs_per_refinery: int = 3
         self.max_gas_miners: int = 100
-        self.worker_speed: float = 1  # Measured in frames
+        self.worker_speed: float = 0.12555803571428573  # Measured in frames
         self.next_point = None  # TODO: Remove this when refactoring scouting logic
 
     def worker_split_frame_zero(self) -> None:
@@ -54,14 +54,18 @@ class SCVManager:
             workers.remove(worker)
 
         for worker in workers:
-            self.__assign_worker_to_resource(worker)
+            mineral_field = self.bot.mineral_field.closest_to(worker)
+            self.__assign_worker_to_resource(worker, mineral_field)
+        townhall = self.bot.townhalls.first
+        self.bot.bases[townhall.position].add_townhall(townhall.tag)
         self.worker_speed = worker.distance_per_step / self.bot.client.game_step
 
     def move_scvs(self) -> None:
         self.__handle_alerts()
-        self.__move_scouts()
+        self.__move_scouts()  # TODO: Move this to scripts when implemented
         self.__distribute_workers()
         self.__speed_mining()
+        self.__handle_idle_workers()
 
     # TODO: Include more possible orders
     # TODO: Create a method to calculate resources spent on repairs
@@ -174,12 +178,11 @@ class SCVManager:
             )
         elif self.bot.alert(Alert.VespeneExhausted):
             self.__remove_miners(
-                self.bot.gas_buildings.tags,
+                self.bot.gas_buildings.ready.filter(lambda x: x.has_vespene).tags,
                 self.bot.scvs.vespene_miners,
                 SCVAssignment.VESPENE,
             )
 
-    # TODO: Test if this method is working for gas geysers
     def __remove_miners(
         self,
         resource_tags: set[int],
@@ -244,25 +247,19 @@ class SCVManager:
                     return
 
     def __speed_mining(self) -> None:
-        for worker_tag in self.bot.scvs[SCVAssignment.MINERALS]:
+        for worker_tag, mineral_field_tag in self.bot.scvs.mineral_miners.items():
             worker = self.bot.workers.find_by_tag(worker_tag)
-            mineralfield_tag = self.bot.scvs[SCVAssignment.MINERALS][worker_tag]
             self.speed_mining.speed_mine_minerals_single(
-                worker, mineralfield_tag, self.bot.scvs[SCVAssignment.MINERALS]
+                worker, mineral_field_tag, self.bot.scvs.mineral_miners
             )
-        for worker_tag in self.bot.scvs[SCVAssignment.VESPENE]:
+        for worker_tag, vespene_tag in self.bot.scvs.vespene_miners.items():
             worker = self.bot.workers.find_by_tag(worker_tag)
-            if (
-                not worker
-            ):  # If worker is inside refinery it can't be found by find_by_tag
-                continue
-            vespene_tag = self.bot.scvs[SCVAssignment.VESPENE][worker_tag]
+            if not worker:
+                continue  # If worker is inside refinery it can't be found by find_by_tag
             self.speed_mining.speed_mine_gas_single(worker, vespene_tag)
 
     def __distribute_workers(self) -> None:
         self.__calculate_custom_assigned_workers()
-        self.__handle_idle_workers()
-
         """
         manages saturation for refineries
         """
@@ -443,6 +440,9 @@ class SCVManager:
                 Defaults to None.
         """
         self.bot.scvs.remove(worker.tag, from_assignment)
+        if from_assignment in {SCVAssignment.MINERALS, SCVAssignment.VESPENE}:
+            self.bot.bases.remove_worker(worker.tag)
+
         if to_assignment in {SCVAssignment.MINERALS, SCVAssignment.VESPENE}:
             self.__assign_worker_to_resource(worker, resource)
         else:
@@ -478,6 +478,7 @@ class SCVManager:
             )
         worker.gather(resource)
         self.bot.scvs[assignment][worker.tag] = resource.tag
+        self.bot.bases.assign_worker_to_resource(worker.tag, resource)
 
     # TODO: Test if it's not including exhausted refinery
     def __find_closest_resource(self, worker: Unit, assignment: SCVAssignment) -> Unit:

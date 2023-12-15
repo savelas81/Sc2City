@@ -2,12 +2,12 @@ from typing import Optional
 
 from sc2.bot_ai import BotAI
 from sc2.data import Race
-from sc2.ids.upgrade_id import UpgradeId
 from sc2.unit import Unit
 from sc2.ids.unit_typeid import UnitTypeId
+from sc2.ids.upgrade_id import UpgradeId
 
 from utils import Settings
-from game_objects import Strategy, Order, Base, Workers, Economy
+from game_objects import Strategy, Order, Bases, Workers, Economy
 from managers import (
     HistoryAnalyzer,
     MapAnalyzer,
@@ -40,8 +40,8 @@ class Sc2City(BotAI):
         self.queue: list[Order] = []
         self.scv_tags: set[int] = set()
         self.economy = Economy(self)
+        self.bases = Bases(self)
         self.scvs = Workers()
-        self.bases: list[Base] = []
 
         # TODO: Implement army logic with scripts. Eg: army = {soldiers: [(Unit, Script)], squads: [(Squad, Script)], scouts: [(Scout, Script)]}
         # TODO: Merge this with scouting logic in micro manager
@@ -50,10 +50,10 @@ class Sc2City(BotAI):
     async def on_start(self) -> None:
         self.client.game_step = 2
         self.macro_manager.choose_first_strategy()
-        self.build_order_manager.execute_frame_zero()
 
         self.map_analyzer = MapAnalyzer(self)
         await self.map_analyzer.get_initial_map_info()
+        self.build_order_manager.execute_frame_zero()
         self.micro_manager.set_initial_unit_scripts()
 
         # Workaround for weird SCV/Refinery behavior
