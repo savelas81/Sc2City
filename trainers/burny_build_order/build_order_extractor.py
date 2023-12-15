@@ -17,14 +17,16 @@ from selenium.webdriver.common.by import By
 from sc2city.utils import OrderType
 from sc2city.game_objects import Order
 from config import BurnyOrder, TYPES, EXCEPTION_IDS, BURNY_ACTIONS
+from sc2city.utils import BuildTypes
 
 
 class BuildOrderExtractor:
     download_folder = "build_orders"
     timeout = 15
 
-    def __init__(self, url: str, download_dir: str):
+    def __init__(self, url: str, build_type: BuildTypes, download_dir: str):
         self.url = url
+        self.build_type = build_type.name
         self.download_dir = os.path.join(download_dir, self.download_folder)
 
     def get_build_order(self) -> None:
@@ -37,7 +39,11 @@ class BuildOrderExtractor:
         with open(filepath, "w") as f:
             build_order_obj = json.loads(build_order)
             formatted_orders = self.__format_build_order(build_order_obj)
-            json.dump(formatted_orders, f, indent=2)
+            strategy_obj = {
+                "build_type": self.build_type,
+                "build_order": formatted_orders,
+            }
+            json.dump(strategy_obj, f, indent=2)
 
     def __format_build_order(self, build_order: list[BurnyOrder]) -> list[Order]:
         priorities = range(len(build_order) * 5, 0, -5)
