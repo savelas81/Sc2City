@@ -584,14 +584,14 @@ class Economy:
         """
         Total minerals spent in the game.
         """
-        return self.total_minerals_history[-1] - self.mineral_history[-1]
+        return self.total_minerals_history[-1] - self.bot.minerals
 
     @property
     def total_vespene_spent(self) -> int:
         """
         Total vespene spent in the game.
         """
-        return self.total_vespene_history[-1] - self.vespene_history[-1]
+        return self.total_vespene_history[-1] - self.bot.vespene
 
     @__can_train_model
     @property
@@ -718,8 +718,15 @@ class Economy:
         Predict the frame at which the given resource will reach the given value.
         """
         model = self.__models[1] if is_gas else self.__models[0]
+        total_resource = (
+            self.total_vespene_history[-1]
+            if is_gas
+            else self.total_minerals_history[-1]
+        )
+        current_resource = self.bot.vespene if is_gas else self.bot.minerals
+        target_value = total_resource + resource - current_resource
         return (
-            int((resource - model.intercept_) / model.coef_)
+            int((target_value - model.intercept_) / model.coef_)
             if model.coef_ != 0
             else np.inf
         )
