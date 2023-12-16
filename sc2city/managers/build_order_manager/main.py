@@ -5,7 +5,7 @@ from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.ability_id import AbilityId
 from sc2.unit import Unit
 
-from utils import Status, OrderType
+from utils import Status, OrderType, SCVAssignment
 from .scv_manager import SCVManager
 from .structure_manager import StructureManager
 
@@ -47,17 +47,27 @@ class BuildOrderManager:
             ),
             None,
         )
-        if order is not None:
-            order.update_status(Status.FINISHED)
-            if order.type == OrderType.STRUCTURE:
-                self.bot.scvs.builders.remove(order.tag)
-                if (
-                    order.id == UnitTypeId.REFINERY
-                ):  # worker goes automatically to gather gas.
-                    self.bot.scvs.vespene_miners[order.tag] = unit.tag
-        else:
+        if not order:
             # TODO: Add logic to handle errors
             print(f"{unit.type_id} not found in finished queue")
+            return
+
+        order.update_status(Status.FINISHED)
+        if unit.is_collecting:
+            unit.stop()  # Only SCVManager can give collection orders
+
+        if order.type != OrderType.STRUCTURE:
+            return
+
+        new_assignment = (
+            SCVAssignment.VESPENE  # worker goes automatically to gather gas.
+            if order_id == UnitTypeId.REFINERY
+            else SCVAssignment.NONE
+        )
+        resource = unit if order_id == UnitTypeId.REFINERY else None
+        self.scv_manager.update_worker_assignment(
+            order.tag, SCVAssignment.BUILD, new_assignment, resource
+        )
 
     def building_construction_started(self, unit: Unit) -> None:
         order = next(

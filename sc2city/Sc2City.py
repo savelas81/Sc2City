@@ -38,7 +38,6 @@ class Sc2City(BotAI):
         self.iteration: int = 0
         self.current_strategy: Optional[Strategy] = None
         self.queue: list[Order] = []
-        self.scv_tags: set[int] = set()
         self.economy = Economy(self)
         self.bases = Bases(self)
         self.scvs = Workers()
@@ -55,9 +54,6 @@ class Sc2City(BotAI):
         await self.map_analyzer.get_initial_map_info()
         self.build_order_manager.execute_frame_zero()
         self.micro_manager.set_initial_unit_scripts()
-
-        # Workaround for weird SCV/Refinery behavior
-        self.scv_tags = {worker.tag for worker in self.workers}
 
     async def on_step(self, iteration: int) -> None:
         self.iteration = iteration
@@ -85,11 +81,8 @@ class Sc2City(BotAI):
 
     async def on_unit_created(self, unit: Unit) -> None:
         # Workaround for weird SCV/Refinery behavior
-        if unit.type_id == UnitTypeId.SCV:
-            if unit.tag in self.scv_tags:
-                return
-            else:
-                self.scv_tags.add(unit.tag)
+        if unit.tag in self.scvs.vespene_miners:
+            return
         self.build_order_manager.production_complete(unit)
 
     async def on_unit_destroyed(self, unit_tag: int) -> None:

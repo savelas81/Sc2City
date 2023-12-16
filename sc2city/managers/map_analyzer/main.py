@@ -80,8 +80,8 @@ class MapAnalyzer:
 
     def __set_bases(self) -> None:
         self.bot.bases.add(self.bot.start_location)
-        self.bot.bases.add(self.bot.enemy_start_locations)
         self.bot.bases.add(self.expansions)
+        self.bot.bases.add(self.bot.enemy_start_locations)
 
     def __update_pending_scouting_points(self) -> None:
         # TODO: Add flexibility for adding any number of scouts and scouting targets
