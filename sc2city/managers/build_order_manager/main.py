@@ -27,6 +27,8 @@ class BuildOrderManager:
 
     def execute_frame_zero(self) -> None:
         self.scv_manager.worker_split_frame_zero()
+        townhall = self.bot.townhalls.first
+        self.bot.bases[townhall.position].add_townhall(townhall.tag)
 
     async def execute_strategy(self) -> None:
         await self.__execute_next_order()

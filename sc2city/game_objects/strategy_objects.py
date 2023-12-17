@@ -438,6 +438,9 @@ class Bases(dict[Point2, Base]):
     - owned: Returns bases that are owned by the bot.
     - enemy: Returns bases that are owned by the enemy.
     - empty: Returns bases that are empty.
+    - first: Returns the first base.
+    - last: Returns the last base.
+    - random: Returns a random base.
     - have_minerals: Returns bases that still have mineral fields.
     - have_vespene: Returns bases that still have vespene geysers.
     - mineral_workers_needed: Returns the number of mineral workers needed to saturate all bases.
@@ -492,6 +495,27 @@ class Bases(dict[Point2, Base]):
         Returns the bases that are empty.
         """
         return self.filter(lambda base: not base.townhalls and not base.enemy)
+
+    @property
+    def first(self) -> Base:
+        """
+        Returns the first base.
+        """
+        return next(iter(self.values()), None)
+
+    @property
+    def last(self) -> Base:
+        """
+        Returns the last base.
+        """
+        return next(reversed(self.values()), None)
+
+    @property
+    def random(self) -> Base:
+        """
+        Returns a random base.
+        """
+        return np.random.choice(tuple(self.values()))
 
     @property
     def have_minerals(self) -> "Bases":

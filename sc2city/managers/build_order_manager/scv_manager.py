@@ -28,9 +28,8 @@ class SCVManager:
         self.next_point = None  # TODO: Remove this when refactoring scouting logic
 
     def worker_split_frame_zero(self) -> None:
-        mineral_fields = self.bot.mineral_field.closer_than(
-            distance=10, position=self.bot.start_location
-        )
+        mineral_fields = self.bot.bases[self.bot.start_location].mineral_fields
+        # Why are we doing this instead of self.bot.workers?
         workers = Units(self.bot.workers, self.bot)
         for mineral_field in mineral_fields:
             worker = workers.closest_to(mineral_field)
@@ -40,8 +39,6 @@ class SCVManager:
         for worker in workers:
             mineral_field = self.bot.mineral_field.closest_to(worker)
             self.__assign_worker_to_resource(worker, mineral_field)
-        townhall = self.bot.townhalls.first
-        self.bot.bases[townhall.position].add_townhall(townhall.tag)
         self.worker_speed = worker.distance_per_step / self.bot.client.game_step
 
     def move_scvs(self) -> None:
