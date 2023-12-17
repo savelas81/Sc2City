@@ -68,14 +68,14 @@ class BuildingPlacements(dict[PositionPriority, list[Point2]]):
     It provides methods to initialize the building placements, load from a dictionary, and load from a build type.
 
     Attributes:
-        main (list[Point2]): The main list of building placements.
-        auxiliary (list[Point2]): The auxiliary list of building placements.
-        supply_depot (list[Point2]): The supply depot list of building placements.
-        turret (list[Point2]): The turret list of building placements.
-        macro_orbital (list[Point2]): The macro orbital list of building placements.
-        expansion (list[Point2]): The expansion list of building placements.
-        bunker (list[Point2]): The bunker list of building placements.
-        sensor_tower (list[Point2]): The sensor tower list of building placements.
+    - main (list[Point2]): The main list of building placements.
+    - auxiliary (list[Point2]): The auxiliary list of building placements.
+    - supply_depot (list[Point2]): The supply depot list of building placements.
+    - turret (list[Point2]): The turret list of building placements.
+    - macro_orbital (list[Point2]): The macro orbital list of building placements.
+    - expansion (list[Point2]): The expansion list of building placements.
+    - bunker (list[Point2]): The bunker list of building placements.
+    - sensor_tower (list[Point2]): The sensor tower list of building placements.
     """
 
     # TODO: Add default building placements to fallback on if no build type is specified
