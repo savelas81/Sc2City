@@ -416,11 +416,19 @@ class SCVManager:
         """
         if assignment == SCVAssignment.VESPENE:
             base = self.bot.bases.owned.sorted(
-                lambda base: base.vespene_workers_assigned
+                lambda base: base.vespene_workers_deficit, reverse=True
             )[0]
-            return base.refineries.first
-        if assignment == SCVAssignment.MINERALS:
-            base = self.bot.bases.owned.sorted(
-                lambda base: base.mineral_workers_assigned
-            )[0]
-            return base.mineral_fields.first
+            return min(
+                base.refineries.ready,
+                key=lambda refinery: len(
+                    self.bot.scvs.get_workers_for_resource(refinery)
+                ),
+            )
+
+        base = self.bot.bases.owned.sorted(
+            lambda base: base.mineral_workers_deficit, reverse=True
+        )[0]
+        return min(
+            base.mineral_fields,
+            key=lambda mineral: len(self.bot.scvs.get_workers_for_resource(mineral)),
+        )

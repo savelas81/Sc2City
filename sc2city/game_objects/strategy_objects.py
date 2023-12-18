@@ -638,7 +638,9 @@ class Bases(dict[Point2, Base]):
         )
         return filtered_bases
 
-    def sorted(self, condition: Callable[[Base], bool]) -> list[Base]:
+    def sorted(
+        self, condition: Callable[[Base], bool], reverse: bool = False
+    ) -> list[Base]:
         """
         Returns a list of bases sorted by a given condition.
 
@@ -649,8 +651,9 @@ class Bases(dict[Point2, Base]):
 
         Args:
             condition (Callable[[Base], bool]): A function that takes a Base and returns a bool.
+            reverse (bool, optional): If set to True, the bases are sorted in descending order. Defaults to False.
         """
-        return sorted(self.values(), key=condition)
+        return sorted(self.values(), key=condition, reverse=reverse)
 
     @get_positions
     def closest_to(self, location: Unit | Point2) -> Base:
