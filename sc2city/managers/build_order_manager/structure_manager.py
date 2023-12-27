@@ -1,14 +1,14 @@
 from typing import TYPE_CHECKING
 
-from sc2.unit import Unit
 from sc2.dicts.unit_trained_from import UNIT_TRAINED_FROM
 from sc2.dicts.upgrade_researched_from import UPGRADE_RESEARCHED_FROM
-from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.ability_id import AbilityId
+from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.upgrade_id import UpgradeId
+from sc2.unit import Unit
 
-from utils import Status
 from game_objects import Order
+from utils import Status
 
 if TYPE_CHECKING:
     from Sc2City import Sc2City

@@ -15,3 +15,6 @@ black = "^23.11.0"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+[tool.isort]
+known_first_party = "utils,game_objects,managers,config,placement_extractor,build_order_extractor,third_party_code"

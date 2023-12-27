@@ -3,9 +3,8 @@ import sys
 from sc2.data import Difficulty, Race
 from sc2.player import Bot, Computer
 
-# Load game client and bot
-from utils import Game, Settings
 from Sc2City import Sc2City
+from utils import Game, Settings
 
 # Start game
 if __name__ == "__main__":

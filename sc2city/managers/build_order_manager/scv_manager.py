@@ -1,17 +1,18 @@
 import math
-import numpy as np
 from copy import copy
 from typing import TYPE_CHECKING
 
+import numpy as np
+from sc2.data import Alert
+from sc2.ids.ability_id import AbilityId
+from sc2.ids.unit_typeid import UnitTypeId
+from sc2.position import Point2
 from sc2.unit import Unit
 from sc2.units import Units
-from sc2.position import Point2
-from sc2.ids.unit_typeid import UnitTypeId
-from sc2.ids.ability_id import AbilityId
-from sc2.data import Alert
 
+from game_objects import BUILDING_PRIORITY, CustomOrders, Order
 from utils import SCVAssignment, Status
-from game_objects import BUILDING_PRIORITY, Order, CustomOrders
+
 from .speed_mining import SpeedMining
 
 if TYPE_CHECKING:

@@ -1,8 +1,9 @@
 import json
 from typing import TYPE_CHECKING
 
-from utils import strategies, Status
-from game_objects import Strategy, Order
+from game_objects import Order, Strategy
+from utils import Status, strategies
+
 from .queue_manager import QueueManager
 
 if TYPE_CHECKING:

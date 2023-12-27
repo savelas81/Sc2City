@@ -1,21 +1,21 @@
 import enum
-import numpy as np
 import functools
-from typing import TYPE_CHECKING, Callable
 from dataclasses import dataclass, field
+from typing import TYPE_CHECKING, Callable
 
+import numpy as np
 from sc2.bot_ai import BotAI
-from sc2.unit import Unit
-from sc2.units import Units
+from sc2.ids.ability_id import AbilityId
 from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.upgrade_id import UpgradeId
-from sc2.ids.ability_id import AbilityId
 from sc2.position import Point2
-
+from sc2.unit import Unit
+from sc2.units import Units
 from sklearn.linear_model import LinearRegression
 
+from utils import BuildTypes, OrderType, SCVAssignment, Status
+
 from .building_placements import BuildingPlacements
-from utils import BuildTypes, OrderType, Status, SCVAssignment
 
 if TYPE_CHECKING:
     from Sc2City import Sc2City

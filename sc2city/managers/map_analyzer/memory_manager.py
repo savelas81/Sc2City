@@ -1,8 +1,8 @@
 from typing import TYPE_CHECKING
-from loguru import logger
 
-from sc2.units import Units
+from loguru import logger
 from sc2.unit import Unit
+from sc2.units import Units
 
 if TYPE_CHECKING:
     from Sc2City import Sc2City

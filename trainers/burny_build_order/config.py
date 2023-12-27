@@ -2,8 +2,8 @@ from dataclasses import dataclass
 
 from sc2.ids.ability_id import AbilityId
 
-from sc2city.utils import OrderType
 from sc2city.game_objects import CustomOrders
+from sc2city.utils import OrderType
 
 
 @dataclass

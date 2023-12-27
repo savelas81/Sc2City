@@ -1,6 +1,6 @@
-import numpy as np
 from typing import TYPE_CHECKING
 
+import numpy as np
 from sc2.position import Point2, Point3
 
 if TYPE_CHECKING:

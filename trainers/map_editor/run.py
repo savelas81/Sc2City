@@ -1,5 +1,5 @@
-import sys
 import os
+import sys
 
 # Get the absolute path of the directory of the current script
 dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -10,9 +10,9 @@ sys.path.append(main_bot_path)
 from sc2.data import Difficulty, Race
 from sc2.player import Bot, Computer
 
-from sc2city.utils import Game, BuildTypes
 from config import MapType
 from placement_extractor import BuildingPlacementExtractor
+from sc2city.utils import BuildTypes, Game
 
 
 def setup_and_start_game(

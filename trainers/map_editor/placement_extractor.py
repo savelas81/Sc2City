@@ -1,13 +1,13 @@
-import json
 import heapq
+import json
 
 from sc2.bot_ai import BotAI
 from sc2.data import Race
 from sc2.ids.unit_typeid import UnitTypeId
 
 from config import MapType
+from sc2city.game_objects import MAP_PINS, BuildingPlacements, PositionPriority
 from sc2city.utils import BuildTypes
-from sc2city.game_objects import PositionPriority, MAP_PINS, PositionPriorityLists
 
 
 class BuildingPlacementExtractor(BotAI):
@@ -53,7 +53,7 @@ class BuildingPlacementExtractor(BotAI):
         self.map_pins_saved = True
         await self.client.leave()
 
-    def get_map_pins(self, player=True) -> PositionPriorityLists:
+    def get_map_pins(self, player=True) -> BuildingPlacements:
         positions_dict = {key: [] for key in PositionPriority}
         structures = self.structures if player else self.enemy_structures
 
@@ -69,7 +69,7 @@ class BuildingPlacementExtractor(BotAI):
             ]
         return positions_dict
 
-    def save_map_pins(self, map_pins: PositionPriorityLists) -> None:
+    def save_map_pins(self, map_pins: BuildingPlacements) -> None:
         path = self.build_type.value
         name = self.game_info.map_name + str(self.start_location) + ".json"
         filename = self.main_bot_path + "/" + path + name

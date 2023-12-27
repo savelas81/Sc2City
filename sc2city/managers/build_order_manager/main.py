@@ -1,11 +1,12 @@
 import asyncio
 from typing import TYPE_CHECKING
 
-from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.ability_id import AbilityId
+from sc2.ids.unit_typeid import UnitTypeId
 from sc2.unit import Unit
 
-from utils import Status, OrderType, SCVAssignment
+from utils import OrderType, SCVAssignment, Status
+
 from .scv_manager import SCVManager
 from .structure_manager import StructureManager
 

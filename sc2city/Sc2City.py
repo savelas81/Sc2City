@@ -2,20 +2,20 @@ from typing import Optional
 
 from sc2.bot_ai import BotAI
 from sc2.data import Race
-from sc2.unit import Unit
 from sc2.ids.unit_typeid import UnitTypeId
 from sc2.ids.upgrade_id import UpgradeId
+from sc2.unit import Unit
 
-from utils import Settings
-from game_objects import Strategy, Order, Bases, Workers, Economy
+from game_objects import Bases, Economy, Order, Strategy, Workers
 from managers import (
-    HistoryAnalyzer,
-    MapAnalyzer,
-    MacroManager,
-    MicroManager,
     BuildOrderManager,
+    HistoryAnalyzer,
+    MacroManager,
+    MapAnalyzer,
+    MicroManager,
     UnitsManager,
 )
+from utils import Settings
 
 
 class Sc2City(BotAI):

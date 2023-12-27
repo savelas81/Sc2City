@@ -1,16 +1,16 @@
 from .building_placements import (
-    BuildingPlacements,
-    PositionPriority,
     BUILDING_PRIORITY,
     MAP_PINS,
-)
-from .strategy_objects import (
-    Strategy,
-    Order,
-    CustomOrders,
-    Base,
-    Workers,
-    Economy,
-    Bases,
+    BuildingPlacements,
+    PositionPriority,
 )
 from .script import Script
+from .strategy_objects import (
+    Base,
+    Bases,
+    CustomOrders,
+    Economy,
+    Order,
+    Strategy,
+    Workers,
+)

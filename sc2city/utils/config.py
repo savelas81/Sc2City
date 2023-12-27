@@ -1,7 +1,8 @@
 import enum
 import json
-from loguru import logger
 from dataclasses import dataclass
+
+from loguru import logger
 
 
 class Paths(enum.Enum):

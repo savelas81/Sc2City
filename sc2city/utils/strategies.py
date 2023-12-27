@@ -1,5 +1,6 @@
 import enum
 import os
+
 from .config import Paths
 
 

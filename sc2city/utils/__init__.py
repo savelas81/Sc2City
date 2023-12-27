@@ -1,8 +1,2 @@
+from .config import BuildTypes, OrderType, SCVAssignment, Settings, Status
 from .game import Game
-from .config import (
-    Settings,
-    Status,
-    BuildTypes,
-    OrderType,
-    SCVAssignment,
-)

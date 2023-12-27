@@ -1,23 +1,22 @@
+import concurrent.futures
+import json
 import os
 import time
-import json
 import uuid
-import pyperclip
-import concurrent.futures
 
+import pyperclip
 from selenium import webdriver
 from selenium.webdriver import ActionChains
-from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.chrome.options import Options as ChromeOptions
-from selenium.webdriver.firefox.options import Options as FirefoxOptions
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from selenium.webdriver.remote.webdriver import WebDriver
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 
-from sc2city.utils import OrderType
+from config import BURNY_ACTIONS, EXCEPTION_IDS, TYPES, BurnyOrder
 from sc2city.game_objects import Order
-from config import BurnyOrder, TYPES, EXCEPTION_IDS, BURNY_ACTIONS
-from sc2city.utils import BuildTypes
+from sc2city.utils import BuildTypes, OrderType
 
 
 class BuildOrderExtractor:

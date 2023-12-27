@@ -1,13 +1,13 @@
 import argparse
 import asyncio
+
 import aiohttp
 from loguru import logger
-
 from sc2 import maps
-from sc2.player import Bot, Computer
-from sc2.main import run_game, _play_game
-from sc2.portconfig import Portconfig
 from sc2.client import Client
+from sc2.main import _play_game, run_game
+from sc2.player import Bot, Computer
+from sc2.portconfig import Portconfig
 from sc2.protocol import ConnectionAlreadyClosed
 
 
