@@ -32,13 +32,13 @@ To build the Docker image, navigate to the project's root directory and run the 
 docker build --rm -t sc2city .
 ```
 
-The base image comes with the standard ladder maps from [SC2 AI Arena](https://aiarena.net/wiki/maps/) wiki and the [Blizzard Repository](https://github.com/Blizzard/s2client-proto?tab=readme-ov-file#map-packs). And you can run it with:
+The base image comes with the standard ladder maps from [SC2 AI Arena](https://aiarena.net/wiki/maps/) wiki and the [Blizzard Repository](https://github.com/Blizzard/s2client-proto?tab=readme-ov-file#map-packs). And you can run the project with:
 
 ```bash
 docker run -it --rm sc2city
 ```
 
-But if you want to add your own maps at runtime, you can run a volume to the standard StarCraft II maps folder on your machine:
+But if you want to add your own maps at runtime, you can run a bind mount from the standard StarCraft II maps folder on your machine to the container maps folder:
 
 ```bash
 docker run -it --rm -v "C:\Program Files (x86)\StarCraft II\Maps:/host_maps" sc2city
