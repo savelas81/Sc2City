@@ -1,6 +1,5 @@
 # Python
 __pycache__/
-*.SC2Replay
 *.pyc
 
 # Virtual Environments
@@ -8,3 +7,10 @@ __pycache__/
 
 # Visual Studio Code
 .vscode/
+.devcontainer/
+
+# PyCharm
+.idea/
+
+# Game
+*.SC2Replay
