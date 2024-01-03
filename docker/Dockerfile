@@ -15,11 +15,14 @@ RUN wget http://blzdistsc2-a.akamaihd.net/Linux/SC2.4.10.zip && \
     unzip -P iagreetotheeula SC2.4.10.zip -d ./ && \
     rm SC2.4.10.zip
 
+# Rename to lowercase for the python-sc2 library
+RUN mv StarCraftII/Maps StarCraftII/maps
+
 # Get the latest version of the maps from the aiarena wiki or use the provided links
 ARG MAP_LINKS=https://aiarena.net/wiki/184/plugin/attachments/download/35/
 RUN set -- $MAP_LINKS && \
     for LINK in "$@"; do \
         wget $LINK -O maps.zip && \
-        unzip maps.zip -d ./StarCraftII/Maps && \
+        unzip maps.zip -d ./StarCraftII/maps && \
         rm maps.zip; \
     done
