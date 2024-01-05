@@ -1,0 +1,21 @@
+version: "3"
+services:
+  development:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - maps:/home/botuser/StarCraftII/maps
+    stdin_open: true
+    tty: true
+    depends_on:
+      - map_updater
+
+  map_updater:
+    image: luguenin/starcraft2-map_updater:latest
+    volumes:
+      - maps:/maps
+      - "c:/Program Files (x86)/StarCraft II/Maps:/host_maps"
+
+volumes:
+  maps:

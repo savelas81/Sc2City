@@ -1,4 +1,4 @@
-FROM starcraft2-base
+FROM luguenin/starcraft2-base:python_3.11
 
 WORKDIR /home/botuser/app
 USER root
@@ -16,9 +16,3 @@ COPY . .
 # Change ownership to allow development in container
 RUN chown -R botuser:botuser .
 USER botuser
-
-# Copy maps from host to container if provided as bind mount
-CMD if [ -d "/host_maps" ]; then \
-    cp -R /host_maps/* /home/botuser/StarCraftII/maps/; \
-  fi && \
-  /bin/bash
