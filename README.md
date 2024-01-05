@@ -15,16 +15,16 @@ SC2City is a StarCraft II bot designed to compete in the SC2AI Arena ladder usin
 ## Project Structure
 
 - `docs`: Contains relevant documents about project architecture, meta information about the game, and other associated documents.
-- `docker`: Contains a Dockerfile for a base StarCraft II image. This image is built on top of the `python:3.11.6-slim` image and is used by other Dockerfiles in the project as a base image.
+- `docker`: Submodule to the [Starcraft2 Docker](https://github.com/l1h2/Starcraft2-Docker?tab=readme-ov-file) repository, containing base images to start docker containers.
 - `sc2city`: Contains the bot files.
 - `tests`: Contains tests for the bot.
 - `trainers`: Contains different data extractors for metagame tools and ML trainers.
 
 ## Docker Support
 
-The project includes a `docker` directory with a [Dockerfile](docker/Dockerfile) for a base StarCraft II image. This image is built on top of the [Python 3.11.6-slim](https://hub.docker.com/layers/library/python/3.11.6-slim/images/sha256-38a28170d13a276d42b7dd55cae54440b581d773549d361d19089ec47d4791c5?context=explore) image and is used by other Dockerfiles in the project as a base image. For more information on the base image, check the [README](docker/README.md) in the `docker` directory.
+The project includes a `docker` directory with a reference to the [Starcraft2 Docker](https://github.com/l1h2/Starcraft2-Docker?tab=readme-ov-file) repository.
 
-The project itself can also be run from a container and has its own Dockerfile built on top of the StarCraft II base image. There are plans to add Dockerfiles for the trainers as well, allowing for running parallel games and improved machine learning support.
+The project itself can also be run from a container and has its own Dockerfile built on top of the [luguenin/starcraft2-base:python_3.11](https://hub.docker.com/layers/luguenin/starcraft2-base/python_3.11/images/sha256-e21b2ddd2181d0b309fd6a17b26b56c13808c4d0da08baf7ef8f069e5a4ca737?context=explore) base image. There are plans to add Dockerfiles for the trainers as well, allowing for running parallel games and improved machine learning support.
 
 To build the Docker image, navigate to the project's root directory and run the following command:
 
@@ -32,19 +32,31 @@ To build the Docker image, navigate to the project's root directory and run the 
 docker build --rm -t sc2city .
 ```
 
-The base image comes with the standard ladder maps from [SC2 AI Arena](https://aiarena.net/wiki/maps/) wiki and the [Blizzard Repository](https://github.com/Blizzard/s2client-proto?tab=readme-ov-file#map-packs). And you can run the project with:
+The base image comes with the standard ladder maps from the [Blizzard Repository](https://github.com/Blizzard/s2client-proto?tab=readme-ov-file#map-packs). And you can run the project for development with:
 
 ```bash
 docker run -it --rm sc2city
 ```
 
-But if you want to add your own maps at runtime, you can run a bind mount from the standard StarCraft II maps folder on your machine to the container maps folder:
+To add different maps from the host machine or from download links the project uses the [luguenin/starcraft2-map_updater](https://hub.docker.com/r/luguenin/starcraft2-map_updater) image. There are two ways to add maps:
+
+- Manually by connecting a volume to running containers at the standard StarCraft II maps folder:
 
 ```bash
-docker run -it --rm -v "C:\Program Files (x86)\StarCraft II\Maps:/host_maps" sc2city
+docker volume create maps
+
+docker run -it --rm -v maps:/home/botuser/StarCraftII/maps sc2city
+
+docker run --rm -v maps:/maps -v "c:/Program Files (x86)/StarCraft II/Maps:/host_maps" -e MAP_LINKS="https://aiarena.net/wiki/184/plugin/attachments/download/35/ https://aiarena.net/wiki/184/plugin/attachments/download/21/" luguenin/starcraft2-map_updater
 ```
 
-Alternatively, you can replace the standard location with your preferred folder. Or see the base image's [README](docker/README.md) for more information on how to add maps at build time.
+- Using docker compose with [compose.yaml](compose.yaml):
+
+```bash
+docker compose up --build
+```
+
+After the container is already running and connected to the maps volume you only need to run the command for the map updater to add new maps.
 
 ## Features
 
