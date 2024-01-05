@@ -1,0 +1,3 @@
+[submodule "docker"]
+	path = docker
+	url = https://github.com/l1h2/Starcraft2-Docker.git
