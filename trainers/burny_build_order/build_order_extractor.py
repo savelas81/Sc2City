@@ -14,9 +14,14 @@ from selenium.webdriver.remote.webdriver import WebDriver
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.ui import WebDriverWait
 
-from config import BURNY_ACTIONS, EXCEPTION_IDS, TYPES, BurnyOrder
 from sc2city.game_objects import Order
 from sc2city.utils import BuildTypes, OrderType
+from trainers.burny_build_order.config import (
+    BURNY_ACTIONS,
+    EXCEPTION_IDS,
+    TYPES,
+    BurnyOrder,
+)
 
 
 class BuildOrderExtractor:

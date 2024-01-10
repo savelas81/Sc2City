@@ -20,4 +20,14 @@ requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.isort]
-known_first_party = "utils,game_objects,managers,config,placement_extractor,build_order_extractor,third_party_code"
+known_first_party = """
+    build_order_extractor,
+    burny_build_order,
+    config,
+    game_objects,
+    managers,
+    map_editor,
+    placement_extractor,
+    third_party_code,
+    utils
+    """

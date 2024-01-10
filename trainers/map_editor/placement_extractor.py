@@ -5,9 +5,9 @@ from sc2.bot_ai import BotAI
 from sc2.data import Race
 from sc2.ids.unit_typeid import UnitTypeId
 
-from config import MapType
 from sc2city.game_objects import MAP_PINS, BuildingPlacements, PositionPriority
 from sc2city.utils import BuildTypes
+from trainers.map_editor.config import MapType
 
 
 class BuildingPlacementExtractor(BotAI):

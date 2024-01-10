@@ -15,14 +15,14 @@ SC2City is a StarCraft II bot designed to compete in the SC2AI Arena ladder usin
 ## Project Structure
 
 - `docs`: Contains relevant documents about project architecture, meta information about the game, and other associated documents.
-- `docker`: Submodule to the [Starcraft2 Docker](https://github.com/l1h2/Starcraft2-Docker?tab=readme-ov-file) repository, containing base images to start docker containers.
+- `docker`: Submodule to the [Starcraft2 Docker](https://github.com/l1h2/Starcraft2-Docker) repository, containing base images to start docker containers.
 - `sc2city`: Contains the bot files.
 - `tests`: Contains tests for the bot.
 - `trainers`: Contains different data extractors for metagame tools and ML trainers.
 
 ## Docker Support
 
-The project includes a `docker` directory with a reference to the [Starcraft2 Docker](https://github.com/l1h2/Starcraft2-Docker?tab=readme-ov-file) repository.
+The project includes a `docker` directory with a reference to the [Starcraft2 Docker](https://github.com/l1h2/Starcraft2-Docker) repository.
 
 The project itself can also be run from a container and has its own Dockerfile built on top of the [luguenin/starcraft2-base:python_3.11](https://hub.docker.com/layers/luguenin/starcraft2-base/python_3.11/images/sha256-e21b2ddd2181d0b309fd6a17b26b56c13808c4d0da08baf7ef8f069e5a4ca737?context=explore) base image. There are plans to add Dockerfiles for the trainers as well, allowing for running parallel games and improved machine learning support.
 
